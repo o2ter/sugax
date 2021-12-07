@@ -41,7 +41,7 @@ export const selector = ([current, setValue], key) => Object.freeze({
             setValue(updated);
         }
     }
-})
+});
 
 export const combineState = (initialState, component) => (props) => {
 
@@ -56,4 +56,4 @@ export const combineState = (initialState, component) => (props) => {
         },
         ...list
     }));
-}
+};
