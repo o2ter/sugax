@@ -26,27 +26,22 @@
 import _ from 'lodash';
 import { useState } from 'react';
 
-export function selector(store, key) {
-    
-    const [current, setValue] = store;
-
-    return Object.freeze({
-        get current() { 
-            return current[key]; 
-        },
-        setValue(value) {
-            if (_.isArrayLike(current)) {
-                const updated = [...current];
-                updated[key] = value;
-                setValue(updated);
-            } else if (_.isPlainObject(current)) {
-                const updated = {...current};
-                updated[key] = value;
-                setValue(updated);
-            }
+export const selector = ([current, setValue], key) => Object.freeze({
+    get current() { 
+        return current[key]; 
+    },
+    setValue(value) {
+        if (_.isArrayLike(current)) {
+            const updated = [...current];
+            updated[key] = value;
+            setValue(updated);
+        } else if (_.isPlainObject(current)) {
+            const updated = {...current};
+            updated[key] = value;
+            setValue(updated);
         }
-    });
-}
+    }
+})
 
 export const combineState = (initialState, component) => (props) => {
 
