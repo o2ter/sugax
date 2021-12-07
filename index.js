@@ -22,3 +22,43 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 //  THE SOFTWARE.
 //
+
+import _ from 'lodash';
+import { useState } from 'react';
+
+export function selector(store, key) {
+    
+    const [current, setValue] = store;
+
+    return Object.freeze({
+        get current() { 
+            return current[key]; 
+        },
+        setValue(value) {
+            if (_.isArrayLike(current)) {
+                const updated = [...current];
+                updated[key] = value;
+                setValue(updated);
+            } else if (_.isPlainObject(current)) {
+                const updated = {...current};
+                updated[key] = value;
+                setValue(updated);
+            }
+        }
+    });
+}
+
+export const combineState = (initialState, component) => (props) => {
+
+    const list = _.mapValues(initialState, (value, key) => {
+        const [current, setValue] = useState(value);
+        return Object.freeze({ current, setValue });
+    });
+
+    return component(props, Object.freeze({
+        setState(values) {
+            _.forEach(values, (value, key) => list[key].setValue(value));
+        },
+        ...list
+    }));
+}
