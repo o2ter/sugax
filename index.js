@@ -45,7 +45,7 @@ export const selector = ([current, setValue], key) => Object.freeze({
 
 export const combineState = (initialState, component) => (props) => {
 
-    const list = _.mapValues(initialState, (value, key) => {
+    const list = _.mapValues(initialState, (value) => {
         const [current, setValue] = useState(value);
         return Object.freeze({ current, setValue });
     });
