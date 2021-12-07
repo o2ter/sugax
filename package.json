@@ -1,0 +1,12 @@
+{
+  "name": "sugax",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/TheOddmen/sugax.git",
+  "author": "Susan Cheng <susan.doggie@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "lodash": "*",
+    "react": ">16.8.0"
+  }
+}
