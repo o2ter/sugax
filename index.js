@@ -53,15 +53,17 @@ const selectElements = ({current, setValue}) => {
 
 const combineState = (initialState, component) => (props) => {
 
-    const list = _.mapValues(initialState, (value) => {
-        const [current, setValue] = useState(value);
-        return Object.freeze({ current, setValue });
-    });
+    const [_state, _setState] = useState(initialState);
+
+    const list = _.mapValues(_state, (value, key) => { 
+        return Object.freeze({
+            get current() { return value; },
+            setValue: (value) => _setState({ ..._state, [key]: value }),
+        });
+    })
 
     return component(props, Object.freeze({
-        setState(values) {
-            _.forEach(values, (value, key) => list[key].setValue(value));
-        },
+        setState: (values) => _setState({ ..._state, ...values }),
         ...list
     }));
 }
