@@ -5,7 +5,7 @@
   "repository": "https://github.com/TheOddmen/sugax.git",
   "author": "Susan Cheng <susan.doggie@gmail.com>",
   "license": "MIT",
-  "dependencies": {
+  "peerDependencies": {
     "lodash": "*",
     "react": ">16.8.0"
   }
