@@ -26,37 +26,48 @@
 const _ = require('lodash');
 const { useState } = require('react');
 
-module.exports = {
-
-    selector: ({current, setValue}, key) => Object.freeze({
-        get current() { 
-            return current[key]; 
-        },
-        setValue(value) {
-            if (_.isArrayLike(current)) {
-                const updated = [...current];
-                updated[key] = value;
-                setValue(updated);
-            } else if (_.isPlainObject(current)) {
-                const updated = {...current};
-                updated[key] = value;
-                setValue(updated);
-            }
-        }
-    }),
-
-    combineState: (initialState, component) => (props) => {
-
-        const list = _.mapValues(initialState, (value) => {
-            const [current, setValue] = useState(value);
-            return Object.freeze({ current, setValue });
-        });
-    
-        return component(props, Object.freeze({
-            setState(values) {
-                _.forEach(values, (value, key) => list[key].setValue(value));
-            },
-            ...list
-        }));
+const selector = ({current, setValue}, key) => Object.freeze({
+    get current() { 
+        return current[key]; 
     },
+    setValue(value) {
+        if (_.isArrayLike(current)) {
+            const updated = [...current];
+            updated[key] = value;
+            setValue(updated);
+        } else if (_.isPlainObject(current)) {
+            const updated = {...current};
+            updated[key] = value;
+            setValue(updated);
+        }
+    }
+})
+
+const selectElements = ({current, setValue}) => {
+    if (_.isArrayLike(current)) {
+      return current.map((_x, i) => selector({current, setValue}, i));
+    } else {
+      return _.mapValues(current, (_value, key) => selector({current, setValue}, key));
+    }
+}
+
+const combineState = (initialState, component) => (props) => {
+
+    const list = _.mapValues(initialState, (value) => {
+        const [current, setValue] = useState(value);
+        return Object.freeze({ current, setValue });
+    });
+
+    return component(props, Object.freeze({
+        setState(values) {
+            _.forEach(values, (value, key) => list[key].setValue(value));
+        },
+        ...list
+    }));
+}
+
+module.exports = {
+    selector,
+    selectElements,
+    combineState,
 };
