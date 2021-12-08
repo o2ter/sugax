@@ -23,37 +23,40 @@
 //  THE SOFTWARE.
 //
 
-import _ from 'lodash';
-import { useState } from 'react';
+const _ = require('lodash');
+const { useState } = require('react');
 
-export const selector = ([current, setValue], key) => Object.freeze({
-    get current() { 
-        return current[key]; 
-    },
-    setValue(value) {
-        if (_.isArrayLike(current)) {
-            const updated = [...current];
-            updated[key] = value;
-            setValue(updated);
-        } else if (_.isPlainObject(current)) {
-            const updated = {...current};
-            updated[key] = value;
-            setValue(updated);
-        }
-    }
-});
+module.exports = {
 
-export const combineState = (initialState, component) => (props) => {
-
-    const list = _.mapValues(initialState, (value) => {
-        const [current, setValue] = useState(value);
-        return Object.freeze({ current, setValue });
-    });
-
-    return component(props, Object.freeze({
-        setState(values) {
-            _.forEach(values, (value, key) => list[key].setValue(value));
+    selector: ({current, setValue}, key) => Object.freeze({
+        get current() { 
+            return current[key]; 
         },
-        ...list
-    }));
+        setValue(value) {
+            if (_.isArrayLike(current)) {
+                const updated = [...current];
+                updated[key] = value;
+                setValue(updated);
+            } else if (_.isPlainObject(current)) {
+                const updated = {...current};
+                updated[key] = value;
+                setValue(updated);
+            }
+        }
+    }),
+
+    combineState: (initialState, component) => (props) => {
+
+        const list = _.mapValues(initialState, (value) => {
+            const [current, setValue] = useState(value);
+            return Object.freeze({ current, setValue });
+        });
+    
+        return component(props, Object.freeze({
+            setState(values) {
+                _.forEach(values, (value, key) => list[key].setValue(value));
+            },
+            ...list
+        }));
+    },
 };
