@@ -24,7 +24,8 @@
 //
 
 const _ = require('lodash');
-const { useState } = require('react');
+const { useState, useEffect } = require('react');
+const EventEmitter = require('events');
 
 const selector = ({current, setValue}, key) => Object.freeze({
     get current() { 
@@ -68,8 +69,44 @@ const combineState = (initialState, component) => (props) => {
     }));
 }
 
+const emitter_maps = new WeakMap();
+
+const createChannel = (initialValue) => {
+
+    const emitter = new EventEmitter();
+
+    class Channel {
+        
+        constructor() {
+            this.current = initialValue;
+            emitter.addListener('update', (value) => this.current = value);
+            emitter_maps.set(this, emitter);
+        }
+
+        setValue(value) {
+            emitter.emit('update', value);
+        }
+    }
+
+    return new Channel();
+}
+
+const useChannel = (channel) => {
+
+  const [value, setValue] = useState(channel.current);
+
+  useEffect(() => {
+    emitter_maps.get(channel).addListener('update', setValue);
+    return () => emitter_maps.get(channel).removeListener('update', setValue);
+  }, [setValue]);
+
+  return value;
+}
+
 module.exports = {
     selector,
     selectElements,
     combineState,
+    createChannel,
+    useChannel,
 };
