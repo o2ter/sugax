@@ -74,21 +74,23 @@ const emitter_maps = new WeakMap();
 const createChannel = (initialValue) => {
 
     const emitter = new EventEmitter();
+    let current = initialValue;
 
-    class Channel {
+    return new class Channel {
         
         constructor() {
-            this.current = initialValue;
-            emitter.addListener('update', (value) => this.current = value);
+            emitter.addListener('update', (value) => current = value);
             emitter_maps.set(this, emitter);
+        }
+
+        get current() {
+            return current;
         }
 
         setValue(value) {
             emitter.emit('update', value);
         }
-    }
-
-    return new Channel();
+    };
 }
 
 const useChannel = (channel) => {
