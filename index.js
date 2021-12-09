@@ -23,11 +23,11 @@
 //  THE SOFTWARE.
 //
 
-const _ = require('lodash');
-const { useState, useEffect } = require('react');
-const EventEmitter = require('events');
+import _ from 'lodash';
+import { useState, useEffect } from 'react';
+import EventEmitter from 'events';
 
-const selector = ({current, setValue}, key) => Object.freeze({
+export const selector = ({current, setValue}, key) => Object.freeze({
     get current() { 
         return current[key]; 
     },
@@ -44,7 +44,7 @@ const selector = ({current, setValue}, key) => Object.freeze({
     }
 })
 
-const selectElements = ({current, setValue}) => {
+export const selectElements = ({current, setValue}) => {
     if (_.isArrayLike(current)) {
       return current.map((_x, i) => selector({current, setValue}, i));
     } else {
@@ -52,7 +52,7 @@ const selectElements = ({current, setValue}) => {
     }
 }
 
-const combineState = (initialState, component) => (props) => {
+export const combineState = (initialState, component) => (props) => {
 
     const [_state, _setState] = useState(initialState);
 
@@ -71,7 +71,7 @@ const combineState = (initialState, component) => (props) => {
 
 const emitter_maps = new WeakMap();
 
-const createChannel = (initialValue) => {
+export const createChannel = (initialValue) => {
 
     const emitter = new EventEmitter();
     let current = initialValue;
@@ -93,7 +93,7 @@ const createChannel = (initialValue) => {
     };
 }
 
-const useChannel = (channel) => {
+export const useChannel = (channel) => {
 
   const [value, setValue] = useState(channel.current);
 
@@ -104,11 +104,3 @@ const useChannel = (channel) => {
 
   return value;
 }
-
-module.exports = {
-    selector,
-    selectElements,
-    combineState,
-    createChannel,
-    useChannel,
-};
