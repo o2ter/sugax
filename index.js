@@ -56,17 +56,12 @@ export const combineState = (initialState, component) => (props) => {
 
     const [_state, _setState] = useState(initialState);
 
-    const list = _.mapValues(_state, (value, key) => { 
+    return component(props, Object.freeze(_.mapValues(_state, (value, key) => { 
         return Object.freeze({
             get current() { return value; },
             setValue: (value) => _setState({ ..._state, [key]: value }),
         });
-    })
-
-    return component(props, Object.freeze({
-        setState: (values) => _setState({ ..._state, ...values }),
-        ...list
-    }));
+    })), (values) => _setState({ ..._state, ...values }));
 }
 
 const emitter_maps = new WeakMap();
