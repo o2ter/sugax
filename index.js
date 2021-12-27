@@ -24,7 +24,7 @@
 //
 
 import _ from 'lodash';
-import { useState, useEffect } from 'react';
+import React from 'react';
 import EventEmitter from 'events';
 
 export const selector = ({current, setValue}, key) => Object.freeze({
@@ -52,9 +52,21 @@ export const selectElements = ({current, setValue}) => {
     }
 }
 
+export const useMapState = (initialState) => {
+
+    const [_state, _setState] = React.useState(initialState);
+    
+    return Object.freeze(_.mapValues(_state, (value, key) => { 
+        return Object.freeze({
+            get current() { return value; },
+            setValue: (value) => _setState({ ..._state, [key]: value }),
+        });
+    }));
+}
+
 export const combineState = (initialState, component) => (props) => {
 
-    const [_state, _setState] = useState(initialState);
+    const [_state, _setState] = React.useState(initialState);
 
     return component(props, Object.freeze(_.mapValues(_state, (value, key) => { 
         return Object.freeze({
@@ -90,9 +102,9 @@ export const createChannel = (initialValue) => {
 
 export const useChannel = (channel) => {
 
-  const [value, setValue] = useState(channel.current);
+  const [value, setValue] = React.useState(channel.current);
 
-  useEffect(() => {
+  React.useEffect(() => {
     emitter_maps.get(channel).addListener('update', setValue);
     return () => emitter_maps.get(channel).removeListener('update', setValue);
   }, [setValue]);
