@@ -25,3 +25,4 @@
 
 export * from './state';
 export * from './channel';
+export * from './mergeRefs';
