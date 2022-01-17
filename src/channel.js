@@ -1,5 +1,5 @@
 //
-//  index.js
+//  channel.js
 //
 //  The MIT License
 //  Copyright (c) 2021 - 2022 The Oddmen Technology Limited. All rights reserved.
@@ -26,55 +26,6 @@
 import _ from 'lodash';
 import React from 'react';
 import EventEmitter from 'events';
-
-export const selector = ({current, setValue}, key) => Object.freeze({
-    get current() { 
-        return current[key]; 
-    },
-    setValue(value) {
-        if (_.isArrayLike(current)) {
-            const updated = [...current];
-            updated[key] = value;
-            setValue(updated);
-        } else if (_.isPlainObject(current)) {
-            const updated = {...current};
-            updated[key] = value;
-            setValue(updated);
-        }
-    }
-})
-
-export const selectElements = ({current, setValue}) => {
-    if (_.isArrayLike(current)) {
-      return current.map((_x, i) => selector({current, setValue}, i));
-    } else {
-      return _.mapValues(current, (_value, key) => selector({current, setValue}, key));
-    }
-}
-
-export const useMapState = (initialState) => {
-
-    const [_state, _setState] = React.useState(initialState);
-    
-    return Object.freeze(_.mapValues(_state, (value, key) => { 
-        return Object.freeze({
-            get current() { return value; },
-            setValue: (value) => _setState({ ..._state, [key]: value }),
-        });
-    }));
-}
-
-export const combineState = (initialState, component) => (props) => {
-
-    const [_state, _setState] = React.useState(initialState);
-
-    return component(props, Object.freeze(_.mapValues(_state, (value, key) => { 
-        return Object.freeze({
-            get current() { return value; },
-            setValue: (value) => _setState({ ..._state, [key]: value }),
-        });
-    })), (values) => _setState({ ..._state, ...values }));
-}
 
 const emitter_maps = new WeakMap();
 
