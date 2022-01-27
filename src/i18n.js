@@ -26,6 +26,13 @@
 import _ from 'lodash';
 import { useSelector } from 'react-redux';
 
+export const i18nReducer = (state = { preferredLocale: 'en' }, action) => {
+    switch (action.type) {
+        case 'I18N_SET_PREFERRED_LOCALE': return { preferredLocale: action.locale };
+        default: return state;
+    }
+};
+
 const _lang_map = {
     "zh-cn": "zh-hans",
     "zh-hk": "zh-hant",
@@ -97,9 +104,9 @@ function _useUserLocales(i18nState) {
 
 export const useUserLocales = () => _useUserLocales(useSelector(state => state.i18n));
 
-export function setUserPreferredLocale(locale, diispatch) { 
+export function setUserPreferredLocale(locale, diispatch) {
     
-    diispatch({ type: 'SET_PREFERRED_LOCALE', locale });
+    diispatch({ type: 'I18N_SET_PREFERRED_LOCALE', locale });
     
     if (global.document) {
         document.cookie = `PREFERRED_LOCALE=${locale}; max-age=31536000; path=/`;
