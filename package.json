@@ -11,7 +11,9 @@
   },
   "peerDependencies": {
     "lodash": "*",
-    "react": ">=16.8.0"
+    "react": ">=16.8.0",
+    "react-redux": "*",
+    "redux": "*"
   },
   "devDependencies": {
     "@babel/core": "^7.16.12",
