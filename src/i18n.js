@@ -41,25 +41,25 @@ const _lang_map = {
 
 function replaceAll(string, pattern, replacement) {
 
-    while(true) {
+    if (!_.isString(string)) return;
 
-        let idx = string.lastIndexOf(pattern);
-
-        if (idx == -1) {
-            return string;
-        }
-        
+    let idx;
+    
+    do {
+        idx = string.lastIndexOf(pattern);
         string = string.substring(0, idx) + replacement + string.substring(idx + pattern.length);
-    }
+    } while (idx !== -1);
+
+    return string;
 }
 
 function getLanguagePartFromCode(code) {
-    if (!code || code.indexOf('-') < 0) return code;
+    if (!_.isString(code) || code.indexOf('-') < 0) return code;
     return code.split('-')[0];
 }
 
 function getScriptPartFromCode(code) {
-    if (!code || code.indexOf('-') < 0) return;
+    if (!_.isString(code) || code.indexOf('-') < 0) return;
     return code.split('-')[1];
 }
 
@@ -162,9 +162,9 @@ function _localize(strings, params, i18nState, toString) {
     }
 }
 
-export const useLocalize = (strings, params) => _localize(strings, params, useSelector(state => state.i18n), (x) => { return x; });
+export const useLocalize = ({...strings}, params = {}) => _localize(strings, params, useSelector(state => state.i18n), (x) => { return x; });
 
-export const LocalizationStrings = (strings) => ({
+export const LocalizationStrings = ({...strings}) => ({
 
     useLocalize() {
         
@@ -172,7 +172,7 @@ export const LocalizationStrings = (strings) => ({
         
         return {
             
-            string(key, params) {
+            string(key, params = {}) {
                 return _localize(strings, params, i18nState, (x) => { return x ? x[key] : null; }) ?? key;
             }
         }
