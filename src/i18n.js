@@ -43,13 +43,13 @@ function replaceAll(string, pattern, replacement) {
 
     if (!_.isString(string)) return;
 
-    let idx;
-    
-    do {
-        idx = string.lastIndexOf(pattern);
-        string = string.substring(0, idx) + replacement + string.substring(idx + pattern.length);
-    } while (idx !== -1);
+    let idx = string.lastIndexOf(pattern);
 
+    while(idx !== -1) {
+        string = string.substring(0, idx) + replacement + string.substring(idx + pattern.length);
+        idx = string.lastIndexOf(pattern);
+    } 
+    
     return string;
 }
 
