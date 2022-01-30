@@ -51,7 +51,7 @@ export const selectElements = ({current, setValue}) => {
     }
 }
 
-export const useMapState = ({...initialState}) => {
+export const useMapState = (initialState) => {
 
     const [_state, _setState] = React.useState(initialState);
     
@@ -63,7 +63,7 @@ export const useMapState = ({...initialState}) => {
     }));
 }
 
-export const combineState = ({...initialState}, component) => ({...props}) => {
+export const combineState = (initialState, component) => ({...props}) => {
 
     const [_state, _setState] = React.useState(initialState);
 
