@@ -28,7 +28,7 @@ import React from 'react';
 
 export const useMergeRefs = (...refs) => React.useMemo(() => (node) => {
   for (const ref of refs) {
-      if (ref == null) {
+      if (_.isNil(ref)) {
         continue;
       }
       if (typeof ref === 'function') {
