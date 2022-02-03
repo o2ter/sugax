@@ -5,9 +5,25 @@ import dts from 'rollup-plugin-dts';
 
 const packageJson = require('./package.json');
 
+const rollupPlugins = [
+    babel({
+        babelrc: false,
+        exclude: 'node_modules/**',
+        babelHelpers: 'bundled',
+    }),
+    commonjs(),
+];
+
+const rollupConfig = {
+    input: 'src/index',
+    external: [
+        /node_modules/
+    ],
+};
+
 export default [
     {
-        input: 'src/index',
+        ...rollupConfig,
         output: [
             {
               file: packageJson.main + '.js',
@@ -20,17 +36,32 @@ export default [
               sourcemap: true,
             },
         ],
-        external: [
-            /node_modules/
+        plugins: [
+            resolve({
+                extensions: ['.js']
+            }),
+            ...rollupPlugins
+        ],
+    },
+    {
+        ...rollupConfig,
+        output: [
+            {
+                file: packageJson.main + '.web.js',
+                format: 'cjs',
+                sourcemap: true,
+            },
+            {
+              file: packageJson.module + '.web.js',
+              format: 'esm',
+              sourcemap: true,
+            },
         ],
         plugins: [
-            resolve(),
-            babel({
-                babelrc: false,
-                exclude: 'node_modules/**',
-                babelHelpers: 'bundled',
+            resolve({
+                extensions: ['.web.js', '.js']
             }),
-            commonjs(),
+            ...rollupPlugins
         ],
     },
     {
