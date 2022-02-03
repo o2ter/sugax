@@ -27,6 +27,22 @@ import _ from 'lodash';
 import React from 'react';
 import { UIManager } from 'react-native';
 
+export function useDOMElementEvent(element, event, callback) {
+
+    const callbackRef = React.useRef();
+  
+    React.useEffect(() => { callbackRef.current = callback; }, [callback]);
+  
+    React.useEffect(() => {
+        const listener = (event) => _.isFunction(callbackRef.current) && callbackRef.current(event);
+        element.addEventListener(event, listener);
+        return () => { element.removeEventListener(event, listener); };
+    }, [element, event]);
+}
+
+export const useWindowEvent = (event, callback) => useDOMElementEvent(window, event, callback);
+export const useDocumentEvent = (event, callback) => useDOMElementEvent(document, event, callback);
+
 const onLayoutCallbackMap = new WeakMap();
 
 const resizeObserver = (() => {
