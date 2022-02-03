@@ -1,5 +1,5 @@
 //
-//  index.js
+//  useMount.js
 //
 //  The MIT License
 //  Copyright (c) 2021 - 2022 O2ter Limited. All rights reserved.
@@ -23,8 +23,13 @@
 //  THE SOFTWARE.
 //
 
-export * from './i18n';
-export * from './state';
-export * from './channel';
-export * from './mergeRefs';
-export * from './useMount';
+import _ from 'lodash';
+import React from 'react';
+
+export function useMount(callback) {
+    React.useEffect(() => { if (_.isFunction(callback)) callback(); }, []);
+}
+
+export function useUnmount(callback) {
+    React.useEffect(() => () => { if (_.isFunction(callback)) callback(); }, []);
+}
