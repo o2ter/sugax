@@ -26,20 +26,25 @@
 import _ from 'lodash';
 import React from 'react';
 
-export const selector = ({current, setValue}, key) => Object.freeze({
+function replace_key(state, key, value) {
+
+    if (_.isArrayLike(state)) {
+        const copy = [...state];
+        copy[key] = value;
+        return copy;
+    }
+
+    if (_.isPlainObject(state)) {
+        return { ...state, [key]: value };
+    }
+}
+
+export const selector = ({current, setValue: set_value}, key) => Object.freeze({
     get current() { 
         return current[key]; 
     },
     setValue(value) {
-        if (_.isArrayLike(current)) {
-            const updated = [...current];
-            updated[key] = value;
-            setValue(updated);
-        } else if (_.isPlainObject(current)) {
-            const updated = {...current};
-            updated[key] = value;
-            setValue(updated);
-        }
+        set_value(state => replace_key(state, key, _.isFunction(value) ? value(state[key]) : value));
     }
 })
 
@@ -58,7 +63,7 @@ export const useMapState = (initialState) => {
     return Object.freeze(_.mapValues(_state, (value, key) => { 
         return Object.freeze({
             get current() { return value; },
-            setValue: (value) => _setState({ ..._state, [key]: value }),
+            setValue: (value) => _setState(state => ({ ...state, [key]: _.isFunction(value) ? value(state[key]) : value })),
         });
     }));
 }
@@ -70,7 +75,7 @@ export const combineState = (initialState, component) => ({...props}) => {
     return component(props, Object.freeze(_.mapValues(_state, (value, key) => { 
         return Object.freeze({
             get current() { return value; },
-            setValue: (value) => _setState({ ..._state, [key]: value }),
+            setValue: (value) => _setState(state => ({ ...state, [key]: _.isFunction(value) ? value(state[key]) : value })),
         });
-    })), (values) => _setState({ ..._state, ...values }));
+    })), (values) => _setState(state => ({ ...state, ...values })));
 }
