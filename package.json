@@ -10,11 +10,14 @@
   "scripts": {
     "rollup": "rollup -c"
   },
+  "dependencies": {
+    "events": ">=3.3.0",
+    "lodash": ">=4.17.21",
+    "react-redux": ">=7.2.6",
+    "redux": ">=4.1.2"
+  },
   "peerDependencies": {
-    "lodash": "*",
-    "react": ">=16.8.0",
-    "react-redux": "*",
-    "redux": "*"
+    "react": ">=16.8.0"
   },
   "devDependencies": {
     "@babel/core": "^7.16.12",
