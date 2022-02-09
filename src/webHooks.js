@@ -26,12 +26,11 @@
 import _ from 'lodash';
 import React from 'react';
 import { UIManager } from 'react-native';
+import { useCallbackRef } from './useCallbackRef';
 
 export function useDOMElementEvent(element, event, callback) {
 
-    const callbackRef = React.useRef();
-  
-    React.useEffect(() => { callbackRef.current = callback; }, [callback]);
+    const callbackRef = useCallbackRef(callback);
   
     React.useEffect(() => {
         const listener = (event) => _.isFunction(callbackRef.current) && callbackRef.current(event);

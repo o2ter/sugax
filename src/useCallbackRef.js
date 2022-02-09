@@ -1,5 +1,5 @@
 //
-//  index.js
+//  useCallbackRef.js
 //
 //  The MIT License
 //  Copyright (c) 2021 - 2022 O2ter Limited. All rights reserved.
@@ -23,9 +23,11 @@
 //  THE SOFTWARE.
 //
 
-export * from './i18n';
-export * from './state';
-export * from './channel';
-export * from './mergeRefs';
-export * from './useCallbackRef';
-export * from './useMount';
+import _ from 'lodash';
+import React from 'react';
+
+export function useCallbackRef(callback) {
+    const callbackRef = React.useRef();
+    React.useEffect(() => { callbackRef.current = callback; }, [callback]);
+    return callbackRef;
+}
