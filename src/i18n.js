@@ -104,9 +104,9 @@ function _useUserLocales(i18nState) {
 
 export const useUserLocales = () => _useUserLocales(useSelector(state => state.i18n));
 
-export function setUserPreferredLocale(locale, diispatch) {
+export function setUserPreferredLocale(locale, dispatch) {
     
-    diispatch({ type: 'I18N_SET_PREFERRED_LOCALE', locale });
+    dispatch({ type: 'I18N_SET_PREFERRED_LOCALE', locale });
     
     if (global.document) {
         document.cookie = `PREFERRED_LOCALE=${locale}; max-age=31536000; path=/`;
