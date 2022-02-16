@@ -33,6 +33,7 @@ export function useDOMElementEvent(element, event, callback) {
     const callbackRef = useCallbackRef(callback);
   
     React.useEffect(() => {
+        if (!(element instanceof EventTarget)) return;
         const listener = (event) => _.isFunction(callbackRef.current) && callbackRef.current(event);
         element.addEventListener(event, listener);
         return () => { element.removeEventListener(event, listener); };
