@@ -80,7 +80,7 @@ export function useElementLayout(ref, onLayout) {
 
     if (_.isNil(resizeObserver)) return;
 
-    React.useLayoutEffect(() => {
+    React.useEffect(() => {
         const node = ref.current;
         if (!_.isNil(node)) {
             onLayoutCallbackMap.set(node, onLayout);
@@ -92,7 +92,7 @@ export function useElementLayout(ref, onLayout) {
         };
     }, [ref, onLayout]);
     
-    React.useLayoutEffect(() => {
+    React.useEffect(() => {
         const node = ref.current;
         if (!_.isNil(node)) {
             const onLayout = onLayoutCallbackMap.get(node);
