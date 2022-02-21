@@ -1,5 +1,5 @@
 //
-//  index.js
+//  usePrevious.js
 //
 //  The MIT License
 //  Copyright (c) 2021 - 2022 O2ter Limited. All rights reserved.
@@ -23,10 +23,11 @@
 //  THE SOFTWARE.
 //
 
-export * from './i18n';
-export * from './state';
-export * from './channel';
-export * from './mergeRefs';
-export * from './useCallbackRef';
-export * from './useMount';
-export * from './usePrevious';
+import _ from 'lodash';
+import React from 'react';
+
+export function usePrevious(state) {
+    const ref = React.useRef();
+    React.useEffect(() => ref.current = state);
+    return ref.current;
+}
