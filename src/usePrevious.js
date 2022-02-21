@@ -31,3 +31,9 @@ export function usePrevious(state) {
     React.useEffect(() => ref.current = state);
     return ref.current;
 }
+
+export function usePreviousMemo(factory, deps) {
+    const ref = React.useRef();
+    React.useMemo(() => ref.current = factory(ref.current), deps);
+    return ref.current;
+}
