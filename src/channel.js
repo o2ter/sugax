@@ -46,7 +46,7 @@ export const createChannel = (initialValue) => {
         }
 
         setValue(value) {
-            emitter.emit('update', value);
+            emitter.emit('update', _.isFunction(value) ? value(current) : value);
         }
     };
 }
