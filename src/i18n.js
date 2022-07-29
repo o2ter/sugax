@@ -24,14 +24,22 @@
 //
 
 import _ from 'lodash';
-import { useSelector } from 'react-redux';
+import React, { useEffect } from 'react';
 
-export const i18nReducer = (state = { preferredLocale: 'en' }, action) => {
-    switch (action.type) {
-        case 'I18N_SET_PREFERRED_LOCALE': return { preferredLocale: action.locale };
-        default: return state;
-    }
-};
+const I18nContext = React.createContext({ preferredLocale: 'en', setPreferredLocale: () => {} });
+
+export const I18nProvider = React.forwardRef(({
+    preferredLocale = 'en',
+    onChange = () => {},
+    children
+}, forwardRef) => {
+    
+    const [_preferredLocale, setPreferredLocale] = React.useState(preferredLocale);
+
+    useEffect(() => { onChange(_preferredLocale); }, [_preferredLocale]);
+    
+    return <I18nContext.Provider ref={forwardRef} value={{ preferredLocale: _preferredLocale, setPreferredLocale }}>{children}</I18nContext.Provider>;
+});
 
 const _lang_map = {
     "zh-cn": "zh-hans",
@@ -102,15 +110,13 @@ function _useUserLocales(i18nState) {
     return locales;
 }
 
-export const useUserLocales = () => _useUserLocales(useSelector(state => state.i18n));
+export const useUserLocales = () => _useUserLocales(React.useContext(I18nContext));
 
-export function setUserPreferredLocale(locale, dispatch) {
+export function setPreferredLocale(locale) {
+
+    const { setPreferredLocale } = React.useContext(I18nContext);
     
-    dispatch({ type: 'I18N_SET_PREFERRED_LOCALE', locale });
-    
-    if (global.document) {
-        document.cookie = `PREFERRED_LOCALE=${locale}; max-age=31536000; path=/`;
-    }
+    setPreferredLocale(locale);
 }
 
 function _localize(strings, params, i18nState, toString) {
@@ -162,13 +168,13 @@ function _localize(strings, params, i18nState, toString) {
     }
 }
 
-export const useLocalize = ({...strings}, params = {}) => _localize(strings, params, useSelector(state => state.i18n), (x) => { return x; });
+export const useLocalize = ({...strings}, params = {}) => _localize(strings, params, React.useContext(I18nContext), (x) => { return x; });
 
 export const LocalizationStrings = ({...strings}) => ({
 
     useLocalize() {
         
-        const i18nState = useSelector(state => state.i18n);
+        const i18nState = React.useContext(I18nContext);
         
         return {
             
