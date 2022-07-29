@@ -24,9 +24,11 @@
 //
 
 import _ from 'lodash';
-import React, { useEffect } from 'react';
+import React from 'react';
+import EventEmitter from 'events';
 
-const I18nContext = React.createContext({ preferredLocale: 'en', setPreferredLocale: () => {} });
+const I18nContext = React.createContext({ preferredLocale: 'en' });
+const i18n_update_event = new EventEmitter();
 
 export const I18nProvider = React.forwardRef(({
     preferredLocale = 'en',
@@ -36,9 +38,14 @@ export const I18nProvider = React.forwardRef(({
     
     const [_preferredLocale, setPreferredLocale] = React.useState(preferredLocale);
 
-    useEffect(() => { onChange(_preferredLocale); }, [_preferredLocale]);
+    React.useEffect(() => {
+        i18n_update_event.addListener('update', setPreferredLocale);
+        return () => i18n_update_event.removeListener('update', setPreferredLocale);
+      }, [setPreferredLocale]);
     
-    return <I18nContext.Provider ref={forwardRef} value={{ preferredLocale: _preferredLocale, setPreferredLocale }}>{children}</I18nContext.Provider>;
+    React.useEffect(() => { onChange(_preferredLocale); }, [_preferredLocale]);
+    
+    return <I18nContext.Provider ref={forwardRef} value={{ preferredLocale: _preferredLocale }}>{children}</I18nContext.Provider>;
 });
 
 const _lang_map = {
@@ -111,13 +118,7 @@ function _useUserLocales(i18nState) {
 }
 
 export const useUserLocales = () => _useUserLocales(React.useContext(I18nContext));
-
-export function setPreferredLocale(locale) {
-
-    const { setPreferredLocale } = React.useContext(I18nContext);
-    
-    setPreferredLocale(locale);
-}
+export const setPreferredLocale = (locale) => i18n_update_event.emit('update', locale);
 
 function _localize(strings, params, i18nState, toString) {
 
