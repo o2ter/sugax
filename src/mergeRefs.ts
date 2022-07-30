@@ -1,5 +1,5 @@
 //
-//  channel.js
+//  mergeRefs.js
 //
 //  The MIT License
 //  Copyright (c) 2021 - 2022 O2ter Limited. All rights reserved.
@@ -25,40 +25,22 @@
 
 import _ from 'lodash';
 import React from 'react';
-import EventEmitter from 'events';
 
-const emitter_maps = new WeakMap();
-
-export const createChannel = (initialValue) => {
-
-    const emitter = new EventEmitter();
-    let current = initialValue;
-
-    return new class Channel {
-        
-        constructor() {
-            emitter.addListener('update', (value) => current = value);
-            emitter_maps.set(this, emitter);
+export const useMergeRefs = <T = any>(
+    ...refs: ReadonlyArray<React.RefCallback<T> | React.MutableRefObject<T> | null>
+): React.RefCallback<T> => React.useMemo(() => (node: T) => {
+    for (const ref of refs) {
+        if (_.isNil(ref)) {
+            continue;
+        } 
+        if (typeof ref === 'function') {
+            ref(node);
+            continue;
+        } 
+        if (typeof ref === 'object') {
+            ref.current = node;
+            continue;
         }
-
-        get current() {
-            return current;
-        }
-
-        setValue(value) {
-            emitter.emit('update', _.isFunction(value) ? value(current) : value);
-        }
-    };
-}
-
-export const useChannel = (channel) => {
-
-  const [value, setValue] = React.useState(channel.current);
-
-  React.useEffect(() => {
-    emitter_maps.get(channel).addListener('update', setValue);
-    return () => emitter_maps.get(channel).removeListener('update', setValue);
-  }, [setValue]);
-
-  return value;
-}
+        console.error(`useMergeRefs cannot handle Refs of type boolean, number or string, received ref ${ref}`);
+    }
+}, [...refs]);

@@ -1,5 +1,5 @@
 //
-//  useMount.js
+//  usePrevious.js
 //
 //  The MIT License
 //  Copyright (c) 2021 - 2022 O2ter Limited. All rights reserved.
@@ -26,10 +26,17 @@
 import _ from 'lodash';
 import React from 'react';
 
-export function useMount(callback) {
-    React.useEffect(() => { if (_.isFunction(callback)) callback(); }, []);
+export function usePrevious<T = any>(state: T) {
+    const ref = React.useRef<T>();
+    React.useEffect(() => { ref.current = state; });
+    return ref.current;
 }
 
-export function useUnmount(callback) {
-    React.useEffect(() => () => { if (_.isFunction(callback)) callback(); }, []);
+export function usePreviousMemo<T = any>(
+    factory: (value: T | undefined) => T,
+    deps: React.DependencyList | undefined
+) {
+    const ref = React.useRef<T>();
+    React.useMemo(() => { ref.current = factory(ref.current); }, deps);
+    return ref.current;
 }

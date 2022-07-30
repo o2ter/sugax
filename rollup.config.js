@@ -1,4 +1,5 @@
 import resolve from '@rollup/plugin-node-resolve';
+import typescript from '@rollup/plugin-typescript';
 import commonjs from '@rollup/plugin-commonjs';
 import babel from '@rollup/plugin-babel';
 import dts from 'rollup-plugin-dts';
@@ -6,6 +7,7 @@ import dts from 'rollup-plugin-dts';
 const packageJson = require('./package.json');
 
 const rollupPlugins = [
+    typescript(),
     babel({
         babelrc: false,
         exclude: 'node_modules/**',
@@ -38,7 +40,9 @@ export default [
         ],
         plugins: [
             resolve({
-                extensions: ['.js']
+                extensions: [
+                    /\.(ts|tsx|m?js)?$/i
+                ]
             }),
             ...rollupPlugins
         ],
@@ -59,7 +63,10 @@ export default [
         ],
         plugins: [
             resolve({
-                extensions: ['.web.js', '.js']
+                extensions: [
+                    /\.web\.(ts|tsx|m?js)?$/i,
+                    /\.(ts|tsx|m?js)?$/i
+                ]
             }),
             ...rollupPlugins
         ],

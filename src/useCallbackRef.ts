@@ -1,5 +1,5 @@
 //
-//  mergeRefs.js
+//  useCallbackRef.js
 //
 //  The MIT License
 //  Copyright (c) 2021 - 2022 O2ter Limited. All rights reserved.
@@ -26,19 +26,8 @@
 import _ from 'lodash';
 import React from 'react';
 
-export const useMergeRefs = (...refs) => React.useMemo(() => (node) => {
-  for (const ref of refs) {
-      if (_.isNil(ref)) {
-        continue;
-      }
-      if (typeof ref === 'function') {
-        ref(node);
-        continue;
-      }
-      if (typeof ref === 'object') {
-        ref.current = node;
-        continue;
-      }
-      console.error(`useMergeRefs cannot handle Refs of type boolean, number or string, received ref ${ref}`);
-  }
-}, [...refs]);
+export function useCallbackRef<TArgs extends any[] = any[], TResult = any>(callback: (...args: TArgs) => TResult) {
+    const callbackRef = React.useRef<(...args: TArgs) => TResult>();
+    React.useEffect(() => { callbackRef.current = callback; }, [callback]);
+    return callbackRef;
+}

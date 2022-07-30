@@ -1,5 +1,5 @@
 //
-//  useCallbackRef.js
+//  channel.js
 //
 //  The MIT License
 //  Copyright (c) 2021 - 2022 O2ter Limited. All rights reserved.
@@ -25,9 +25,47 @@
 
 import _ from 'lodash';
 import React from 'react';
+import EventEmitter from 'events';
 
-export function useCallbackRef(callback) {
-    const callbackRef = React.useRef();
-    React.useEffect(() => { callbackRef.current = callback; }, [callback]);
-    return callbackRef;
+const emitter_maps = new WeakMap();
+
+interface IChannel<T = any> {
+
+    get current(): T
+
+    setValue(value: T): void
+}
+
+export const createChannel = <T = any>(initialValue: T): IChannel<T> => {
+
+    const emitter = new EventEmitter();
+    let current = initialValue;
+
+    return new class implements IChannel<T> {
+        
+        constructor() {
+            emitter.addListener('update', (value) => current = value);
+            emitter_maps.set(this, emitter);
+        }
+
+        get current() {
+            return current;
+        }
+
+        setValue(value: T) {
+            emitter.emit('update', _.isFunction(value) ? value(current) : value);
+        }
+    };
+}
+
+export const useChannel = <T = any>(channel: IChannel<T>) => {
+
+  const [value, setValue] = React.useState(channel.current);
+
+  React.useEffect(() => {
+    emitter_maps.get(channel).addListener('update', setValue);
+    return () => emitter_maps.get(channel).removeListener('update', setValue);
+  }, [setValue]);
+
+  return value;
 }
