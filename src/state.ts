@@ -1,5 +1,5 @@
 //
-//  channel.js
+//  state.js
 //
 //  The MIT License
 //  Copyright (c) 2021 - 2022 O2ter Limited. All rights reserved.
@@ -25,41 +25,44 @@
 
 import _ from 'lodash';
 import React from 'react';
-import EventEmitter from 'events';
 import { IState } from './types';
 
-const emitter_maps = new WeakMap();
-
-export const createChannel = <T = any>(initialValue: T): IState<T> => {
-
-    const emitter = new EventEmitter();
-    let current = initialValue;
-
-    return new class implements IState<T> {
-        
-        constructor() {
-            emitter.addListener('update', (value) => current = value);
-            emitter_maps.set(this, emitter);
-        }
-
-        get current() {
-            return current;
-        }
-
-        setValue(value: React.SetStateAction<T>) {
-            emitter.emit('update', _.isFunction(value) ? value(current) : value);
-        }
-    };
+function replace_key<T extends any[] | object>(
+    state: T, 
+    key: keyof T, 
+    value: T[keyof T]
+) {
+    const copy = _.clone(state);
+    copy[key] = value;
+    return copy;
 }
 
-export const useChannel = <T = any>(channel: IState<T>) => {
+export const selector = <T extends any[] | object>(
+    state: IState<T>, 
+    key: keyof T
+): IState<T[keyof T]> => Object.freeze({
+    get current() { 
+        return state.current[key]; 
+    },
+    setValue(value) {
+        state.setValue(state => replace_key(state, key, _.isFunction(value) ? value(state[key]) : value));
+    }
+})
 
-  const [value, setValue] = React.useState(channel.current);
+export const selectElements = <T extends any[] | object>(state: IState<T>) => {
+    if (_.isArrayLike(state.current)) {
+      return state.current.map((_x, i) => selector(state, i as keyof T));
+    } else {
+      return _.mapValues(state.current, (_value, key) => selector(state, key as keyof T));
+    }
+}
 
-  React.useEffect(() => {
-    emitter_maps.get(channel).addListener('update', setValue);
-    return () => emitter_maps.get(channel).removeListener('update', setValue);
-  }, [setValue]);
+export const useMapState = <T extends object>(initialState: T) => {
 
-  return value;
+    const [_state, _setState] = React.useState(initialState);
+    
+    return Object.freeze(_.mapValues(_state, (value, key): IState<T[keyof T]> => Object.freeze({
+        get current() { return value; },
+        setValue: (value) => _setState(state => ({ ...state, [key]: _.isFunction(value) ? value(state[key as keyof T]) : value })),
+    })));
 }
