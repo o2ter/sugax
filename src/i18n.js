@@ -40,7 +40,7 @@ export const I18nProvider = React.forwardRef(({
 
     React.useEffect(() => {
         i18n_update_event.addListener('update', setPreferredLocale);
-        return () => i18n_update_event.removeListener('update', setPreferredLocale);
+        return () => { i18n_update_event.removeListener('update', setPreferredLocale); }
       }, [setPreferredLocale]);
     
     React.useEffect(() => { onChange(_preferredLocale); }, [_preferredLocale]);

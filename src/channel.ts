@@ -58,7 +58,7 @@ export const useChannel = <T = any>(channel: IState<T>) => {
 
   React.useEffect(() => {
     emitter_maps.get(channel).addListener('update', setValue);
-    return () => emitter_maps.get(channel).removeListener('update', setValue);
+    return () => { emitter_maps.get(channel).removeListener('update', setValue); }
   }, [setValue]);
 
   return value;
