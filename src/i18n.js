@@ -41,11 +41,12 @@ export const I18nProvider = React.forwardRef(({
     React.useEffect(() => {
         i18n_update_event.addListener('update', setPreferredLocale);
         return () => { i18n_update_event.removeListener('update', setPreferredLocale); }
-      }, [setPreferredLocale]);
+    }, [setPreferredLocale]);
     
     React.useEffect(() => { onChange(_preferredLocale); }, [_preferredLocale]);
+    const value = React.useMemo(() => ({ preferredLocale: _preferredLocale }), [_preferredLocale]);
     
-    return <I18nContext.Provider ref={forwardRef} value={{ preferredLocale: _preferredLocale }}>{children}</I18nContext.Provider>;
+    return <I18nContext.Provider ref={forwardRef} value={value}>{children}</I18nContext.Provider>;
 });
 
 const _lang_map = {
