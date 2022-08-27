@@ -40,9 +40,7 @@ export default [
         ],
         plugins: [
             resolve({
-                extensions: [
-                    /\.(ts|tsx|m?js)?$/i
-                ]
+                extensions: ['.ts', '.tsx', '.mjs', '.js']
             }),
             ...rollupPlugins
         ],
@@ -64,8 +62,8 @@ export default [
         plugins: [
             resolve({
                 extensions: [
-                    /\.web\.(ts|tsx|m?js)?$/i,
-                    /\.(ts|tsx|m?js)?$/i
+                  '.web.ts', '.web.tsx', '.web.mjs', '.web.js',
+                  '.ts', '.tsx', '.mjs', '.js',
                 ]
             }),
             ...rollupPlugins
@@ -76,6 +74,16 @@ export default [
         output: [
             {
                 file: 'dist/index.d.ts',
+                format: 'es',
+            },
+        ],
+        plugins: [dts()],
+    },
+    {
+        input: 'src/index.web',
+        output: [
+            {
+                file: 'dist/index.web.d.ts',
                 format: 'es',
             },
         ],
