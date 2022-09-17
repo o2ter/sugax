@@ -51,7 +51,7 @@ export const selector = <T extends any[] | object>(
 
 export const selectElements = <T extends any[] | object>(state: IState<T>) => {
     if (_.isArrayLike(state.current)) {
-      return state.current.map((_x, i) => selector(state, i as keyof T));
+      return _.map(state.current, (_x, i) => selector(state, i as keyof T));
     } else {
       return _.mapValues(state.current, (_value, key) => selector(state, key as keyof T));
     }
