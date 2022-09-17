@@ -30,11 +30,11 @@ import EventEmitter from 'events';
 const I18nContext = React.createContext({ preferredLocale: 'en' });
 const i18n_update_event = new EventEmitter();
 
-export const I18nProvider = React.forwardRef(({
+export const I18nProvider = ({
     preferredLocale = 'en',
     onChange = () => {},
     children
-}, forwardRef) => {
+}) => {
     
     const [_preferredLocale, setPreferredLocale] = React.useState(preferredLocale);
 
@@ -46,8 +46,8 @@ export const I18nProvider = React.forwardRef(({
     React.useEffect(() => { onChange(_preferredLocale); }, [_preferredLocale]);
     const value = React.useMemo(() => ({ preferredLocale: _preferredLocale }), [_preferredLocale]);
     
-    return <I18nContext.Provider ref={forwardRef} value={value}>{children}</I18nContext.Provider>;
-});
+    return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
+};
 
 const _lang_map = {
     "zh-cn": "zh-hans",
