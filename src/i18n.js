@@ -121,7 +121,7 @@ function _useUserLocales(i18nState) {
 export const useUserLocales = () => _useUserLocales(React.useContext(I18nContext));
 export const setPreferredLocale = (locale) => i18n_update_event.emit('update', locale);
 
-function _localize(strings, params, i18nState, toString) {
+function _localize(strings, params, i18nState, selector) {
 
     if (_.isEmpty(strings)) return;
 
@@ -136,9 +136,9 @@ function _localize(strings, params, i18nState, toString) {
             let tag = `${locale.languageCode}-${locale.scriptCode}`.toLowerCase();
             tag = _lang_map[tag] ?? tag;
 
-            if (!_.isNil(toString(strings[tag]))) {
+            if (!_.isNil(selector(strings[tag]))) {
 
-                let result = toString(strings[tag]);
+                let result = selector(strings[tag]);
 
                 if (params && _.isString(result)) {
                     for (const [key, value] of Object.entries(params)) {
@@ -154,9 +154,9 @@ function _localize(strings, params, i18nState, toString) {
 
             const languageCode = locale.languageCode.toLowerCase();
             
-            if (!_.isNil(toString(strings[languageCode]))) {
+            if (!_.isNil(selector(strings[languageCode]))) {
 
-                let result = toString(strings[languageCode]);
+                let result = selector(strings[languageCode]);
 
                 if (params && _.isString(result)) {
                     for (const [key, value] of Object.entries(params)) {
@@ -170,7 +170,7 @@ function _localize(strings, params, i18nState, toString) {
     }
 }
 
-export const useLocalize = ({...strings}, params = {}) => _localize(strings, params, React.useContext(I18nContext), (x) => { return x; });
+export const useLocalize = ({...strings}, params = {}) => _localize(strings, params, React.useContext(I18nContext), x => x);
 
 export const LocalizationStrings = ({...strings}) => ({
 
@@ -181,7 +181,7 @@ export const LocalizationStrings = ({...strings}) => ({
         return {
             
             string(key, params = {}) {
-                return _localize(strings, params, i18nState, (x) => { return x ? x[key] : null; }) ?? key;
+                return _localize(strings, params, i18nState, x => _.get(x, key)) ?? key;
             }
         }
     }
