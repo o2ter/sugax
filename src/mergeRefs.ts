@@ -27,7 +27,7 @@ import _ from 'lodash';
 import React from 'react';
 
 export const useMergeRefs = <T = any>(
-    ...refs: ReadonlyArray<React.RefCallback<T> | React.MutableRefObject<T | undefined> | null>
+    ...refs: ReadonlyArray<React.RefCallback<T> | React.MutableRefObject<T | null | undefined> | null>
 ): React.RefCallback<T> => React.useMemo(() => (node: T) => {
     for (const ref of refs) {
         if (_.isNil(ref)) {
