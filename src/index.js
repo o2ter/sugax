@@ -30,3 +30,4 @@ export * from './mergeRefs';
 export * from './useCallbackRef';
 export * from './useMount';
 export * from './usePrevious';
+export * from './schema';

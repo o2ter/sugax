@@ -23,4 +23,4 @@
 //  THE SOFTWARE.
 //
 
-import _ from 'lodash';
+export * from './string';
