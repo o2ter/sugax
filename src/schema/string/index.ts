@@ -26,10 +26,12 @@
 import _ from 'lodash';
 import { ISchema, schema_builder } from '../types';
 
-export const string = (): ISchema<string> => schema_builder({}, (
-  internals: { default?: string },
-  builder
-) => ({
+export const string = (): ISchema<string> => schema_builder<string, {
+
+}>({
+  rules: [],
+  transforms: [],
+}, (internals, builder) => ({
 
   
   
