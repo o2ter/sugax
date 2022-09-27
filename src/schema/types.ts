@@ -36,7 +36,7 @@ export interface ISchema<Type> {
 type Internals<Type> = {
   default?: Type;
   rules: ((value: Type) => void)[];
-  transform: (value: any) => Type | undefined;
+  transform: (value: any) => Type;
 }
 
 export const schema_builder = <Type, P>(
@@ -55,9 +55,16 @@ export const schema_builder = <Type, P>(
   },
 
   transform(
-    t: (value: any) => Type | undefined
+    t: (value: any) => Type
   ) {
     return schema_builder({ ...internals, transform: t }, extension);
+  },
+
+  validate(
+    value: Type
+  ) {
+    const _value = internals.transform(value);
+    for (const rule of internals.rules) rule(_value);
   },
 
   ...extension(internals, (v) => schema_builder({ ...internals, ...v }, extension)),
