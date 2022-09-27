@@ -1,5 +1,5 @@
 //
-//  i18n.js
+//  i18n.tsx
 //
 //  The MIT License
 //  Copyright (c) 2021 - 2022 O2ter Limited. All rights reserved.
@@ -30,32 +30,35 @@ import EventEmitter from 'events';
 const I18nContext = React.createContext({ preferredLocale: 'en' });
 const i18n_update_event = new EventEmitter();
 
-export const I18nProvider = ({
+export const I18nProvider: React.FC<{
+  preferredLocale?: string;
+  onChange?: (locale: string) => void;
+}> = ({
   preferredLocale = 'en',
   onChange = () => { },
   children
 }) => {
 
-  const [_preferredLocale, setPreferredLocale] = React.useState(preferredLocale);
+    const [_preferredLocale, setPreferredLocale] = React.useState(preferredLocale);
 
-  React.useEffect(() => {
-    i18n_update_event.addListener('update', setPreferredLocale);
-    return () => { i18n_update_event.removeListener('update', setPreferredLocale); }
-  }, [setPreferredLocale]);
+    React.useEffect(() => {
+      i18n_update_event.addListener('update', setPreferredLocale);
+      return () => { i18n_update_event.removeListener('update', setPreferredLocale); }
+    }, [setPreferredLocale]);
 
-  React.useEffect(() => { onChange(_preferredLocale); }, [_preferredLocale]);
-  const value = React.useMemo(() => ({ preferredLocale: _preferredLocale }), [_preferredLocale]);
+    React.useEffect(() => { onChange(_preferredLocale); }, [_preferredLocale]);
+    const value = React.useMemo(() => ({ preferredLocale: _preferredLocale }), [_preferredLocale]);
 
-  return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
-};
+    return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
+  };
 
-const _lang_map = {
+const _lang_map: Record<string, string> = {
   "zh-cn": "zh-hans",
   "zh-hk": "zh-hant",
   "zh-tw": "zh-hant",
 };
 
-function replaceAll(string, pattern, replacement) {
+function replaceAll(string: string, pattern: string, replacement: string) {
 
   if (!_.isString(string)) return;
 
@@ -69,17 +72,17 @@ function replaceAll(string, pattern, replacement) {
   return string;
 }
 
-function getLanguagePartFromCode(code) {
+function getLanguagePartFromCode(code: string) {
   if (!_.isString(code) || code.indexOf('-') < 0) return code;
   return code.split('-')[0];
 }
 
-function getScriptPartFromCode(code) {
+function getScriptPartFromCode(code: string) {
   if (!_.isString(code) || code.indexOf('-') < 0) return;
   return code.split('-')[1];
 }
 
-function _useUserLocales(i18nState) {
+function _useUserLocales(i18nState?: { preferredLocale: string; }) {
 
   const locales = [];
 
@@ -119,14 +122,19 @@ function _useUserLocales(i18nState) {
 }
 
 export const useUserLocales = () => _useUserLocales(React.useContext(I18nContext));
-export const setPreferredLocale = (locale) => i18n_update_event.emit('update', locale);
+export const setPreferredLocale = (locale: string) => i18n_update_event.emit('update', locale);
 
-function _localize(strings, params, i18nState, selector) {
+function _localize<T extends unknown>(
+  strings: Record<string, T>,
+  params: Record<string, any>,
+  i18nState: { preferredLocale: string; },
+  selector: (x: T) => any
+) {
 
   if (_.isEmpty(strings)) return;
 
   const default_locales = [
-    { languageCode: 'en' },
+    { languageCode: 'en', scriptCode: undefined },
   ]
 
   for (const locale of _useUserLocales(i18nState).concat(default_locales)) {
@@ -170,9 +178,12 @@ function _localize(strings, params, i18nState, selector) {
   }
 }
 
-export const useLocalize = ({ ...strings }, params = {}) => _localize(strings, params, React.useContext(I18nContext), x => x);
+export const useLocalize = <T extends unknown>(
+  strings: Record<string, T>,
+  params: Record<string, any> = {}
+) => _localize(strings, params, React.useContext(I18nContext), (x: T) => x);
 
-export const LocalizationStrings = ({ ...strings }) => ({
+export const LocalizationStrings = <T extends unknown>(strings: Record<string, T>) => ({
 
   useLocalize() {
 
@@ -180,8 +191,8 @@ export const LocalizationStrings = ({ ...strings }) => ({
 
     return {
 
-      string(key, params = {}) {
-        return _localize(strings, params, i18nState, x => _.get(x, key)) ?? key;
+      string(key: _.PropertyPath, params: Record<string, any> = {}) {
+        return _localize(strings, params, i18nState, (x: T) => _.get(x, key)) ?? key;
       }
     }
   }
