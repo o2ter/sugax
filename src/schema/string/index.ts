@@ -26,9 +26,7 @@
 import _ from 'lodash';
 import { ISchema, schema_builder } from '../types';
 
-export const string = (): ISchema<string> => schema_builder<string, {
-
-}>({
+export const string = (): ISchema<string> => schema_builder<string, {}>({
   rules: [],
   transforms: [],
 }, (internals, builder) => ({
