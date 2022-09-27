@@ -28,7 +28,7 @@ import { ISchema, schema_builder } from '../types';
 
 export const string = (): ISchema<string> => schema_builder<string, {}>({
   rules: [],
-  transforms: [],
+  transform: (v) => _.isString(v) ? v : `${v}`,
 }, (internals, builder) => ({
 
   
