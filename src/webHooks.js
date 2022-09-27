@@ -30,14 +30,14 @@ import { useCallbackRef } from './useCallbackRef';
 
 export function useDOMElementEvent(element, event, callback) {
 
-    const callbackRef = useCallbackRef(callback);
-  
-    React.useEffect(() => {
-        if (!(element instanceof EventTarget)) return;
-        const listener = (event) => _.isFunction(callbackRef.current) && callbackRef.current(event);
-        element.addEventListener(event, listener);
-        return () => { element.removeEventListener(event, listener); };
-    }, [element, event]);
+  const callbackRef = useCallbackRef(callback);
+
+  React.useEffect(() => {
+    if (!(element instanceof EventTarget)) return;
+    const listener = (event) => _.isFunction(callbackRef.current) && callbackRef.current(event);
+    element.addEventListener(event, listener);
+    return () => { element.removeEventListener(event, listener); };
+  }, [element, event]);
 }
 
 export const useWindowEvent = (event, callback) => useDOMElementEvent(window, event, callback);
@@ -46,66 +46,66 @@ export const useDocumentEvent = (event, callback) => useDOMElementEvent(document
 const onLayoutCallbackMap = new WeakMap();
 
 const resizeObserver = (() => {
-    
-    if (typeof window === 'undefined' || typeof window.ResizeObserver === 'undefined') return;
 
-    return new window.ResizeObserver((entries) => {
+  if (typeof window === 'undefined' || typeof window.ResizeObserver === 'undefined') return;
 
-        for (const entry of entries) {
+  return new window.ResizeObserver((entries) => {
 
-            const node = entry.target;
-            const onLayout = onLayoutCallbackMap.get(node);
+    for (const entry of entries) {
 
-            if (_.isFunction(onLayout)) {
+      const node = entry.target;
+      const onLayout = onLayoutCallbackMap.get(node);
 
-                UIManager.measure(node, (x, y, width, height, left, top) => {
-                    const event = {
-                        nativeEvent: {
-                            layout: { x, y, width, height, left, top }
-                        },
-                        timeStamp: Date.now(),
-                    };
-                    Object.defineProperty(event.nativeEvent, 'target', {
-                        enumerable: true,
-                        get: () => entry.target
-                    });
-                    onLayout(event);
-                });
-            }
-        }
-    });
+      if (_.isFunction(onLayout)) {
+
+        UIManager.measure(node, (x, y, width, height, left, top) => {
+          const event = {
+            nativeEvent: {
+              layout: { x, y, width, height, left, top }
+            },
+            timeStamp: Date.now(),
+          };
+          Object.defineProperty(event.nativeEvent, 'target', {
+            enumerable: true,
+            get: () => entry.target
+          });
+          onLayout(event);
+        });
+      }
+    }
+  });
 })();
 
 export function useElementLayout(ref, onLayout) {
 
-    if (_.isNil(resizeObserver)) return;
+  if (_.isNil(resizeObserver)) return;
 
-    React.useEffect(() => {
-        const node = ref.current;
-        if (!_.isNil(node)) {
-            onLayoutCallbackMap.set(node, onLayout);
-        }
-        return () => {
-            if (!_.isNil(node)) {
-                resizeObserver.unobserve(node);
-            }
-        };
-    }, [ref, onLayout]);
-    
-    React.useEffect(() => {
-        const node = ref.current;
-        if (!_.isNil(node)) {
-            const onLayout = onLayoutCallbackMap.get(node);
-            if (_.isFunction(onLayout)) {
-                resizeObserver.observe(node);
-            } else {
-                resizeObserver.unobserve(node);
-            }
-        }
-        return () => {
-            if (!_.isNil(node)) {
-                resizeObserver.unobserve(node);
-            }
-        };
-    }, [ref]);
+  React.useEffect(() => {
+    const node = ref.current;
+    if (!_.isNil(node)) {
+      onLayoutCallbackMap.set(node, onLayout);
+    }
+    return () => {
+      if (!_.isNil(node)) {
+        resizeObserver.unobserve(node);
+      }
+    };
+  }, [ref, onLayout]);
+
+  React.useEffect(() => {
+    const node = ref.current;
+    if (!_.isNil(node)) {
+      const onLayout = onLayoutCallbackMap.get(node);
+      if (_.isFunction(onLayout)) {
+        resizeObserver.observe(node);
+      } else {
+        resizeObserver.unobserve(node);
+      }
+    }
+    return () => {
+      if (!_.isNil(node)) {
+        resizeObserver.unobserve(node);
+      }
+    };
+  }, [ref]);
 }

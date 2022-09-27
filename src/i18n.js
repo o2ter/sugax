@@ -31,91 +31,91 @@ const I18nContext = React.createContext({ preferredLocale: 'en' });
 const i18n_update_event = new EventEmitter();
 
 export const I18nProvider = ({
-    preferredLocale = 'en',
-    onChange = () => {},
-    children
+  preferredLocale = 'en',
+  onChange = () => { },
+  children
 }) => {
-    
-    const [_preferredLocale, setPreferredLocale] = React.useState(preferredLocale);
 
-    React.useEffect(() => {
-        i18n_update_event.addListener('update', setPreferredLocale);
-        return () => { i18n_update_event.removeListener('update', setPreferredLocale); }
-    }, [setPreferredLocale]);
-    
-    React.useEffect(() => { onChange(_preferredLocale); }, [_preferredLocale]);
-    const value = React.useMemo(() => ({ preferredLocale: _preferredLocale }), [_preferredLocale]);
-    
-    return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
+  const [_preferredLocale, setPreferredLocale] = React.useState(preferredLocale);
+
+  React.useEffect(() => {
+    i18n_update_event.addListener('update', setPreferredLocale);
+    return () => { i18n_update_event.removeListener('update', setPreferredLocale); }
+  }, [setPreferredLocale]);
+
+  React.useEffect(() => { onChange(_preferredLocale); }, [_preferredLocale]);
+  const value = React.useMemo(() => ({ preferredLocale: _preferredLocale }), [_preferredLocale]);
+
+  return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
 };
 
 const _lang_map = {
-    "zh-cn": "zh-hans",
-    "zh-hk": "zh-hant",
-    "zh-tw": "zh-hant",
+  "zh-cn": "zh-hans",
+  "zh-hk": "zh-hant",
+  "zh-tw": "zh-hant",
 };
 
 function replaceAll(string, pattern, replacement) {
 
-    if (!_.isString(string)) return;
+  if (!_.isString(string)) return;
 
-    let idx = string.lastIndexOf(pattern);
+  let idx = string.lastIndexOf(pattern);
 
-    while(idx !== -1) {
-        string = string.substring(0, idx) + replacement + string.substring(idx + pattern.length);
-        idx = string.lastIndexOf(pattern);
-    } 
-    
-    return string;
+  while (idx !== -1) {
+    string = string.substring(0, idx) + replacement + string.substring(idx + pattern.length);
+    idx = string.lastIndexOf(pattern);
+  }
+
+  return string;
 }
 
 function getLanguagePartFromCode(code) {
-    if (!_.isString(code) || code.indexOf('-') < 0) return code;
-    return code.split('-')[0];
+  if (!_.isString(code) || code.indexOf('-') < 0) return code;
+  return code.split('-')[0];
 }
 
 function getScriptPartFromCode(code) {
-    if (!_.isString(code) || code.indexOf('-') < 0) return;
-    return code.split('-')[1];
+  if (!_.isString(code) || code.indexOf('-') < 0) return;
+  return code.split('-')[1];
 }
 
 function _useUserLocales(i18nState) {
 
-    const locales = [];
+  const locales = [];
 
-    if (i18nState?.preferredLocale) {
-        
+  if (i18nState?.preferredLocale) {
+
+    locales.push({
+      languageCode: getLanguagePartFromCode(i18nState.preferredLocale),
+      scriptCode: getScriptPartFromCode(i18nState.preferredLocale),
+    });
+  }
+
+  if (global.navigator) {
+
+    const languages = navigator.languages;
+    const language = navigator.language;
+
+    if (languages) {
+
+      for (const language of languages) {
+
         locales.push({
-            languageCode: getLanguagePartFromCode(i18nState.preferredLocale),
-            scriptCode: getScriptPartFromCode(i18nState.preferredLocale),
+          languageCode: getLanguagePartFromCode(language),
+          scriptCode: getScriptPartFromCode(language),
         });
+      }
+
+    } else if (language) {
+
+      locales.push({
+        languageCode: getLanguagePartFromCode(language),
+        scriptCode: getScriptPartFromCode(language),
+      });
     }
+  }
 
-    if (global.navigator) {
-
-        const languages = navigator.languages;
-        const language = navigator.language;
-
-        if (languages) {
-
-            for (const language of languages) {
-            
-                locales.push({
-                    languageCode: getLanguagePartFromCode(language),
-                    scriptCode: getScriptPartFromCode(language),
-                });
-            }
-
-        } else if (language) {
-            
-            locales.push({
-                languageCode: getLanguagePartFromCode(language),
-                scriptCode: getScriptPartFromCode(language),
-            });
-        }
-    }
-
-    return locales;
+  return locales;
 }
 
 export const useUserLocales = () => _useUserLocales(React.useContext(I18nContext));
@@ -123,66 +123,66 @@ export const setPreferredLocale = (locale) => i18n_update_event.emit('update', l
 
 function _localize(strings, params, i18nState, selector) {
 
-    if (_.isEmpty(strings)) return;
+  if (_.isEmpty(strings)) return;
 
-    const default_locales = [
-        { languageCode: 'en' },
-    ]
-    
-    for (const locale of _useUserLocales(i18nState).concat(default_locales)) {
-    
-        if (!_.isEmpty(locale.languageCode) && !_.isEmpty(locale.scriptCode)) {
+  const default_locales = [
+    { languageCode: 'en' },
+  ]
 
-            let tag = `${locale.languageCode}-${locale.scriptCode}`.toLowerCase();
-            tag = _lang_map[tag] ?? tag;
+  for (const locale of _useUserLocales(i18nState).concat(default_locales)) {
 
-            if (!_.isNil(selector(strings[tag]))) {
+    if (!_.isEmpty(locale.languageCode) && !_.isEmpty(locale.scriptCode)) {
 
-                let result = selector(strings[tag]);
+      let tag = `${locale.languageCode}-${locale.scriptCode}`.toLowerCase();
+      tag = _lang_map[tag] ?? tag;
 
-                if (params && _.isString(result)) {
-                    for (const [key, value] of Object.entries(params)) {
-                        result = replaceAll(result, '${' + key + '}', `${value}`);
-                    }
-                }
+      if (!_.isNil(selector(strings[tag]))) {
 
-                return result;
-            }
+        let result = selector(strings[tag]);
+
+        if (params && _.isString(result)) {
+          for (const [key, value] of Object.entries(params)) {
+            result = replaceAll(result, '${' + key + '}', `${value}`);
+          }
         }
 
-        if (!_.isEmpty(locale.languageCode)) {
-
-            const languageCode = locale.languageCode.toLowerCase();
-            
-            if (!_.isNil(selector(strings[languageCode]))) {
-
-                let result = selector(strings[languageCode]);
-
-                if (params && _.isString(result)) {
-                    for (const [key, value] of Object.entries(params)) {
-                        result = replaceAll(result, '${' + key + '}', `${value}`);
-                    }
-                }
-
-                return result;
-            }
-        }
+        return result;
+      }
     }
+
+    if (!_.isEmpty(locale.languageCode)) {
+
+      const languageCode = locale.languageCode.toLowerCase();
+
+      if (!_.isNil(selector(strings[languageCode]))) {
+
+        let result = selector(strings[languageCode]);
+
+        if (params && _.isString(result)) {
+          for (const [key, value] of Object.entries(params)) {
+            result = replaceAll(result, '${' + key + '}', `${value}`);
+          }
+        }
+
+        return result;
+      }
+    }
+  }
 }
 
-export const useLocalize = ({...strings}, params = {}) => _localize(strings, params, React.useContext(I18nContext), x => x);
+export const useLocalize = ({ ...strings }, params = {}) => _localize(strings, params, React.useContext(I18nContext), x => x);
 
-export const LocalizationStrings = ({...strings}) => ({
+export const LocalizationStrings = ({ ...strings }) => ({
 
-    useLocalize() {
-        
-        const i18nState = React.useContext(I18nContext);
-        
-        return {
-            
-            string(key, params = {}) {
-                return _localize(strings, params, i18nState, x => _.get(x, key)) ?? key;
-            }
-        }
+  useLocalize() {
+
+    const i18nState = React.useContext(I18nContext);
+
+    return {
+
+      string(key, params = {}) {
+        return _localize(strings, params, i18nState, x => _.get(x, key)) ?? key;
+      }
     }
+  }
 });

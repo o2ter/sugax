@@ -27,9 +27,9 @@ import _ from 'lodash';
 import React from 'react';
 
 export function useMount(callback: () => void) {
-    React.useEffect(() => { if (_.isFunction(callback)) callback(); }, []);
+  React.useEffect(() => { if (_.isFunction(callback)) callback(); }, []);
 }
 
 export function useUnmount(callback: () => void) {
-    React.useEffect(() => () => { if (_.isFunction(callback)) callback(); }, []);
+  React.useEffect(() => () => { if (_.isFunction(callback)) callback(); }, []);
 }

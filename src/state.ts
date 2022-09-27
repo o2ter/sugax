@@ -28,41 +28,41 @@ import React from 'react';
 import { IState } from './types';
 
 function replace_key<T extends any[] | object>(
-    state: T, 
-    key: keyof T, 
-    value: T[keyof T]
+  state: T,
+  key: keyof T,
+  value: T[keyof T]
 ) {
-    const copy = _.clone(state);
-    copy[key] = value;
-    return copy;
+  const copy = _.clone(state);
+  copy[key] = value;
+  return copy;
 }
 
 export const selector = <T extends any[] | object>(
-    state: IState<T>, 
-    key: keyof T
+  state: IState<T>,
+  key: keyof T
 ): IState<T[keyof T]> => Object.freeze({
-    get current() { 
-        return state.current[key]; 
-    },
-    setValue(value) {
-        state.setValue(state => replace_key(state, key, _.isFunction(value) ? value(state[key]) : value));
-    }
+  get current() {
+    return state.current[key];
+  },
+  setValue(value) {
+    state.setValue(state => replace_key(state, key, _.isFunction(value) ? value(state[key]) : value));
+  }
 })
 
 export const selectElements = <T extends any[] | object>(state: IState<T>) => {
-    if (_.isArrayLike(state.current)) {
-      return _.map(state.current, (_x, i) => selector(state, i as keyof T));
-    } else {
-      return _.mapValues(state.current, (_value, key) => selector(state, key as keyof T));
-    }
+  if (_.isArrayLike(state.current)) {
+    return _.map(state.current, (_x, i) => selector(state, i as keyof T));
+  } else {
+    return _.mapValues(state.current, (_value, key) => selector(state, key as keyof T));
+  }
 }
 
 export const useMapState = <T extends object>(initialState: T) => {
 
-    const [_state, _setState] = React.useState(initialState);
-    
-    return Object.freeze(_.mapValues(_state, (value, key): IState<T[keyof T]> => Object.freeze({
-        get current() { return value; },
-        setValue: (value) => _setState(state => ({ ...state, [key]: _.isFunction(value) ? value(state[key as keyof T]) : value })),
-    })));
+  const [_state, _setState] = React.useState(initialState);
+
+  return Object.freeze(_.mapValues(_state, (value, key): IState<T[keyof T]> => Object.freeze({
+    get current() { return value; },
+    setValue: (value) => _setState(state => ({ ...state, [key]: _.isFunction(value) ? value(state[key as keyof T]) : value })),
+  })));
 }

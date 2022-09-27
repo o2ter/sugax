@@ -32,24 +32,24 @@ const emitter_maps = new WeakMap();
 
 export const createChannel = <T = any>(initialValue: T): IState<T> => {
 
-    const emitter = new EventEmitter();
-    let current = initialValue;
+  const emitter = new EventEmitter();
+  let current = initialValue;
 
-    return new class implements IState<T> {
-        
-        constructor() {
-            emitter.addListener('update', (value) => current = value);
-            emitter_maps.set(this, emitter);
-        }
+  return new class implements IState<T> {
 
-        get current() {
-            return current;
-        }
+    constructor() {
+      emitter.addListener('update', (value) => current = value);
+      emitter_maps.set(this, emitter);
+    }
 
-        setValue(value: React.SetStateAction<T>) {
-            emitter.emit('update', _.isFunction(value) ? value(current) : value);
-        }
-    };
+    get current() {
+      return current;
+    }
+
+    setValue(value: React.SetStateAction<T>) {
+      emitter.emit('update', _.isFunction(value) ? value(current) : value);
+    }
+  };
 }
 
 export const useChannel = <T = any>(channel: IState<T>) => {

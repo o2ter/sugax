@@ -27,16 +27,16 @@ import _ from 'lodash';
 import React from 'react';
 
 export function usePrevious<T = any>(state: T) {
-    const ref = React.useRef<T>();
-    React.useEffect(() => { ref.current = state; });
-    return ref.current;
+  const ref = React.useRef<T>();
+  React.useEffect(() => { ref.current = state; });
+  return ref.current;
 }
 
 export function usePreviousMemo<T = any>(
-    factory: (value: T | undefined) => T,
-    deps: React.DependencyList | undefined
+  factory: (value: T | undefined) => T,
+  deps: React.DependencyList | undefined
 ) {
-    const ref = React.useRef<T>();
-    React.useMemo(() => { ref.current = factory(ref.current); }, deps);
-    return ref.current;
+  const ref = React.useRef<T>();
+  React.useMemo(() => { ref.current = factory(ref.current); }, deps);
+  return ref.current;
 }
