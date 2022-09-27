@@ -35,17 +35,17 @@ export interface ISchema<Type> {
 
 export const schema_builder = <Type, P extends { default?: Type }>(
   internals: P,
-  builder: (internals: P, builder: (internals: P) => ISchema<Type>) => any
+  extension: (internals: P, builder: (internals: P) => ISchema<Type>) => any
 ): ISchema<Type> => ({
   
   default(value: Type) {
-    return schema_builder({ ...internals, default: value }, builder);
+    return schema_builder({ ...internals, default: value }, extension);
   },
   
   getDefault() {
     return internals.default;
   },
 
-  ...builder(internals, (v) => schema_builder({ ...internals, ...v }, builder)),
+  ...extension(internals, (v) => schema_builder({ ...internals, ...v }, extension)),
 
 });
