@@ -1,5 +1,5 @@
 //
-//  index.js
+//  index.ts
 //
 //  The MIT License
 //  Copyright (c) 2021 - 2022 O2ter Limited. All rights reserved.
@@ -23,10 +23,16 @@
 //  THE SOFTWARE.
 //
 
-export * from './error';
-export * from './string';
-export * from './object';
-export * from './array';
-export * from './boolean';
-export * from './number';
-export * from './date';
+import _ from 'lodash';
+import { ISchema, SchemaBuilder } from '../internals/types';
+import * as _rules from './rules';
+
+export const date = (): ISchema<Date, typeof _rules, {
+
+}> => SchemaBuilder({
+  type: 'date',
+  rules: [],
+  transform: (v) => _.isDate(v) ? v : `${v}`,
+}, _rules, (internals, builder) => ({
+
+}));

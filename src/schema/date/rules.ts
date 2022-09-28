@@ -1,5 +1,5 @@
 //
-//  index.js
+//  rules.ts
 //
 //  The MIT License
 //  Copyright (c) 2021 - 2022 O2ter Limited. All rights reserved.
@@ -23,10 +23,6 @@
 //  THE SOFTWARE.
 //
 
-export * from './error';
-export * from './string';
-export * from './object';
-export * from './array';
-export * from './boolean';
-export * from './number';
-export * from './date';
+import _ from 'lodash';
+
+export const length = (value: any, length: number): boolean => _.isString(value) && value.length === length;
