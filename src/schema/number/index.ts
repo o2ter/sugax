@@ -33,10 +33,11 @@ export const number = (): ISchema<number, typeof _rules, {
   type: 'number',
   rules: [],
   transform: (v) => {
-    try { 
-      if (_.isNumber(v)) return v;
-      if (_.isString(v)) return parseFloat(v);
-    } catch {}
+    if (_.isNumber(v)) return v;
+    if (_.isString(v)) {
+      const f = parseFloat(v);
+      if (!_.isNaN(f)) return f;
+    }
   },
 }, _rules, (internals, builder) => ({
 

@@ -32,7 +32,13 @@ export const date = (): ISchema<Date, typeof _rules, {
 }> => SchemaBuilder({
   type: 'date',
   rules: [],
-  transform: (v) => _.isDate(v) ? v : `${v}`,
+  transform: (v) => {
+    if (_.isDate(v)) return v;
+    if (_.isString(v) || _.isNumber(v)) {
+      const date = new Date(v);
+      if (!_.isNaN(date)) return date;
+    }
+  },
 }, _rules, (internals, builder) => ({
 
 }));

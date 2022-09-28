@@ -32,7 +32,7 @@ export const boolean = (): ISchema<boolean, typeof _rules, {
 }> => SchemaBuilder({
   type: 'boolean',
   rules: [],
-  transform: (v) => _.isBoolean(v) ? v : `${v}`,
+  transform: (v) => _.isBoolean(v) ? v : !!v,
 }, _rules, (internals, builder) => ({
 
 }));
