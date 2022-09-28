@@ -26,7 +26,7 @@
 import _ from 'lodash';
 import * as common_rules from './common_rules';
 
-import { ValidateError } from './error';
+import { ValidateError } from '../error';
 
 type Internals<T> = {
   type: string;

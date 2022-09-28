@@ -24,7 +24,7 @@
 //
 
 import _ from 'lodash';
-import { ISchema, SchemaBuilder } from '../types';
+import { ISchema, SchemaBuilder } from '../internals/types';
 import * as _rules from './rules';
 
 export const string = (): ISchema<string, typeof _rules, {

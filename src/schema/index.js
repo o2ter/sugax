@@ -23,4 +23,5 @@
 //  THE SOFTWARE.
 //
 
+export * from './error';
 export * from './string';
