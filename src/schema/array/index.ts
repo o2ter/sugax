@@ -31,6 +31,7 @@ export const array = <T = void>(array?: T): ISchema<TypeOfSchema<T>[], typeof _r
 
 }> => SchemaBuilder({
   type: 'array',
+  default: [],
   rules: [],
   transform: (v) => _.isArray(v) ? v : undefined,
 }, _rules, (internals, builder) => ({
