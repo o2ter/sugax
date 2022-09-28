@@ -24,17 +24,15 @@
 //
 
 import _ from 'lodash';
-import { ISchema, MappedRules, SchemaBuilder, RulesLoader } from '../types';
+import { ISchema, SchemaBuilder } from '../types';
 import * as _rules from './rules';
 
-export const string = (): ISchema<string, MappedRules<typeof _rules> & {
+export const string = (): ISchema<string, {
 
 }> => SchemaBuilder({
   type: 'string',
   rules: [],
   transform: (v) => _.isNil(v) || _.isString(v) ? v : `${v}`,
-}, (internals, builder) => ({
+}, _rules, (internals, builder) => ({
 
-  ...RulesLoader(_rules, internals, builder),
-    
 }));
