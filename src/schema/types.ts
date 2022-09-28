@@ -39,31 +39,31 @@ type OmitFirstArg<F> = F extends (x: any, ...args: infer P) => infer R ? (...arg
 
 type RuleType = Record<string, (...args: any) => boolean>
 
-type MappedRules<T, E, R extends RuleType> = {
-  [K in keyof R]: (...args: Parameters<OmitFirstArg<R[K]>>) => ISchema<T, E>;
+type MappedRules<T, R extends RuleType, E> = {
+  [K in keyof R]: (...args: Parameters<OmitFirstArg<R[K]>>) => ISchema<T, R, E>;
 }
 
-export type ISchema<T, E> = {
+export type ISchema<T, R extends RuleType, E> = {
 
-  default(value: T): ISchema<T, E>
+  default(value: T): ISchema<T, R, E>
 
   getDefault(): T | undefined
 
   transform(
     t: (value: any) => any
-  ): ISchema<T, E>
+  ): ISchema<T, R, E>
 
   validate(
     value: any,
     path?: string | string[],
   ): void
 
-} & MappedRules<T, E, typeof common_rules> & E
+} & MappedRules<T, typeof common_rules, E> & MappedRules<T, R, E> & E
 
 const RulesLoader = <T, E, R extends RuleType, P>(
   rules: R,
   internals: P & Internals<T>,
-  builder: (internals: Partial<P | Internals<T>>) => ISchema<T, E>
+  builder: (internals: Partial<P | Internals<T>>) => ISchema<T, R, E>
 ) => _.mapValues(rules, (rule, key) => (...args: any) => builder({
   rules: [...internals.rules, { rule: key, validate: (v) => rule(v, ...args) }],
 }));
@@ -73,9 +73,9 @@ export const SchemaBuilder = <T, E, R extends RuleType, P>(
   rules: R,
   extension: (
     internals: P & Internals<T>,
-    builder: (internals: Partial<P | Internals<T>>) => ISchema<T, E> & MappedRules<T, E, R>
+    builder: (internals: Partial<P | Internals<T>>) => ISchema<T, R, E>
   ) => E
-): ISchema<T, E> & MappedRules<T, E, R> => {
+): ISchema<T, R, E> => {
 
   const builder = (v: Partial<P | Internals<T>>) => SchemaBuilder({ ...internals, ...v }, rules, extension);
 
