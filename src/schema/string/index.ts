@@ -24,7 +24,7 @@
 //
 
 import _ from 'lodash';
-import { ISchema, SchemaBuilder } from '../types';
+import { ISchema, SchemaBuilder, RulesLoader } from '../types';
 import * as _rules from './rules';
 
 export const string = (): ISchema<string> => SchemaBuilder({
@@ -33,4 +33,6 @@ export const string = (): ISchema<string> => SchemaBuilder({
   transform: (v) => _.isNil(v) || _.isString(v) ? v : `${v}`,
 }, (internals, builder) => ({
 
+  ...RulesLoader(_rules, internals, builder),
+    
 }));
