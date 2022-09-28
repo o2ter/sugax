@@ -32,6 +32,14 @@ export interface ISchema<Type> {
 
   getDefault(): Type | undefined
 
+  transform(
+    t: (value: any) => any
+  ): ISchema<Type>
+
+  validate(
+    value: any,
+    path?: string | string[],
+  ): void
 }
 
 type Internals<Type> = {
