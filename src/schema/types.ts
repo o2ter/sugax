@@ -73,7 +73,7 @@ export const SchemaBuilder = <T, E, R extends RuleType, P>(
   rules: R,
   extension: (
     internals: P & Internals<T>,
-    builder: (internals: Partial<P | Internals<T>>) => ISchema<T, E>
+    builder: (internals: Partial<P | Internals<T>>) => ISchema<T, E> & MappedRules<T, E, R>
   ) => E
 ): ISchema<T, E> & MappedRules<T, E, R> => {
 
