@@ -67,6 +67,8 @@ export class ValidateError extends Error {
   }
 }
 
+type OmitFirstArg<F> = F extends (x: any, ...args: infer P) => infer R ? (...args: P) => R : never;
+
 type IRules = Record<string, (value: any, ...args: any[]) => boolean>
 
 type IExtension<T, P, E> = (
