@@ -26,23 +26,7 @@
 import _ from 'lodash';
 import * as common_rules from './common_rules';
 
-export class ValidateError extends Error {
-
-  type: string;
-  rule: string;
-  path?: string[];
-
-  constructor(
-    type: string,
-    rule: string,
-    path?: string[]
-  ) {
-    super();
-    this.type = type;
-    this.rule = rule;
-    this.path = path;
-  }
-}
+import { ValidateError } from './error';
 
 type Internals<T> = {
   type: string;
