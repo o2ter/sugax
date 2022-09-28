@@ -69,25 +69,25 @@ export class ValidateError extends Error {
 
 type IRules = Record<string, (value: any, ...args: any[]) => boolean>
 
-type IExtension<Type, P> = (
+type IExtension<Type, P, E> = (
   internals: P & Internals<Type>,
   builder: (internals: P & Internals<Type>) => ISchema<Type>,
   rules: (rules: IRules) => Record<string, (...args: any[]) => ISchema<Type>>
-) => any
+) => E
 
-const RulesLoader = <Type, P>(
+const RulesLoader = <Type, P, E>(
   rules: IRules,
   internals: P & Internals<Type>,
-  extension: IExtension<Type, P>
+  extension: IExtension<Type, P, E>
 ) => _.mapValues(rules, (rule, key) => (...args: any[]) => SchemaBuilder({
   ...internals,
   rules: [...internals.rules, { rule: key, validate: (v) => rule(v, ...args) }],
 }, extension));
 
-export const SchemaBuilder = <Type, P>(
+export const SchemaBuilder = <Type, P, E>(
   internals: P & Internals<Type>,
-  extension: IExtension<Type, P>
-): ISchema<Type> => ({
+  extension: IExtension<Type, P, E>
+): ISchema<Type> & E => ({
 
   default(
     value: Type

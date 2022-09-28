@@ -27,7 +27,7 @@ import _ from 'lodash';
 import { ISchema, SchemaBuilder } from '../types';
 import * as _rules from './rules';
 
-export const string = (): ISchema<string> => SchemaBuilder<string, {}>({
+export const string = (): ISchema<string> => SchemaBuilder<string, {}, {}>({
   type: 'string',
   rules: [],
   transform: (v) => _.isNil(v) || _.isString(v) ? v : `${v}`,
