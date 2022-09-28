@@ -26,15 +26,15 @@
 import _ from 'lodash';
 import * as common_rules from './common_rules';
 
-export interface ISchema<Type> {
+export interface ISchema<T> {
 
-  default(value: Type): ISchema<Type>
+  default(value: T): ISchema<T>
 
-  getDefault(): Type | undefined
+  getDefault(): T | undefined
 
   transform(
     t: (value: any) => any
-  ): ISchema<Type>
+  ): ISchema<T>
 
   validate(
     value: any,
@@ -42,9 +42,9 @@ export interface ISchema<Type> {
   ): void
 }
 
-type Internals<Type> = {
+type Internals<T> = {
   type: string;
-  default?: Type;
+  default?: T;
   rules: ({ rule: string, validate: (value: any) => boolean })[];
   transform: (value: any) => any;
 }
@@ -69,30 +69,35 @@ export class ValidateError extends Error {
 
 type IRules = Record<string, (value: any, ...args: any[]) => boolean>
 
-type IExtension<Type, P, E> = (
-  internals: P & Internals<Type>,
-  builder: (internals: Partial<P | Internals<Type>>) => ISchema<Type>
+type IExtension<T, P, E> = (
+  internals: P & Internals<T>,
+  builder: (internals: Partial<P | Internals<T>>) => ISchema<T>
 ) => E
 
-export const RulesLoader = <Type, P>(
-  rules: IRules,
-  internals: P & Internals<Type>,
-  builder: (internals: Partial<P | Internals<Type>>) => ISchema<Type>
+export const RulesLoader = <T, R extends IRules, P>(
+  rules: R,
+  internals: P & Internals<T>,
+  builder: (internals: Partial<P | Internals<T>>) => ISchema<T>
 ) => _.mapValues(rules, (rule, key) => (...args: any[]) => builder({
   rules: [...internals.rules, { rule: key, validate: (v) => rule(v, ...args) }],
 }));
 
-export const SchemaBuilder = <Type, P, E>(
-  internals: P & Internals<Type>,
-  extension: IExtension<Type, P, E>
-): ISchema<Type> & E => {
+const CommonRulesLoader = <T, P>(
+  internals: P & Internals<T>,
+  builder: (internals: Partial<P | Internals<T>>) => ISchema<T>
+) => RulesLoader(common_rules, internals, builder);
 
-  const builder = (v: Partial<P | Internals<Type>>) => SchemaBuilder({ ...internals, ...v }, extension);
+export const SchemaBuilder = <T, P, E>(
+  internals: P & Internals<T>,
+  extension: IExtension<T, P, E>
+): ISchema<T> & E => {
 
-  return {
+  const builder = (v: Partial<P | Internals<T>>) => SchemaBuilder({ ...internals, ...v }, extension);
+
+  const result = {
 
     default(
-      value: Type
+      value: T
     ) {
       return builder({ default: value });
     },
@@ -119,9 +124,10 @@ export const SchemaBuilder = <Type, P, E>(
       };
     },
     
-    ...RulesLoader(common_rules, internals, builder),
+    ...CommonRulesLoader(internals, builder),
     
     ...extension(internals, builder),
-  
   }
+
+  return result;
 };
