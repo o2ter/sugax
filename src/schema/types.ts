@@ -60,7 +60,7 @@ export type ISchema<T, R extends RuleType, E> = {
 
 } & MappedRules<T, typeof common_rules & R, E> & E
 
-export const SchemaBuilder = <T, E, R extends RuleType, P>(
+export const SchemaBuilder = <T, R extends RuleType, E, P>(
   internals: P & Internals<T>,
   rules: R,
   extension: (
