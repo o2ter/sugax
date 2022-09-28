@@ -26,29 +26,6 @@
 import _ from 'lodash';
 import * as common_rules from './common_rules';
 
-export interface ISchema<T> {
-
-  default(value: T): ISchema<T>
-
-  getDefault(): T | undefined
-
-  transform(
-    t: (value: any) => any
-  ): ISchema<T>
-
-  validate(
-    value: any,
-    path?: string | string[],
-  ): void
-}
-
-type Internals<T> = {
-  type: string;
-  default?: T;
-  rules: ({ rule: string, validate: (value: any) => boolean })[];
-  transform: (value: any) => any;
-}
-
 export class ValidateError extends Error {
 
   type: string;
@@ -67,36 +44,60 @@ export class ValidateError extends Error {
   }
 }
 
-type OmitFirstArg<F> = F extends (x: any, ...args: infer P) => infer R ? (...args: P) => R : never;
-
-type IRules = Record<string, (value: any, ...args: any[]) => boolean>
-
-type IExtension<T, P, E> = (
-  internals: P & Internals<T>,
-  builder: (internals: Partial<P | Internals<T>>) => ISchema<T>
-) => E
-
-type SchemaType<T, E> = ISchema<T> & E & {
-  [K in keyof typeof common_rules]: (...args: any[]) => SchemaType<T, E>;
+export type Internals<T> = {
+  type: string;
+  default?: T;
+  rules: ({ rule: string, validate: (value: any) => boolean })[];
+  transform: (value: any) => any;
 }
 
-export const RulesLoader = <T, R extends IRules, P, E>(
+export type OmitFirstArg<F> = F extends (x: any, ...args: infer P) => infer R ? (...args: P) => R : never;
+
+type RuleType = Record<string, (...args: any) => boolean>
+
+export type MappedRules<R extends RuleType> = {
+  [K in keyof R]: OmitFirstArg<R[K]>;
+}
+
+export type ISchema<T, E> = {
+
+  default(value: T): ISchema<T, E>
+
+  getDefault(): T | undefined
+
+  transform(
+    t: (value: any) => any
+  ): ISchema<T, E>
+
+  validate(
+    value: any,
+    path?: string | string[],
+  ): void
+  
+} & MappedRules<typeof common_rules> & E
+
+type IExtension<T, E, P> = (
+  internals: P & Internals<T>,
+  builder: (internals: Partial<P | Internals<T>>) => ISchema<T, E>
+) => E
+
+export const RulesLoader = <T, E, R extends RuleType, P>(
   rules: R,
   internals: P & Internals<T>,
-  builder: (internals: Partial<P | Internals<T>>) => SchemaType<T, E>
-) => _.mapValues(rules, (rule, key) => (...args: any[]) => builder({
+  builder: (internals: Partial<P | Internals<T>>) => ISchema<T, E>
+) => _.mapValues(rules, (rule, key) => (...args: any) => builder({
   rules: [...internals.rules, { rule: key, validate: (v) => rule(v, ...args) }],
-}));
+})) as MappedRules<R>;
 
-const CommonRulesLoader = <T, P, E>(
+const CommonRulesLoader = <T, E, P>(
   internals: P & Internals<T>,
-  builder: (internals: Partial<P | Internals<T>>) => SchemaType<T, E>
+  builder: (internals: Partial<P | Internals<T>>) => ISchema<T, E>
 ) => RulesLoader(common_rules, internals, builder);
 
-export const SchemaBuilder = <T, P, E>(
+export const SchemaBuilder = <T, E, P>(
   internals: P & Internals<T>,
-  extension: IExtension<T, P, E>
-): SchemaType<T, E> => {
+  extension: IExtension<T, E, P>
+): ISchema<T, E> => {
 
   const builder = (v: Partial<P | Internals<T>>) => SchemaBuilder({ ...internals, ...v }, extension);
 
