@@ -74,27 +74,31 @@ type IExtension<T, P, E> = (
   builder: (internals: Partial<P | Internals<T>>) => ISchema<T>
 ) => E
 
-export const RulesLoader = <T, R extends IRules, P>(
+type SchemaType<T, E> = ISchema<T> & E & {
+  [K in keyof typeof common_rules]: (...args: any[]) => SchemaType<T, E>;
+}
+
+export const RulesLoader = <T, R extends IRules, P, E>(
   rules: R,
   internals: P & Internals<T>,
-  builder: (internals: Partial<P | Internals<T>>) => ISchema<T>
+  builder: (internals: Partial<P | Internals<T>>) => SchemaType<T, E>
 ) => _.mapValues(rules, (rule, key) => (...args: any[]) => builder({
   rules: [...internals.rules, { rule: key, validate: (v) => rule(v, ...args) }],
 }));
 
-const CommonRulesLoader = <T, P>(
+const CommonRulesLoader = <T, P, E>(
   internals: P & Internals<T>,
-  builder: (internals: Partial<P | Internals<T>>) => ISchema<T>
+  builder: (internals: Partial<P | Internals<T>>) => SchemaType<T, E>
 ) => RulesLoader(common_rules, internals, builder);
 
 export const SchemaBuilder = <T, P, E>(
   internals: P & Internals<T>,
   extension: IExtension<T, P, E>
-): ISchema<T> & E => {
+): SchemaType<T, E> => {
 
   const builder = (v: Partial<P | Internals<T>>) => SchemaBuilder({ ...internals, ...v }, extension);
 
-  const result = {
+  return {
 
     default(
       value: T
@@ -128,6 +132,4 @@ export const SchemaBuilder = <T, P, E>(
     
     ...extension(internals, builder),
   }
-
-  return result;
 };
