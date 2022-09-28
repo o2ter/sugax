@@ -58,7 +58,7 @@ export type ISchema<T, R extends RuleType, E> = {
     path?: string | string[],
   ): void
 
-} & MappedRules<T, typeof common_rules, E> & MappedRules<T, R, E> & E
+} & MappedRules<T, typeof common_rules & R, E> & E
 
 const RulesLoader = <T, E, R extends RuleType, P>(
   rules: R,
