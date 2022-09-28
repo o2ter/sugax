@@ -24,3 +24,5 @@
 //
 
 import _ from 'lodash';
+
+export const length = (value: any, length: number): boolean => _.isArray(value) && value.length === length;
