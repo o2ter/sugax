@@ -60,14 +60,6 @@ export type ISchema<T, R extends RuleType, E> = {
 
 } & MappedRules<T, typeof common_rules & R, E> & E
 
-const RulesLoader = <T, E, R extends RuleType, P>(
-  rules: R,
-  internals: P & Internals<T>,
-  builder: (internals: Partial<P | Internals<T>>) => ISchema<T, R, E>
-) => _.mapValues(rules, (rule, key) => (...args: any) => builder({
-  rules: [...internals.rules, { rule: key, validate: (v) => rule(v, ...args) }],
-}));
-
 export const SchemaBuilder = <T, E, R extends RuleType, P>(
   internals: P & Internals<T>,
   rules: R,
@@ -79,6 +71,14 @@ export const SchemaBuilder = <T, E, R extends RuleType, P>(
 
   const builder = (v: Partial<P | Internals<T>>) => SchemaBuilder({ ...internals, ...v }, rules, extension);
 
+  const RulesLoader = <R2 extends RuleType>(
+    rules: R2,
+    internals: P & Internals<T>,
+    builder: (internals: Partial<P | Internals<T>>) => ISchema<T, R, E>
+  ) => _.mapValues(rules, (rule, key) => (...args: any) => builder({
+    rules: [...internals.rules, { rule: key, validate: (v) => rule(v, ...args) }],
+  }));
+  
   return {
 
     default(
