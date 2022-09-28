@@ -60,6 +60,12 @@ export type ISchema<T, R extends RuleType, E> = {
 
 } & MappedRules<T, typeof common_rules & R, E> & E
 
+export type TypeOfSchema<S> = S extends ISchema<infer T, any, {}> ? T : never;
+
+export type TypeFromShape<S> = {
+  [K in keyof S]: TypeOfSchema<S[K]>;
+};
+
 export const SchemaBuilder = <T, R extends RuleType, E, P>(
   internals: P & Internals<T>,
   rules: R,

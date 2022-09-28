@@ -1,5 +1,5 @@
 //
-//  index.js
+//  index.ts
 //
 //  The MIT License
 //  Copyright (c) 2021 - 2022 O2ter Limited. All rights reserved.
@@ -23,6 +23,16 @@
 //  THE SOFTWARE.
 //
 
-export * from './error';
-export * from './string';
-export * from './object';
+import _ from 'lodash';
+import { ISchema, TypeFromShape, SchemaBuilder } from '../internals/types';
+import * as _rules from './rules';
+
+export const object = <S>(shape: S): ISchema<TypeFromShape<S>, typeof _rules, {
+
+}> => SchemaBuilder({
+  type: 'object',
+  rules: [],
+  transform: (v) => _.isNil(v) || _.isString(v) ? v : `${v}`,
+}, _rules, (internals, builder) => ({
+
+}));

@@ -1,5 +1,5 @@
 //
-//  index.js
+//  rules.ts
 //
 //  The MIT License
 //  Copyright (c) 2021 - 2022 O2ter Limited. All rights reserved.
@@ -23,6 +23,4 @@
 //  THE SOFTWARE.
 //
 
-export * from './error';
-export * from './string';
-export * from './object';
+import _ from 'lodash';
