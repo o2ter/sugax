@@ -72,9 +72,7 @@ export const SchemaBuilder = <T, E, R extends RuleType, P>(
   const builder = (v: Partial<P | Internals<T>>) => SchemaBuilder({ ...internals, ...v }, rules, extension);
 
   const RulesLoader = <R2 extends RuleType>(
-    rules: R2,
-    internals: P & Internals<T>,
-    builder: (internals: Partial<P | Internals<T>>) => ISchema<T, R, E>
+    rules: R2
   ) => _.mapValues(rules, (rule, key) => (...args: any) => builder({
     rules: [...internals.rules, { rule: key, validate: (v) => rule(v, ...args) }],
   }));
@@ -109,10 +107,8 @@ export const SchemaBuilder = <T, E, R extends RuleType, P>(
       };
     },
     
-    ...RulesLoader(common_rules, internals, builder),
-    
-    ...RulesLoader(rules, internals, builder),
-    
+    ...RulesLoader(common_rules),
+    ...RulesLoader(rules),
     ...extension(internals, builder),
   }
 };
