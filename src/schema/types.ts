@@ -59,15 +59,32 @@ export class ValidateError extends Error {
   }
 }
 
-export const schema_builder = <Type, P>(
+type IRules = Record<string, (value: any, ...args: any[]) => boolean>
+
+type IExtension<Type, P> = (
   internals: P & Internals<Type>,
-  extension: (internals: P & Internals<Type>, builder: (internals: P & Internals<Type>) => ISchema<Type>) => any
+  builder: (internals: P & Internals<Type>) => ISchema<Type>,
+  rules: (rules: IRules) => Record<string, (...args: any[]) => ISchema<Type>>
+) => any
+
+const RulesLoader = <Type, P>(
+  rules: IRules,
+  internals: P & Internals<Type>,
+  extension: IExtension<Type, P>
+) => _.mapValues(rules, (rule, key) => (...args: any[]) => SchemaBuilder({
+  ...internals,
+  rules: [...internals.rules, { rule: key, validate: (v) => rule(v, ...args) }],
+}, extension));
+
+export const SchemaBuilder = <Type, P>(
+  internals: P & Internals<Type>,
+  extension: IExtension<Type, P>
 ): ISchema<Type> => ({
 
   default(
     value: Type
   ) {
-    return schema_builder({ ...internals, default: value }, extension);
+    return SchemaBuilder({ ...internals, default: value }, extension);
   },
 
   getDefault() {
@@ -77,9 +94,9 @@ export const schema_builder = <Type, P>(
   transform(
     t: (value: any) => any
   ) {
-    return schema_builder({ ...internals, transform: t }, extension);
+    return SchemaBuilder({ ...internals, transform: t }, extension);
   },
-  
+
   validate(
     value: any,
     path?: string | string[],
@@ -91,12 +108,13 @@ export const schema_builder = <Type, P>(
       }
     };
   },
-
-  ..._.mapValues(common_rules, (rule, key) => () => schema_builder({
-    ...internals,
-    rules: [...internals.rules, { rule: key, validate: rule }],
-  }, extension)),
-
-  ...extension(internals, (v) => schema_builder({ ...internals, ...v }, extension)),
+  
+  ...RulesLoader(common_rules, internals, extension),
+  
+  ...extension(
+    internals,
+    (v) => SchemaBuilder({ ...internals, ...v }, extension),
+    (rules: IRules) => RulesLoader(rules, internals, extension)
+  ),
 
 });
