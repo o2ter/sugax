@@ -74,7 +74,7 @@ type IExtension<Type, P, E> = (
   builder: (internals: Partial<P | Internals<Type>>) => ISchema<Type>
 ) => E
 
-const RulesLoader = <Type, P, E>(
+const RulesLoader = <Type, P>(
   rules: IRules,
   internals: P & Internals<Type>,
   builder: (internals: Partial<P | Internals<Type>>) => ISchema<Type>
