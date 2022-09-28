@@ -31,8 +31,6 @@ export const string = (): ISchema<string> => SchemaBuilder({
   type: 'string',
   rules: [],
   transform: (v) => _.isNil(v) || _.isString(v) ? v : `${v}`,
-}, (internals, builder, rules) => ({
+}, (internals, builder) => ({
 
-  ...rules(_rules),
-  
 }));

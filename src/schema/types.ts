@@ -71,58 +71,57 @@ type IRules = Record<string, (value: any, ...args: any[]) => boolean>
 
 type IExtension<Type, P, E> = (
   internals: P & Internals<Type>,
-  builder: (internals: P & Internals<Type>) => ISchema<Type>,
-  rules: (rules: IRules) => Record<string, (...args: any[]) => ISchema<Type>>
+  builder: (internals: Partial<P | Internals<Type>>) => ISchema<Type>
 ) => E
 
 const RulesLoader = <Type, P, E>(
   rules: IRules,
   internals: P & Internals<Type>,
-  extension: IExtension<Type, P, E>
-) => _.mapValues(rules, (rule, key) => (...args: any[]) => SchemaBuilder({
-  ...internals,
+  builder: (internals: Partial<P | Internals<Type>>) => ISchema<Type>
+) => _.mapValues(rules, (rule, key) => (...args: any[]) => builder({
   rules: [...internals.rules, { rule: key, validate: (v) => rule(v, ...args) }],
-}, extension));
+}));
 
 export const SchemaBuilder = <Type, P, E>(
   internals: P & Internals<Type>,
   extension: IExtension<Type, P, E>
-): ISchema<Type> & E => ({
+): ISchema<Type> & E => {
 
-  default(
-    value: Type
-  ) {
-    return SchemaBuilder({ ...internals, default: value }, extension);
-  },
+  const builder = (v: Partial<P | Internals<Type>>) => SchemaBuilder({ ...internals, ...v }, extension);
 
-  getDefault() {
-    return internals.default;
-  },
+  return {
 
-  transform(
-    t: (value: any) => any
-  ) {
-    return SchemaBuilder({ ...internals, transform: t }, extension);
-  },
-
-  validate(
-    value: any,
-    path?: string | string[],
-  ) {
-    const _value = internals.transform(value);
-    for (const rule of internals.rules) {
-      if (!rule.validate(_value)) {
-        throw new ValidateError(internals.type, rule.rule, _.toPath(path));
-      }
-    };
-  },
+    default(
+      value: Type
+    ) {
+      return builder({ default: value });
+    },
   
-  ...RulesLoader(common_rules, internals, extension),
+    getDefault() {
+      return internals.default;
+    },
   
-  ...extension(
-    internals,
-    (v) => SchemaBuilder({ ...internals, ...v }, extension),
-    (rules: IRules) => RulesLoader(rules, internals, extension)
-  ),
-
-});
+    transform(
+      t: (value: any) => any
+    ) {
+      return builder({ transform: t });
+    },
+  
+    validate(
+      value: any,
+      path?: string | string[],
+    ) {
+      const _value = internals.transform(value);
+      for (const rule of internals.rules) {
+        if (!rule.validate(_value)) {
+          throw new ValidateError(internals.type, rule.rule, _.toPath(path));
+        }
+      };
+    },
+    
+    ...RulesLoader(common_rules, internals, builder),
+    
+    ...extension(internals, builder),
+  
+  }
+};
