@@ -24,15 +24,20 @@
 //
 
 import _ from 'lodash';
-import { ISchema, TypeOfSchema, SchemaBuilder } from '../internals/types';
+import { ISchema, SchemaBuilder } from '../internals/types';
 import * as _rules from './rules';
 
-export const object = <S>(shape: S): ISchema<{ [K in keyof S]: TypeOfSchema<S[K]>; }, typeof _rules, {
+export const number = (): ISchema<number, typeof _rules, {
 
 }> => SchemaBuilder({
-  type: 'object',
+  type: 'number',
   rules: [],
-  transform: (v) => _.isPlainObject(v) ? v : undefined,
+  transform: (v) => {
+    try { 
+      if (_.isNumber(v)) return v;
+      if (_.isString(v)) return parseFloat(v);
+    } catch {}
+  },
 }, _rules, (internals, builder) => ({
 
 }));
