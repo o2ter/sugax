@@ -24,6 +24,7 @@
 //
 
 import _ from 'lodash';
+import * as common_rules from './common_rules';
 
 export interface ISchema<Type> {
 
@@ -34,9 +35,28 @@ export interface ISchema<Type> {
 }
 
 type Internals<Type> = {
+  type: string;
   default?: Type;
-  rules: ((value: Type) => void)[];
-  transform: (value: any) => Type;
+  rules: ({ rule: string, validate: (value: any) => boolean })[];
+  transform: (value: any) => any;
+}
+
+export class ValidateError extends Error {
+
+  type: string;
+  rule: string;
+  path?: string[];
+
+  constructor(
+    type: string,
+    rule: string,
+    path?: string[]
+  ) {
+    super();
+    this.type = type;
+    this.rule = rule;
+    this.path = path;
+  }
 }
 
 export const schema_builder = <Type, P>(
@@ -55,17 +75,27 @@ export const schema_builder = <Type, P>(
   },
 
   transform(
-    t: (value: any) => Type
+    t: (value: any) => any
   ) {
     return schema_builder({ ...internals, transform: t }, extension);
   },
-
+  
   validate(
-    value: Type
+    value: any,
+    path?: string | string[],
   ) {
     const _value = internals.transform(value);
-    for (const rule of internals.rules) rule(_value);
+    for (const rule of internals.rules) {
+      if (!rule.validate(_value)) {
+        throw new ValidateError(internals.type, rule.rule, _.toPath(path));
+      }
+    };
   },
+
+  ..._.mapValues(common_rules, (rule, key) => () => schema_builder({
+    ...internals,
+    rules: [...internals.rules, { rule: key, validate: rule }],
+  }, extension)),
 
   ...extension(internals, (v) => schema_builder({ ...internals, ...v }, extension)),
 

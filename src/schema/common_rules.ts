@@ -1,5 +1,5 @@
 //
-//  index.ts
+//  rules.ts
 //
 //  The MIT License
 //  Copyright (c) 2021 - 2022 O2ter Limited. All rights reserved.
@@ -24,14 +24,5 @@
 //
 
 import _ from 'lodash';
-import { ISchema, schema_builder } from '../types';
 
-export const string = (): ISchema<string> => schema_builder<string, {}>({
-  type: 'string',
-  rules: [],
-  transform: (v) => _.isNil(v) || _.isString(v) ? v : `${v}`,
-}, (internals, builder) => ({
-
-  
-  
-}));
+export const required = (value: any): boolean => !_.isNil(value);
