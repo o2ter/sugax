@@ -25,25 +25,41 @@
 
 import _ from 'lodash';
 import locales from './locales';
+import { replaceAll } from '../utils';
 
 export class ValidateError extends Error {
 
   type: string;
   rule: string;
   path?: string[];
+  attrs: Record<string, string>;
 
   constructor(
     type: string,
     rule: string,
-    path?: string[]
+    path?: string[],
+    attrs: Record<string, string> = {}
   ) {
     super();
     this.type = type;
     this.rule = rule;
     this.path = path;
+    this.attrs = attrs;
   }
 
   static get _locales() {
     return locales;
+  }
+
+  get message() {
+
+    const params = { ...this.attrs, field: this.path?.join('.') ?? '' }
+    let result: string = _.get(locales, `en.${this.type}.${this.rule}`) ?? '';
+
+    for (const [key, value] of Object.entries(params)) {
+      result = replaceAll(result, '${' + key + '}', `${value}`);
+    }
+
+    return result;
   }
 }

@@ -27,8 +27,6 @@ import _ from 'lodash';
 
 export function replaceAll(string: string, pattern: string, replacement: string) {
 
-  if (!_.isString(string)) return;
-
   let idx = string.lastIndexOf(pattern);
 
   while (idx !== -1) {
