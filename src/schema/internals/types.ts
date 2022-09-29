@@ -39,37 +39,37 @@ type OmitFirstArg<F> = F extends (x: any, ...args: infer P) => infer R ? (...arg
 
 type RuleType = Record<string, (...args: any) => boolean>
 
-type MappedRules<T, R extends RuleType, E> = {
-  [K in keyof R]: (...args: Parameters<OmitFirstArg<R[K]>>) => ISchema<T, R, E>;
+type MappedRules<T, R extends RuleType> = {
+  [K in keyof R]: (...args: Parameters<OmitFirstArg<R[K]>>) => ISchema<T, R>;
 }
 
-export type ISchema<T, R extends RuleType, E> = {
+export type ISchema<T, R extends RuleType> = {
 
-  default(value: T): ISchema<T, R, E>
+  default(value: T): ISchema<T, R>
 
   getDefault(): T | undefined
 
   transform(
     t: (value: any) => any
-  ): ISchema<T, R, E>
+  ): ISchema<T, R>
 
   validate(
     value: any,
     path?: string | string[],
   ): void
 
-} & MappedRules<T, typeof common_rules & R, E> & E
+} & MappedRules<T, typeof common_rules & R>
 
-export type TypeOfSchema<S> = S extends ISchema<infer T, any, {}> ? T : S;
+export type TypeOfSchema<S> = S extends ISchema<infer T, any> ? T : S;
 
-export const SchemaBuilder = <T, R extends RuleType, E, P>(
+export const SchemaBuilder = <T, R extends RuleType, P>(
   internals: P & Internals<T>,
   rules: R,
   extension: (
     internals: P & Internals<T>,
-    builder: (internals: Partial<P | Internals<T>>) => ISchema<T, R, E>
-  ) => E
-): ISchema<T, R, E> => {
+    builder: (internals: Partial<P | Internals<T>>) => ISchema<T, R>
+  ) => Partial<ISchema<T, R>>
+): ISchema<T, R> => {
 
   const builder = (v: Partial<P | Internals<T>>) => SchemaBuilder({ ...internals, ...v }, rules, extension);
 
@@ -78,7 +78,7 @@ export const SchemaBuilder = <T, R extends RuleType, E, P>(
   ) => _.mapValues(rules, (rule, key) => (...args: any) => builder({
     rules: [...internals.rules, { rule: key, validate: (v) => rule(v, ...args) }],
   }));
-  
+
   return {
 
     default(
@@ -86,17 +86,17 @@ export const SchemaBuilder = <T, R extends RuleType, E, P>(
     ) {
       return builder({ default: value });
     },
-  
+
     getDefault() {
       return internals.default;
     },
-  
+
     transform(
       t: (value: any) => any
     ) {
       return builder({ transform: t });
     },
-  
+
     validate(
       value: any,
       path?: string | string[],
@@ -108,7 +108,7 @@ export const SchemaBuilder = <T, R extends RuleType, E, P>(
         }
       };
     },
-    
+
     ...RulesLoader(common_rules),
     ...RulesLoader(rules),
     ...extension(internals, builder),

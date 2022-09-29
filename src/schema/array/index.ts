@@ -27,9 +27,7 @@ import _ from 'lodash';
 import { ISchema, TypeOfSchema, SchemaBuilder } from '../internals/types';
 import * as _rules from './rules';
 
-export const array = <T extends ISchema<any, any, {}>>(type?: T): ISchema<TypeOfSchema<T>[], typeof _rules, {
-
-}> => SchemaBuilder({
+export const array = <T extends ISchema<any, any>>(type?: T): ISchema<TypeOfSchema<T>[], typeof _rules> => SchemaBuilder({
   type: 'array',
   default: [],
   rules: [],

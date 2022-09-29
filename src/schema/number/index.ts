@@ -27,9 +27,7 @@ import _ from 'lodash';
 import { ISchema, SchemaBuilder } from '../internals/types';
 import * as _rules from './rules';
 
-export const number = (): ISchema<number, typeof _rules, {
-
-}> => SchemaBuilder({
+export const number = (): ISchema<number, typeof _rules> => SchemaBuilder({
   type: 'number',
   rules: [],
   transform: (v) => {
