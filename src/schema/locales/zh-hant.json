@@ -6,6 +6,7 @@
     "type": "${field}必須為\"${type}\"類"
   },
   "string": {
+    "notEmpty": "${field}不能為空",
     "length": "${field}必須包含${length}個字符",
     "min": "${field}必須至少包含${min}個字符",
     "max": "${field}必須最多包含${max}個字符",
@@ -33,6 +34,7 @@
     "moreThan": "${field}必須大於${more}"
   },
   "array": {
+    "notEmpty": "${field}不能為空",
     "min": "${field}必須至少有${min}項",
     "max": "${field}必須最多有${max}項",
     "length": "${field}必須有${length}項"

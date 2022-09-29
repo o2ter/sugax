@@ -6,6 +6,7 @@
     "type": "${field} must be a \"${type}\" type"
   },
   "string": {
+    "notEmpty": "${field} must not be empty",
     "length": "${field} must be exactly ${length} characters",
     "min": "${field} must be at least ${min} characters",
     "max": "${field} must be at most ${max} characters",
@@ -39,6 +40,7 @@
     "noUnknown": "${field} field has unspecified keys: ${unknown}"
   },
   "array": {
+    "notEmpty": "${field} must not be empty",
     "min": "${field} field must have at least ${min} items",
     "max": "${field} field must have less than or equal to ${max} items",
     "length": "${field} must have ${length} items"

@@ -26,6 +26,11 @@
 import _ from 'lodash';
 import { ValidateError } from '../error';
 
+export const notEmpty = (
+  value: any,
+  error: (attrs: Record<string, string>) => ValidateError,
+) => _.isArray(value) && !_.isEmpty(value) ? undefined : error({});
+
 export const min = (
   value: any,
   error: (attrs: Record<string, string>) => ValidateError,
