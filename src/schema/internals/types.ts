@@ -45,6 +45,8 @@ type MappedRules<T, R extends RuleType> = {
 
 export type ISchema<T, R extends RuleType> = {
 
+  strict(): ISchema<T, R>
+
   default(value: T): ISchema<T, R>
 
   getDefault(): T | undefined
@@ -79,7 +81,11 @@ export const SchemaBuilder = <T, R extends RuleType, P>(
     rules: [...internals.rules, { rule: key, validate: (v) => rule(v, ...args) }],
   }));
 
-  return {
+  const schema = {
+
+    strict() {
+      return schema;
+    },
 
     default(
       value: T
@@ -112,5 +118,8 @@ export const SchemaBuilder = <T, R extends RuleType, P>(
     ...RulesLoader(common_rules),
     ...RulesLoader(rules),
     ...extension(internals, builder),
-  }
+    
+  };
+
+  return schema;
 };

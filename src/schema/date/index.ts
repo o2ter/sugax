@@ -39,4 +39,8 @@ export const date = (): ISchema<Date, typeof _rules> => SchemaBuilder({
   },
 }, _rules, (internals, builder) => ({
 
+  strict() {
+    return builder({ transform: (v) => _.isDate(v) ? v : undefined });
+  },
+
 }));

@@ -39,4 +39,8 @@ export const number = (): ISchema<number, typeof _rules> => SchemaBuilder({
   },
 }, _rules, (internals, builder) => ({
 
+  strict() {
+    return builder({ transform: (v) => _.isNumber(v) ? v : undefined });
+  },
+
 }));
