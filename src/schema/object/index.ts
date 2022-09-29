@@ -32,7 +32,7 @@ export const object = <S extends Record<string, ISchema<any, any>>>(shape: S): I
   type: 'object',
   default: {},
   rules: [],
-  transform: (v) => _.isPlainObject(v) ? _.mapValues(v, (v, k) => shape[k]?.transform(v) ?? v) : undefined,
+  transform: (v) => _.isPlainObject(v) ? _.mapValues(v, (v, k) => _.isNil(shape[k]) ? v : shape[k].transform(v)) : undefined,
   validate: (
     internals,
     value: any,
