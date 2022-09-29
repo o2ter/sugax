@@ -34,17 +34,16 @@ export const array = <T extends ISchema<any, any>>(type?: T): ISchema<TypeOfSche
   rules: [],
   transform: (v) => _.isArray(v) ? _.isNil(type) ? v : _.map(v, v => type.transform(v)) : undefined,
   typeCheck: _.isArray,
-  validate: (
-    value: any,
-    path?: string | string[],
-  ) => {
+  validate: (value: any) => {
+
+    if (_.isNil(value) || _.isNil(type)) return [];
 
     const errors: ValidateError[] = [];
 
-    if (!_.isNil(value) && !_.isNil(type)) {
-      for (const [i, item] of value.entries()) {
-        errors.push(...type.validate(item, [..._.toPath(path), `${i}`]));
-      }
+    for (const [i, item] of value.entries()) {
+      const _errors = type.validate(item);
+      _errors.forEach(x => x.path = [`${i}`, ...x.path]);
+      errors.push(..._errors);
     }
 
     return errors;

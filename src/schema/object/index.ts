@@ -33,17 +33,16 @@ export const object = <S extends Record<string, ISchema<any, any>>>(shape: S): I
   rules: [],
   transform: (v) => _.isPlainObject(v) ? _.mapValues(v, (v, k) => _.isNil(shape[k]) ? v : shape[k].transform(v)) : undefined,
   typeCheck: _.isPlainObject,
-  validate: (
-    value: any,
-    path?: string | string[],
-  ) => {
+  validate: (value: any) => {
+
+    if (_.isNil(value)) return [];
 
     const errors: ValidateError[] = [];
 
-    if (!_.isNil(value)) {
-      for (const [key, type] of _.entries(shape)) {
-        errors.push(...type.validate(value[key], [..._.toPath(path), key]));
-      }
+    for (const [key, type] of _.entries(shape)) {
+      const _errors = type.validate(value[key]);
+      _errors.forEach(x => x.path = [key, ...x.path]);
+      errors.push(..._errors);
     }
 
     return errors;

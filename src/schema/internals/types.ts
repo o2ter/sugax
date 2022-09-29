@@ -41,13 +41,8 @@ type Internals<T> = {
   })[];
 
   transform: (value: any) => any;
-
   typeCheck: (value: any) => boolean;
-
-  validate?: (
-    value: any,
-    path?: string | string[],
-  ) => ValidateError[];
+  validate?: (value: any) => ValidateError[];
 
 }
 
@@ -71,10 +66,7 @@ export type ISchema<T, R extends RuleType = RuleType> = {
     t: (value: any) => any
   ): ISchema<T, R>
 
-  validate(
-    value: any,
-    path?: string | string[],
-  ): ValidateError[]
+  validate(value: any): ValidateError[]
 
 } & MappedRules<T, typeof common_rules & R>
 
@@ -115,25 +107,22 @@ export const SchemaBuilder = <T, R extends RuleType>(
       return builder({ transform: t });
     },
 
-    validate(
-      value: any,
-      path?: string | string[],
-    ) {
+    validate(value: any) {
 
       const errors: ValidateError[] = [];
       const _value = internals.transform(value);
 
       for (const rule of internals.rules) {
-        const error = rule.validate(_value, (attrs) => new ValidateError(internals.type, rule.rule, _.toPath(path), attrs));
+        const error = rule.validate(_value, (attrs) => new ValidateError(internals.type, rule.rule, [], attrs));
         if (!_.isNil(error)) errors.push(error);
       };
 
       if (!_.isNil(value) && !internals.typeCheck(value)) {
-        errors.push(new ValidateError(internals.type, 'type', _.toPath(path)));
+        errors.push(new ValidateError(internals.type, 'type'));
       }
       
       if (!_.isNil(internals.validate)) {
-        errors.push(...internals.validate(_value, path));
+        errors.push(...internals.validate(_value));
       }
 
       return errors;
