@@ -49,3 +49,15 @@ export const moreThan = (
   error: (attrs: Record<string, string>) => ValidateError,
   more: Date
 ) => _.isDate(value) && value > more ? undefined : error({ more: `${more}` });
+
+export const oneOf = (
+  value: any,
+  error: (attrs: Record<string, string>) => ValidateError,
+  values: Date[]
+) => _.isDate(value) && values.includes(value) ? undefined : error({ values: `${values}` });
+
+export const notOneOf = (
+  value: any,
+  error: (attrs: Record<string, string>) => ValidateError,
+  values: Date[]
+) => _.isDate(value) && !values.includes(value) ? undefined : error({ values: `${values}` });

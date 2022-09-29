@@ -25,7 +25,6 @@
 
 import _ from 'lodash';
 import { ISchema, SchemaBuilder } from '../internals/types';
-import { ValidateError } from '../error';
 import * as _rules from './rules';
 
 export const date = (): ISchema<Date, typeof _rules> => SchemaBuilder({

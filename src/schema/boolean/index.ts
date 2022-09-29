@@ -25,7 +25,6 @@
 
 import _ from 'lodash';
 import { ISchema, SchemaBuilder } from '../internals/types';
-import { ValidateError } from '../error';
 
 export const boolean = (): ISchema<boolean> => SchemaBuilder({
   type: 'boolean',

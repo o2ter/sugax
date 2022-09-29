@@ -64,3 +64,15 @@ export const integer = (
   value: any,
   error: (attrs: Record<string, string>) => ValidateError
 ) => _.isSafeInteger(value) ? undefined : error({});
+
+export const oneOf = (
+  value: any,
+  error: (attrs: Record<string, string>) => ValidateError,
+  values: number[]
+) => _.isNumber(value) && values.includes(value) ? undefined : error({ values: `${values}` });
+
+export const notOneOf = (
+  value: any,
+  error: (attrs: Record<string, string>) => ValidateError,
+  values: number[]
+) => _.isNumber(value) && !values.includes(value) ? undefined : error({ values: `${values}` });
