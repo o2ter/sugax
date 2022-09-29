@@ -24,6 +24,7 @@
 //
 
 import _ from 'lodash';
+import locales from './locales';
 
 export class ValidateError extends Error {
 
@@ -40,5 +41,9 @@ export class ValidateError extends Error {
     this.type = type;
     this.rule = rule;
     this.path = path;
+  }
+
+  static get _locales() {
+    return locales;
   }
 }
