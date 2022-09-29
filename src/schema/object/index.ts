@@ -39,12 +39,22 @@ export const object = <S extends Record<string, ISchema<any, any>>>(shape: S): I
     value: any,
     path?: string | string[],
   ) {
+
     const _value = internals.transform(value);
+
     for (const rule of internals.rules) {
       if (!rule.validate(_value)) {
         throw new ValidateError(internals.type, rule.rule, _.toPath(path));
       }
     };
+    
+    if (!_.isPlainObject(_value)) {
+      throw new ValidateError(internals.type, 'type', _.toPath(path));
+    }
+    
+    for (const [key, type] of _.entries(shape)) {
+      type.validate(_value[key], [..._.toPath(path), key]);
+    }
   },
 
 }));
