@@ -1,11 +1,9 @@
 {
   "mixed": {
-    "default": "${field} is invalid",
     "required": "${field} is a required field",
     "oneOf": "${field} must be one of the following values: ${values}",
     "notOneOf": "${field} must not be one of the following values: ${values}",
-    "notType": "${field} must be a \"${type}\" type",
-    "defined": "${field} must be defined"
+    "type": "${field} must be a \"${type}\" type"
   },
   "string": {
     "length": "${field} must be exactly ${length} characters",
