@@ -48,12 +48,14 @@ export const object = <S extends Record<string, ISchema<any, any>>>(shape: S): I
       }
     };
     
-    if (!_.isPlainObject(_value)) {
+    if (!_.isNil(_value) && !_.isPlainObject(_value)) {
       throw new ValidateError(internals.type, 'type', _.toPath(path));
     }
     
-    for (const [key, type] of _.entries(shape)) {
-      type.validate(_value[key], [..._.toPath(path), key]);
+    if (!_.isNil(_value)) {
+      for (const [key, type] of _.entries(shape)) {
+        type.validate(_value[key], [..._.toPath(path), key]);
+      }
     }
   },
 

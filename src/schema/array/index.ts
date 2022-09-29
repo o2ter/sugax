@@ -48,12 +48,14 @@ export const array = <T extends ISchema<any, any>>(type?: T): ISchema<TypeOfSche
       }
     };
 
-    if (!_.isArray(_value)) {
+    if (!_.isNil(_value) && !_.isArray(_value)) {
       throw new ValidateError(internals.type, 'type', _.toPath(path));
     }
     
-    for (const [i, item] of _value.entries()) {
-      type?.validate(item, [..._.toPath(path), `${i}`]);
+    if (!_.isNil(_value)) {
+      for (const [i, item] of _value.entries()) {
+        type?.validate(item, [..._.toPath(path), `${i}`]);
+      }
     }
   },
 
