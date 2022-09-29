@@ -47,19 +47,22 @@ export class ValidateError extends Error {
     this.attrs = attrs;
   }
 
-  static get _locales() {
-    return locales;
+  get locales() {
+
+    return _.mapValues(locales, locale => {
+
+      const params = { ...this.attrs, field: this.path?.join('.') ?? '' }
+      let result: string = _.get(locale, `${this.type}.${this.rule}`) ?? '';
+  
+      for (const [key, value] of Object.entries(params)) {
+        result = replaceAll(result, '${' + key + '}', `${value}`);
+      }
+  
+      return result;
+    });
   }
 
   get message() {
-
-    const params = { ...this.attrs, field: this.path?.join('.') ?? '' }
-    let result: string = _.get(locales, `en.${this.type}.${this.rule}`) ?? '';
-
-    for (const [key, value] of Object.entries(params)) {
-      result = replaceAll(result, '${' + key + '}', `${value}`);
-    }
-
-    return result;
+    return this.locales.en;
   }
 }
