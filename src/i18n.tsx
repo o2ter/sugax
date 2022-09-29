@@ -27,6 +27,8 @@ import _ from 'lodash';
 import React from 'react';
 import EventEmitter from 'events';
 
+import { replaceAll } from './utils';
+
 const I18nContext = React.createContext({ preferredLocale: 'en' });
 const i18n_update_event = new EventEmitter();
 
@@ -57,20 +59,6 @@ const _lang_map: Record<string, string> = {
   "zh-hk": "zh-hant",
   "zh-tw": "zh-hant",
 };
-
-function replaceAll(string: string, pattern: string, replacement: string) {
-
-  if (!_.isString(string)) return;
-
-  let idx = string.lastIndexOf(pattern);
-
-  while (idx !== -1) {
-    string = string.substring(0, idx) + replacement + string.substring(idx + pattern.length);
-    idx = string.lastIndexOf(pattern);
-  }
-
-  return string;
-}
 
 function getLanguagePartFromCode(code: string) {
   if (!_.isString(code) || code.indexOf('-') < 0) return code;
