@@ -24,3 +24,43 @@
 //
 
 import _ from 'lodash';
+import { ValidateError } from '../error';
+
+export const min = (
+  value: any,
+  error: (attrs: Record<string, string>) => ValidateError,
+  min: number
+) => _.isNumber(value) && value >= min ? undefined : error({ min: `${min}` });
+
+export const max = (
+  value: any,
+  error: (attrs: Record<string, string>) => ValidateError,
+  max: number
+) => _.isNumber(value) && value <= max ? undefined : error({ max: `${max}` });
+
+export const lessThan = (
+  value: any,
+  error: (attrs: Record<string, string>) => ValidateError,
+  less: number
+) => _.isNumber(value) && value < less ? undefined : error({ less: `${less}` });
+
+export const moreThan = (
+  value: any,
+  error: (attrs: Record<string, string>) => ValidateError,
+  more: number
+) => _.isNumber(value) && value > more ? undefined : error({ more: `${more}` });
+
+export const positive = (
+  value: any,
+  error: (attrs: Record<string, string>) => ValidateError
+) => _.isNumber(value) && value > 0 ? undefined : error({});
+
+export const negative = (
+  value: any,
+  error: (attrs: Record<string, string>) => ValidateError
+) => _.isNumber(value) && value < 0 ? undefined : error({});
+
+export const integer = (
+  value: any,
+  error: (attrs: Record<string, string>) => ValidateError
+) => _.isSafeInteger(value) ? undefined : error({});

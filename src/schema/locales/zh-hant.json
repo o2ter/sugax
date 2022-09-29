@@ -28,7 +28,9 @@
   },
   "date": {
     "min": "${field}必須為${min}之後",
-    "max": "${field}必須為${max}之前"
+    "max": "${field}必須為${max}之前",
+    "lessThan": "${field}必須少於${less}",
+    "moreThan": "${field}必須大於${more}"
   },
   "array": {
     "min": "${field}必須至少有${min}項",

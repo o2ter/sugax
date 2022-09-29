@@ -28,7 +28,9 @@
   },
   "date": {
     "min": "${field} field must be later than ${min}",
-    "max": "${field} field must be at earlier than ${max}"
+    "max": "${field} field must be at earlier than ${max}",
+    "lessThan": "${field} must be less than ${less}",
+    "moreThan": "${field} must be greater than ${more}"
   },
   "boolean": {
     "isValue": "${field} field must be ${value}"

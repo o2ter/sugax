@@ -24,3 +24,9 @@
 //
 
 import _ from 'lodash';
+import { ValidateError } from '../error';
+
+export const required = (
+  value: any,
+  error: (attrs: Record<string, string>) => ValidateError
+) => _.isNil(value) ? error({}) : undefined;

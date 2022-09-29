@@ -52,7 +52,7 @@ export class ValidateError extends Error {
     return _.mapValues(locales, locale => {
 
       const params = { ...this.attrs, field: this.path?.join('.') ?? '' }
-      let result: string = _.get(locale, `${this.type}.${this.rule}`) ?? '';
+      let result: string = _.get(locale, `${this.type}.${this.rule}`) ?? _.get(locale, `mixed.${this.rule}`) ?? '';
   
       for (const [key, value] of Object.entries(params)) {
         result = replaceAll(result, '${' + key + '}', `${value}`);

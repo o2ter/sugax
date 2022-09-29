@@ -38,19 +38,5 @@ export const date = (): ISchema<Date, typeof _rules> => SchemaBuilder({
       if (!_.isNaN(date)) return date;
     }
   },
-  validate: (
-    internals,
-    value: any,
-    path?: string | string[],
-  ) => {
-    if (!_.isNil(value) && !_.isDate(value)) {
-      throw new ValidateError(internals.type, 'type', _.toPath(path));
-    }
-  },
-}, _rules, (internals, builder) => ({
-
-  strict() {
-    return builder({ transform: (v) => _.isDate(v) ? v : undefined });
-  },
-
-}));
+  typeCheck: _.isDate,
+}, _rules);

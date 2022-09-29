@@ -24,5 +24,22 @@
 //
 
 import _ from 'lodash';
+import { ValidateError } from '../error';
 
-export const length = (value: any, length: number): boolean => _.isString(value) && value.length === length;
+export const min = (
+  value: any,
+  error: (attrs: Record<string, string>) => ValidateError,
+  min: number
+) => _.isString(value) && value.length >= min ? undefined : error({ min: `${min}` });
+
+export const max = (
+  value: any,
+  error: (attrs: Record<string, string>) => ValidateError,
+  max: number
+) => _.isString(value) && value.length <= max ? undefined : error({ max: `${max}` });
+
+export const length = (
+  value: any,
+  error: (attrs: Record<string, string>) => ValidateError,
+  length: number
+) => _.isString(value) && value.length === length ? undefined : error({ length: `${length}` });

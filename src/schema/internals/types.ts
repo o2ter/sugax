@@ -24,33 +24,42 @@
 //
 
 import _ from 'lodash';
-import * as common_rules from './common_rules';
-
+import * as common_rules from './rules';
 import { ValidateError } from '../error';
 
 type Internals<T> = {
+
   type: string;
   default?: T;
-  rules: ({ rule: string, validate: (value: any) => boolean })[];
+
+  rules: ({
+    rule: string,
+    validate: (
+      value: any,
+      error: (attrs: Record<string, string>) => ValidateError
+    ) => ValidateError | undefined,
+  })[];
+
   transform: (value: any) => any;
 
+  typeCheck: (value: any) => boolean;
+
   validate?: (
-    internals: Internals<T>,
     value: any,
     path?: string | string[],
-  ) => void;
+  ) => ValidateError[];
 
 }
 
 type OmitFirstArg<F> = F extends (x: any, ...args: infer P) => infer R ? (...args: P) => R : never;
 
-type RuleType = Record<string, (...args: any) => boolean>
+type RuleType = Record<string, (...args: any) => ValidateError | undefined>
 
 type MappedRules<T, R extends RuleType> = {
-  [K in keyof R]: (...args: Parameters<OmitFirstArg<R[K]>>) => ISchema<T, R>;
+  [K in keyof R]: (...args: Parameters<OmitFirstArg<OmitFirstArg<R[K]>>>) => ISchema<T, R>;
 }
 
-export type ISchema<T, R extends RuleType> = {
+export type ISchema<T, R extends RuleType = RuleType> = {
 
   strict(): ISchema<T, R>
 
@@ -65,7 +74,7 @@ export type ISchema<T, R extends RuleType> = {
   validate(
     value: any,
     path?: string | string[],
-  ): void
+  ): ValidateError[]
 
 } & MappedRules<T, typeof common_rules & R>
 
@@ -73,25 +82,21 @@ export type TypeOfSchema<S> = S extends ISchema<infer T, any> ? T : S;
 
 export const SchemaBuilder = <T, R extends RuleType>(
   internals: Internals<T>,
-  rules: R,
-  extension: (
-    internals: Internals<T>,
-    builder: (internals: Partial<Internals<T>>) => ISchema<T, R>
-  ) => Partial<ISchema<T, R>>
+  rules: R
 ): ISchema<T, R> => {
 
-  const builder = (v: Partial<Internals<T>>) => SchemaBuilder({ ...internals, ...v }, rules, extension);
+  const builder = (v: Partial<Internals<T>>) => SchemaBuilder({ ...internals, ...v }, rules);
 
   const RulesLoader = <R2 extends RuleType>(
     rules: R2
   ) => _.mapValues(rules, (rule, key) => (...args: any) => builder({
-    rules: [...internals.rules, { rule: key, validate: (v) => rule(v, ...args) }],
+    rules: [...internals.rules, { rule: key, validate: (v, error) => rule(v, error, ...args) }],
   }));
 
   const schema = {
 
     strict() {
-      return schema;
+      return builder({ transform: (v) => internals.typeCheck(v) ? v : undefined });
     },
 
     default(
@@ -114,19 +119,29 @@ export const SchemaBuilder = <T, R extends RuleType>(
       value: any,
       path?: string | string[],
     ) {
+
+      const errors: ValidateError[] = [];
       const _value = internals.transform(value);
+
       for (const rule of internals.rules) {
-        if (!rule.validate(_value)) {
-          throw new ValidateError(internals.type, rule.rule, _.toPath(path));
-        }
+        const error = rule.validate(_value, (attrs) => new ValidateError(internals.type, rule.rule, _.toPath(path), attrs));
+        if (!_.isNil(error)) errors.push(error);
       };
-      internals.validate?.(internals, _value, path);
+
+      if (!_.isNil(value) && !internals.typeCheck(value)) {
+        errors.push(new ValidateError(internals.type, 'type', _.toPath(path)));
+      }
+      
+      if (!_.isNil(internals.validate)) {
+        errors.push(...internals.validate(_value, path));
+      }
+
+      return errors;
     },
 
     ...RulesLoader(common_rules),
     ...RulesLoader(rules),
-    ...extension(internals, builder),
-    
+
   };
 
   return schema;

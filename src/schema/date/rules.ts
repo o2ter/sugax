@@ -24,3 +24,28 @@
 //
 
 import _ from 'lodash';
+import { ValidateError } from '../error';
+
+export const min = (
+  value: any,
+  error: (attrs: Record<string, string>) => ValidateError,
+  min: Date
+) => _.isDate(value) && value >= min ? undefined : error({ min: `${min}` });
+
+export const max = (
+  value: any,
+  error: (attrs: Record<string, string>) => ValidateError,
+  max: Date
+) => _.isDate(value) && value <= max ? undefined : error({ max: `${max}` });
+
+export const lessThan = (
+  value: any,
+  error: (attrs: Record<string, string>) => ValidateError,
+  less: Date
+) => _.isDate(value) && value < less ? undefined : error({ less: `${less}` });
+
+export const moreThan = (
+  value: any,
+  error: (attrs: Record<string, string>) => ValidateError,
+  more: Date
+) => _.isDate(value) && value > more ? undefined : error({ more: `${more}` });

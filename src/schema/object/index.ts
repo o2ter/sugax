@@ -26,27 +26,26 @@
 import _ from 'lodash';
 import { ISchema, TypeOfSchema, SchemaBuilder } from '../internals/types';
 import { ValidateError } from '../error';
-import * as _rules from './rules';
 
-export const object = <S extends Record<string, ISchema<any, any>>>(shape: S): ISchema<{ [K in keyof S]?: TypeOfSchema<S[K]>; }, typeof _rules> => SchemaBuilder({
+export const object = <S extends Record<string, ISchema<any, any>>>(shape: S): ISchema<{ [K in keyof S]?: TypeOfSchema<S[K]>; }> => SchemaBuilder({
   type: 'object',
   default: {},
   rules: [],
   transform: (v) => _.isPlainObject(v) ? _.mapValues(v, (v, k) => _.isNil(shape[k]) ? v : shape[k].transform(v)) : undefined,
+  typeCheck: _.isPlainObject,
   validate: (
-    internals,
     value: any,
     path?: string | string[],
   ) => {
-    if (!_.isNil(value) && !_.isPlainObject(value)) {
-      throw new ValidateError(internals.type, 'type', _.toPath(path));
-    }
+
+    const errors: ValidateError[] = [];
+
     if (!_.isNil(value)) {
       for (const [key, type] of _.entries(shape)) {
-        type.validate(value[key], [..._.toPath(path), key]);
+        errors.push(...type.validate(value[key], [..._.toPath(path), key]));
       }
     }
-  },
-}, _rules, (internals, builder) => ({
 
-}));
+    return errors;
+  },
+}, {});

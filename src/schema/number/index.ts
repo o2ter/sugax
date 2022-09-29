@@ -38,19 +38,5 @@ export const number = (): ISchema<number, typeof _rules> => SchemaBuilder({
       if (!_.isNaN(f)) return f;
     }
   },
-  validate: (
-    internals,
-    value: any,
-    path?: string | string[],
-  ) => {
-    if (!_.isNil(value) && !_.isNumber(value)) {
-      throw new ValidateError(internals.type, 'type', _.toPath(path));
-    }
-  },
-}, _rules, (internals, builder) => ({
-
-  strict() {
-    return builder({ transform: (v) => _.isNumber(v) ? v : undefined });
-  },
-
-}));
+  typeCheck: _.isNumber,
+}, _rules);

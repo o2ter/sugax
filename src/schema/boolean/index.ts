@@ -26,25 +26,10 @@
 import _ from 'lodash';
 import { ISchema, SchemaBuilder } from '../internals/types';
 import { ValidateError } from '../error';
-import * as _rules from './rules';
 
-export const boolean = (): ISchema<boolean, typeof _rules> => SchemaBuilder({
+export const boolean = (): ISchema<boolean> => SchemaBuilder({
   type: 'boolean',
   rules: [],
   transform: (v) => _.isBoolean(v) ? v : !!v,
-  validate: (
-    internals,
-    value: any,
-    path?: string | string[],
-  ) => {
-    if (!_.isNil(value) && !_.isBoolean(value)) {
-      throw new ValidateError(internals.type, 'type', _.toPath(path));
-    }
-  },
-}, _rules, (internals, builder) => ({
-
-  strict() {
-    return builder({ transform: (v) => _.isBoolean(v) ? v : undefined });
-  },
-
-}));
+  typeCheck: _.isBoolean,
+}, {});

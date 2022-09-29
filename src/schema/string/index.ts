@@ -33,19 +33,5 @@ export const string = (): ISchema<string, typeof _rules> => SchemaBuilder({
   default: '',
   rules: [],
   transform: (v) => _.isNil(v) || _.isString(v) ? v : `${v}`,
-  validate: (
-    internals,
-    value: any,
-    path?: string | string[],
-  ) => {
-    if (!_.isNil(value) && !_.isString(value)) {
-      throw new ValidateError(internals.type, 'type', _.toPath(path));
-    }
-  },
-}, _rules, (internals, builder) => ({
-
-  strict() {
-    return builder({ transform: (v) => _.isString(v) ? v : undefined });
-  },
-  
-}));
+  typeCheck: _.isString,
+}, _rules);
