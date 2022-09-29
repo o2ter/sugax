@@ -33,30 +33,20 @@ export const array = <T extends ISchema<any, any>>(type?: T): ISchema<TypeOfSche
   default: [],
   rules: [],
   transform: (v) => _.isArray(v) ? _.map(v, v => type?.transform(v) ?? v) : undefined,
-}, _rules, (internals, builder) => ({
-
-  validate(
+  validate: (
+    internals,
     value: any,
     path?: string | string[],
-  ) {
-
-    const _value = internals.transform(value);
-
-    for (const rule of internals.rules) {
-      if (!rule.validate(_value)) {
-        throw new ValidateError(internals.type, rule.rule, _.toPath(path));
-      }
-    };
-
-    if (!_.isNil(_value) && !_.isArray(_value)) {
+  ) => {
+    if (!_.isNil(value) && !_.isArray(value)) {
       throw new ValidateError(internals.type, 'type', _.toPath(path));
     }
-    
-    if (!_.isNil(_value)) {
-      for (const [i, item] of _value.entries()) {
+    if (!_.isNil(value)) {
+      for (const [i, item] of value.entries()) {
         type?.validate(item, [..._.toPath(path), `${i}`]);
       }
     }
   },
+}, _rules, (internals, builder) => ({
 
 }));

@@ -33,6 +33,13 @@ type Internals<T> = {
   default?: T;
   rules: ({ rule: string, validate: (value: any) => boolean })[];
   transform: (value: any) => any;
+
+  validate?: (
+    internals: Internals<T>,
+    value: any,
+    path?: string | string[],
+  ) => void;
+
 }
 
 type OmitFirstArg<F> = F extends (x: any, ...args: infer P) => infer R ? (...args: P) => R : never;
@@ -113,6 +120,7 @@ export const SchemaBuilder = <T, R extends RuleType>(
           throw new ValidateError(internals.type, rule.rule, _.toPath(path));
         }
       };
+      internals.validate?.(internals, _value, path);
     },
 
     ...RulesLoader(common_rules),

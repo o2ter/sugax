@@ -25,6 +25,7 @@
 
 import _ from 'lodash';
 import { ISchema, SchemaBuilder } from '../internals/types';
+import { ValidateError } from '../error';
 import * as _rules from './rules';
 
 export const number = (): ISchema<number, typeof _rules> => SchemaBuilder({
@@ -35,6 +36,15 @@ export const number = (): ISchema<number, typeof _rules> => SchemaBuilder({
     if (_.isString(v)) {
       const f = parseFloat(v);
       if (!_.isNaN(f)) return f;
+    }
+  },
+  validate: (
+    internals,
+    value: any,
+    path?: string | string[],
+  ) => {
+    if (!_.isNil(value) && !_.isNumber(value)) {
+      throw new ValidateError(internals.type, 'type', _.toPath(path));
     }
   },
 }, _rules, (internals, builder) => ({

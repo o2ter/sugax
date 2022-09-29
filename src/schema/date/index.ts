@@ -25,6 +25,7 @@
 
 import _ from 'lodash';
 import { ISchema, SchemaBuilder } from '../internals/types';
+import { ValidateError } from '../error';
 import * as _rules from './rules';
 
 export const date = (): ISchema<Date, typeof _rules> => SchemaBuilder({
@@ -35,6 +36,15 @@ export const date = (): ISchema<Date, typeof _rules> => SchemaBuilder({
     if (_.isString(v) || _.isNumber(v)) {
       const date = new Date(v);
       if (!_.isNaN(date)) return date;
+    }
+  },
+  validate: (
+    internals,
+    value: any,
+    path?: string | string[],
+  ) => {
+    if (!_.isNil(value) && !_.isDate(value)) {
+      throw new ValidateError(internals.type, 'type', _.toPath(path));
     }
   },
 }, _rules, (internals, builder) => ({
