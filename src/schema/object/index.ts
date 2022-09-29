@@ -25,6 +25,7 @@
 
 import _ from 'lodash';
 import { ISchema, TypeOfSchema, SchemaBuilder } from '../internals/types';
+import { ValidateError } from '../error';
 import * as _rules from './rules';
 
 export const object = <S extends Record<string, ISchema<any, any>>>(shape: S): ISchema<{ [K in keyof S]?: TypeOfSchema<S[K]>; }, typeof _rules> => SchemaBuilder({
@@ -33,5 +34,17 @@ export const object = <S extends Record<string, ISchema<any, any>>>(shape: S): I
   rules: [],
   transform: (v) => _.isPlainObject(v) ? _.mapValues(v, (v, k) => shape[k]?.transform(v) ?? v) : undefined,
 }, _rules, (internals, builder) => ({
+
+  validate(
+    value: any,
+    path?: string | string[],
+  ) {
+    const _value = internals.transform(value);
+    for (const rule of internals.rules) {
+      if (!rule.validate(_value)) {
+        throw new ValidateError(internals.type, rule.rule, _.toPath(path));
+      }
+    };
+  },
 
 }));

@@ -25,6 +25,7 @@
 
 import _ from 'lodash';
 import { ISchema, TypeOfSchema, SchemaBuilder } from '../internals/types';
+import { ValidateError } from '../error';
 import * as _rules from './rules';
 
 export const array = <T extends ISchema<any, any>>(type?: T): ISchema<TypeOfSchema<T>[], typeof _rules> => SchemaBuilder({
@@ -33,5 +34,27 @@ export const array = <T extends ISchema<any, any>>(type?: T): ISchema<TypeOfSche
   rules: [],
   transform: (v) => _.isArray(v) ? _.map(v, v => type?.transform(v) ?? v) : undefined,
 }, _rules, (internals, builder) => ({
+
+  validate(
+    value: any,
+    path?: string | string[],
+  ) {
+
+    const _value = internals.transform(value);
+
+    for (const rule of internals.rules) {
+      if (!rule.validate(_value)) {
+        throw new ValidateError(internals.type, rule.rule, _.toPath(path));
+      }
+    };
+
+    if (!_.isArray(_value)) {
+      throw new ValidateError(internals.type, 'type', _.toPath(path));
+    }
+    
+    for (const [i, item] of _value.entries()) {
+      type?.validate(item, [..._.toPath(path), `${i}`]);
+    }
+  },
 
 }));

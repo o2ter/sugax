@@ -64,16 +64,16 @@ export type ISchema<T, R extends RuleType> = {
 
 export type TypeOfSchema<S> = S extends ISchema<infer T, any> ? T : S;
 
-export const SchemaBuilder = <T, R extends RuleType, P>(
-  internals: P & Internals<T>,
+export const SchemaBuilder = <T, R extends RuleType>(
+  internals: Internals<T>,
   rules: R,
   extension: (
-    internals: P & Internals<T>,
-    builder: (internals: Partial<P | Internals<T>>) => ISchema<T, R>
+    internals: Internals<T>,
+    builder: (internals: Partial<Internals<T>>) => ISchema<T, R>
   ) => Partial<ISchema<T, R>>
 ): ISchema<T, R> => {
 
-  const builder = (v: Partial<P | Internals<T>>) => SchemaBuilder({ ...internals, ...v }, rules, extension);
+  const builder = (v: Partial<Internals<T>>) => SchemaBuilder({ ...internals, ...v }, rules, extension);
 
   const RulesLoader = <R2 extends RuleType>(
     rules: R2
