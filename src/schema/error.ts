@@ -49,6 +49,10 @@ export class ValidateError extends Error {
     this.attrs = attrs ?? {};
   }
 
+  static get _locales() {
+    return locales;
+  }
+
   get locales() {
 
     return _.mapValues(locales, locale => {

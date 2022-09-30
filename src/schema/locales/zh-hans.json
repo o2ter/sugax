@@ -1,0 +1,42 @@
+{
+  "mixed": {
+    "required": "${field}为必填",
+    "oneOf": "${field}必须为以下之一: ${values}",
+    "notOneOf": "${field}不得是以下之一: ${values}",
+    "type": "${field}必须为\"${type}\"类"
+  },
+  "string": {
+    "notEmpty": "${field}不能为空",
+    "length": "${field}必须包含${length}个字符",
+    "min": "${field}必须至少包含${min}个字符",
+    "max": "${field}必须最多包含${max}个字符",
+    "matches": "${field}必须符合: \"${regex}\"",
+    "email": "${field}必须为有效电邮地址",
+    "url": "${field}必须为有效URL",
+    "uuid": "${field}必须为有效UUID",
+    "trim": "${field}首尾不能有空白",
+    "lowercase": "${field}必须为细楷",
+    "uppercase": "${field}必须为大楷"
+  },
+  "number": {
+    "min": "${field}必须为${min}或以上",
+    "max": "${field}必须为${max}或以下",
+    "lessThan": "${field}必须少于${less}",
+    "moreThan": "${field}必须大于${more}",
+    "positive": "${field}必须为正数",
+    "negative": "${field}必须为负数",
+    "integer": "${field}必须为整数"
+  },
+  "date": {
+    "min": "${field}必须为${min}之后",
+    "max": "${field}必须为${max}之前",
+    "lessThan": "${field}必须少于${less}",
+    "moreThan": "${field}必须大于${more}"
+  },
+  "array": {
+    "notEmpty": "${field}不能为空",
+    "min": "${field}必须至少有${min}项",
+    "max": "${field}必须最多有${max}项",
+    "length": "${field}必须有${length}项"
+  }
+}
