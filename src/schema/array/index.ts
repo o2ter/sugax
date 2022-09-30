@@ -32,7 +32,7 @@ export const array = <T extends ISchema<any, any>>(type?: T): ISchema<TypeOfSche
   type: 'array',
   default: [],
   rules: [],
-  transform: (v) => _.isArray(v) ? _.isNil(type) ? v : _.map(v, v => type.transform(v)) : undefined,
+  transform: (v) => _.isArray(v) ? _.isNil(type) ? v : _.map(v, v => type.cast(v)) : undefined,
   typeCheck: _.isArray,
   validate: (value: any) => {
 

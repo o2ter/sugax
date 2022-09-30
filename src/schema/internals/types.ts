@@ -66,6 +66,8 @@ export type ISchema<T, R extends RuleType = RuleType> = {
     t: (value: any) => any
   ): ISchema<T, R>
 
+  cast: (value: any) => any;
+
   validate(value: any): ValidateError[]
 
 } & MappedRules<T, typeof common_rules & R>
@@ -105,6 +107,10 @@ export const SchemaBuilder = <T, R extends RuleType>(
       t: (value: any) => any
     ) {
       return builder({ transform: t });
+    },
+
+    cast(value: any) {
+      return internals.transform(value);
     },
 
     validate(value: any) {
