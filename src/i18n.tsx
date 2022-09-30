@@ -37,7 +37,7 @@ export const I18nProvider: React.FC<{
   onChange?: (locale: string) => void;
 }> = ({
   preferredLocale = 'en',
-  onChange = () => { },
+  onChange = () => {},
   children
 }) => {
 
