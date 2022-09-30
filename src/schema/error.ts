@@ -37,21 +37,21 @@ export class ValidateError extends Error {
   constructor(
     type: string,
     rule: string,
-    path: string[] = [],
-    attrs: Record<string, string> = {},
+    path?: string[],
+    attrs?: Record<string, string>,
   ) {
     super();
     this.type = type;
     this.rule = rule;
-    this.path = path;
-    this.attrs = attrs;
+    this.path = path ?? [];
+    this.attrs = attrs ?? {};
   }
 
   get locales() {
 
     return _.mapValues(locales, locale => {
 
-      const params = { ...this.attrs, field: this.path.join('.') ?? '' }
+      const params = { ...this.attrs, field: this.path.join('.') }
       let result: string = _.get(locale, `${this.type}.${this.rule}`) ?? _.get(locale, `mixed.${this.rule}`) ?? '';
   
       for (const [key, value] of Object.entries(params)) {
