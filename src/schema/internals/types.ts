@@ -87,7 +87,34 @@ export const SchemaBuilder = <T, R extends RuleType>(
     rules: [...internals.rules, { rule: key, validate: (v, error) => rule(v, error, ...args) }],
   }));
 
+  const cast = (value: any) => {
+    return internals.transform(value);
+  };
+
+  const validate = _.memoize((value: any) => {
+
+    const errors: ValidateError[] = [];
+    const _value = cast(value);
+
+    for (const rule of internals.rules) {
+      const error = rule.validate(_value, (attrs) => new ValidateError(internals.type, rule.rule, [], attrs));
+      if (!_.isNil(error)) errors.push(error);
+    };
+
+    if (!_.isNil(_value) && !internals.typeCheck(_value)) {
+      errors.push(new ValidateError(internals.type, 'type', [], { type: internals.type }));
+    }
+    
+    if (!_.isNil(internals.validate)) {
+      errors.push(...internals.validate(_value));
+    }
+
+    return errors;
+  });
+
   const schema = {
+
+    cast, validate,
 
     strict() {
       return builder({ transform: (v) => internals.typeCheck(v) ? v : undefined });
@@ -107,31 +134,6 @@ export const SchemaBuilder = <T, R extends RuleType>(
       t: (value: any) => any
     ) {
       return builder({ transform: t });
-    },
-
-    cast(value: any) {
-      return internals.transform(value);
-    },
-
-    validate(value: any) {
-
-      const errors: ValidateError[] = [];
-      const _value = internals.transform(value);
-
-      for (const rule of internals.rules) {
-        const error = rule.validate(_value, (attrs) => new ValidateError(internals.type, rule.rule, [], attrs));
-        if (!_.isNil(error)) errors.push(error);
-      };
-
-      if (!_.isNil(_value) && !internals.typeCheck(_value)) {
-        errors.push(new ValidateError(internals.type, 'type', [], { type: internals.type }));
-      }
-      
-      if (!_.isNil(internals.validate)) {
-        errors.push(...internals.validate(_value));
-      }
-
-      return errors;
     },
 
     ...RulesLoader(common_rules),
