@@ -118,7 +118,7 @@ export const SchemaBuilder = <T, R extends RuleType>(
       };
 
       if (!_.isNil(value) && !internals.typeCheck(value)) {
-        errors.push(new ValidateError(internals.type, 'type'));
+        errors.push(new ValidateError(internals.type, 'type', [], { type: internals.type }));
       }
       
       if (!_.isNil(internals.validate)) {
