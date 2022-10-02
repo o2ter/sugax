@@ -29,8 +29,6 @@ import { replaceAll } from '../utils';
 
 export class ValidateError extends Error {
 
-  __proto__ = ValidateError.prototype;
-
   type: string;
   rule: string;
   path: string[];
@@ -43,6 +41,7 @@ export class ValidateError extends Error {
     attrs?: Record<string, string>,
   ) {
     super();
+    Object.setPrototypeOf(this, ValidateError.prototype);
     this.type = type;
     this.rule = rule;
     this.path = path ?? [];
