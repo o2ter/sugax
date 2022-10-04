@@ -83,21 +83,6 @@ export default [
     ],
     plugins: [
       resolve({
-        extensions: ['.ts', '.tsx', '.mjs', '.js']
-      }),
-      dts()
-    ],
-  },
-  {
-    input: 'src/index.web',
-    output: [
-      {
-        file: 'dist/index.web.d.ts',
-        format: 'es',
-      },
-    ],
-    plugins: [
-      resolve({
         extensions: [
           '.web.ts', '.web.tsx', '.web.mjs', '.web.js',
           '.ts', '.tsx', '.mjs', '.js',
