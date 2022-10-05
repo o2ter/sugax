@@ -1,8 +1,7 @@
 {
   "name": "sugax",
   "version": "1.0.0",
-  "main": "dist/cjs/index",
-  "module": "dist/esm/index",
+  "main": "dist/index",
   "types": "dist/index.d.ts",
   "repository": "https://github.com/o2ter/sugax.git",
   "author": "Susan Cheng <susan.doggie@gmail.com>",
