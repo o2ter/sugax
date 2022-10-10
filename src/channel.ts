@@ -38,7 +38,7 @@ export const createChannel = <T = any>(initialValue: T): IState<T> => {
   return new class implements IState<T> {
 
     constructor() {
-      emitter.addListener('update', (value) => current = value);
+      emitter.addListener('update', (value: T) => current = value);
       emitter_maps.set(this, emitter);
     }
 

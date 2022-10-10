@@ -32,10 +32,10 @@ import { replaceAll } from './utils';
 const I18nContext = React.createContext({ preferredLocale: 'en' });
 const i18n_update_event = new EventEmitter();
 
-export const I18nProvider: React.FC<{
+export const I18nProvider: React.FC<React.PropsWithChildren<{
   preferredLocale?: string;
   onChange?: (locale: string) => void;
-}> = ({
+}>> = ({
   preferredLocale = 'en',
   onChange = () => {},
   children
@@ -82,7 +82,7 @@ function _useUserLocales(i18nState?: { preferredLocale: string; }) {
     });
   }
 
-  if (global.navigator) {
+  if (globalThis.navigator) {
 
     const languages = navigator.languages;
     const language = navigator.language;
@@ -137,7 +137,7 @@ function _localize<T extends unknown>(
         let result = selector(strings[tag]);
 
         if (params && _.isString(result)) {
-          for (const [key, value] of Object.entries(params)) {
+          for (const [key, value] of _.entries(params)) {
             result = replaceAll(result, '${' + key + '}', `${value}`);
           }
         }
@@ -155,7 +155,7 @@ function _localize<T extends unknown>(
         let result = selector(strings[languageCode]);
 
         if (params && _.isString(result)) {
-          for (const [key, value] of Object.entries(params)) {
+          for (const [key, value] of _.entries(params)) {
             result = replaceAll(result, '${' + key + '}', `${value}`);
           }
         }
