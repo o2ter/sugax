@@ -53,30 +53,6 @@ export default [
     ...rollupConfig,
     output: [
       {
-        file: packageJson.main + '.web.js',
-        format: 'cjs',
-        sourcemap: true,
-      },
-      {
-        file: packageJson.main + '.web.mjs',
-        format: 'esm',
-        sourcemap: true,
-      },
-    ],
-    plugins: [
-      resolve({
-        extensions: [
-          '.web.ts', '.web.tsx', '.web.mjs', '.web.js',
-          '.ts', '.tsx', '.mjs', '.js',
-        ]
-      }),
-      ...rollupPlugins
-    ],
-  },
-  {
-    ...rollupConfig,
-    output: [
-      {
         file: 'dist/index.d.ts',
         format: 'es',
       },
@@ -84,24 +60,6 @@ export default [
     plugins: [
       resolve({
         extensions: ['.ts', '.tsx', '.mjs', '.js']
-      }),
-      dts()
-    ],
-  },
-  {
-    ...rollupConfig,
-    output: [
-      {
-        file: 'dist/index.web.d.ts',
-        format: 'es',
-      },
-    ],
-    plugins: [
-      resolve({
-        extensions: [
-          '.web.ts', '.web.tsx', '.web.mjs', '.web.js',
-          '.ts', '.tsx', '.mjs', '.js',
-        ]
       }),
       dts()
     ],
