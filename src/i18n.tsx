@@ -166,12 +166,12 @@ function _localize<T extends unknown>(
   }
 }
 
-export const useLocalize = <T extends unknown>(
-  strings: Record<string, T>,
+export const useLocalize = (
+  { ...strings },
   params: Record<string, any> = {}
-) => _localize(strings, params, React.useContext(I18nContext), (x: T) => x);
+) => _localize(strings, params, React.useContext(I18nContext), (x) => x);
 
-export const LocalizationStrings = <T extends unknown>(strings: Record<string, T>) => ({
+export const LocalizationStrings = ({ ...strings }) => ({
 
   useLocalize() {
 
@@ -180,7 +180,7 @@ export const LocalizationStrings = <T extends unknown>(strings: Record<string, T
     return {
 
       string(key: _.PropertyPath, params: Record<string, any> = {}) {
-        return _localize(strings, params, i18nState, (x: T) => _.get(x, key)) ?? key;
+        return _localize(strings, params, i18nState, (x) => _.get(x, key)) ?? key;
       }
     }
   }
