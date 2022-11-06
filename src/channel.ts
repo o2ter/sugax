@@ -46,7 +46,8 @@ export const createChannel = <T = any>(initialValue: T): IState<T> => {
     }
 
     setValue(value: React.SetStateAction<T>) {
-      emitter.emit('update', current = _.isFunction(value) ? value(current) : value);
+      current = _.isFunction(value) ? value(current) : value;
+      emitter.emit('update', current);
     }
   };
 }
