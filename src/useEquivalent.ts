@@ -1,5 +1,5 @@
 //
-//  index.js
+//  useEquivalent.js
 //
 //  The MIT License
 //  Copyright (c) 2021 - 2022 O2ter Limited. All rights reserved.
@@ -23,12 +23,14 @@
 //  THE SOFTWARE.
 //
 
-export * from './i18n';
-export * from './state';
-export * from './channel';
-export * from './mergeRefs';
-export * from './useCallbackRef';
-export * from './useEquivalent';
-export * from './useMount';
-export * from './usePrevious';
-export * from './schema';
+import _ from 'lodash';
+import React from 'react';
+
+export const useEquivalent = <T = any>(
+  value: T,
+  equal: (value: T, other: T) => boolean = _.isEqual
+) => {
+  const [state, setState] = React.useState(value);
+  if (!equal(state, value)) setState(value);
+  return state;
+}
