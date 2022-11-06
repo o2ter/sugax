@@ -1,5 +1,5 @@
 //
-//  useMount.js
+//  equivalent.ts
 //
 //  The MIT License
 //  Copyright (c) 2021 - 2022 O2ter Limited. All rights reserved.
@@ -26,10 +26,11 @@
 import _ from 'lodash';
 import React from 'react';
 
-export function useMount(callback: () => void) {
-  React.useEffect(() => { if (_.isFunction(callback)) callback(); }, []);
-}
-
-export function useUnmount(callback: () => void) {
-  React.useEffect(() => () => { if (_.isFunction(callback)) callback(); }, []);
+export const useEquivalent = <T = any>(
+  value: T,
+  equal: (value: T, other: T) => boolean = _.isEqual
+) => {
+  const [state, setState] = React.useState(value);
+  if (!equal(state, value)) setState(value);
+  return state;
 }

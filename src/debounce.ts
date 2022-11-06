@@ -1,5 +1,5 @@
 //
-//  types.ts
+//  debounce.ts
 //
 //  The MIT License
 //  Copyright (c) 2021 - 2022 O2ter Limited. All rights reserved.
@@ -23,9 +23,14 @@
 //  THE SOFTWARE.
 //
 
+import _ from 'lodash';
 import React from 'react';
 
-export interface IState<T = any> {
-  get current(): T
-  setValue(value: React.SetStateAction<T>): void
+export const useDebounce = <T extends (...args: any) => any>(
+  callback: T,
+  setting: _.DebounceSettings & { wait?: number; },
+  deps: React.DependencyList,
+) => {
+  const { wait, ...options } = setting;
+  return React.useCallback(_.debounce(callback, wait, options), deps);
 }
