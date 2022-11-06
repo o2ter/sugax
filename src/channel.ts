@@ -38,7 +38,6 @@ export const createChannel = <T = any>(initialValue: T): IState<T> => {
   return new class implements IState<T> {
 
     constructor() {
-      emitter.addListener('update', (value: T) => current = value);
       emitter_maps.set(this, emitter);
     }
 
@@ -47,7 +46,7 @@ export const createChannel = <T = any>(initialValue: T): IState<T> => {
     }
 
     setValue(value: React.SetStateAction<T>) {
-      emitter.emit('update', _.isFunction(value) ? value(current) : value);
+      emitter.emit('update', current = _.isFunction(value) ? value(current) : value);
     }
   };
 }
@@ -57,8 +56,9 @@ export const useChannel = <T = any>(channel: IState<T>) => {
   const [value, setValue] = React.useState(channel.current);
 
   React.useEffect(() => {
-    emitter_maps.get(channel).addListener('update', setValue);
-    return () => { emitter_maps.get(channel).removeListener('update', setValue); }
+    const emitter = emitter_maps.get(channel);
+    emitter.addListener('update', setValue);
+    return () => { emitter.removeListener('update', setValue); }
   }, [setValue]);
 
   return value;
