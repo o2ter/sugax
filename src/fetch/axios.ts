@@ -60,6 +60,7 @@ export const service: NetworkService<AxiosRequestConfig, AxiosResponse> = {
       headers: config.headers,
       params: config.params,
       data: config.data,
+      onDownloadProgress: config.onDownloadProgress,
       signal: controller?.signal,
     });
 
