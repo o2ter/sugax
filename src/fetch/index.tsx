@@ -89,7 +89,15 @@ const _useFetch = <C, R>(
   }));
 }
 
-export const useFetch = <R = DefaultResponse>(resource: string) => React.useContext(Storage)[resource] as FetchResult<R>[string] | undefined;
+export const useFetch = <R = DefaultResponse>(resource: string) => {
+  const fetch: FetchResult<R>[string] = React.useContext(Storage)[resource];
+  if (_.isNil(fetch)) return;
+  return {
+    ..._.omit(fetch, 'cancelToken'),
+    get cancelled() { return fetch.cancelToken?.cancelled ?? false; },
+    cancel: () => { fetch.cancelToken?.cancel(); },
+  };
+}
 
 const FetchBase = <C = DefaultRequestConfig, R = DefaultResponse>({
   resources,
