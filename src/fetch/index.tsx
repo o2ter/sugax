@@ -119,9 +119,7 @@ const FetchProvider = <C extends {} = DefaultRequestConfig, R extends unknown = 
   children,
 }: React.PropsWithChildren<{
   service: NetworkService<C, R>;
-}>) => {
-  return <NetworkContext.Provider value={service}>{children}</NetworkContext.Provider>;
-}
+}>) => <NetworkContext.Provider value={service}>{children}</NetworkContext.Provider>;
 
 export const Fetch = _.assign(FetchBase, {
   Provider: FetchProvider,
