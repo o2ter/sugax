@@ -36,6 +36,7 @@ type ResponseState<R> = {
   response?: R;
   error?: Error;
   cancelToken?: CancelToken;
+  loading?: boolean;
 }
 
 const NetworkContext = React.createContext<NetworkService<any, any>>(defaultService);
@@ -67,9 +68,9 @@ const _useFetch = <C, R>(
     async (resource: string, cancelToken?: CancelToken) => {
       if (_.isNil(resources[resource])) return;
       const _cancelToken = cancelToken ?? network.createCancelToken();
-      setResource(resource, { cancelToken: _cancelToken });
+      setResource(resource, { cancelToken: _cancelToken, loading: true });
       const response = await fetch<C, R>(network, { ...resources[resource], cancelToken: _cancelToken });
-      setResource(resource, response);
+      setResource(resource, { ...response, loading: false });
     },
     debounce,
     [network, setState, useEquivalent(resources)]
@@ -93,8 +94,9 @@ export const useFetch = <R extends unknown = DefaultResponse>(resource: string) 
   const fetch: FetchResult<R>[string] = React.useContext(Storage)[resource];
   if (_.isNil(fetch)) return;
   return {
-    ..._.omit(fetch, 'cancelToken'),
+    ...fetch,
     get cancelled() { return fetch.cancelToken?.cancelled ?? false; },
+    get loading() { return fetch.loading ?? false; },
     cancel: () => { fetch.cancelToken?.cancel(); },
   };
 }
