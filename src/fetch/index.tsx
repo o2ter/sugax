@@ -53,28 +53,24 @@ const _useFetch = <C, R>(
   const setResource = (resource: string, next: ResourceState) => setState(state => ({ ...state, [resource]: _.assign({}, state[resource], next) }));
   const setResourceProgress = (resource: string, next: ProgressEvent) => setProgress(progress => ({ ...progress, [resource]: _.assign({}, progress[resource], next) }));
 
-  const refresh = useDebounce(
-    async (resource: string, cancelToken?: CancelToken) => {
+  const refresh = useDebounce(async (resource: string, cancelToken?: CancelToken) => {
 
-      if (_.isNil(resources[resource])) return;
+    if (_.isNil(resources[resource])) return;
 
-      const _cancelToken = cancelToken ?? network.createCancelToken();
-      setResource(resource, { cancelToken: _cancelToken, loading: true });
+    const _cancelToken = cancelToken ?? network.createCancelToken();
+    setResource(resource, { cancelToken: _cancelToken, loading: true });
 
-      try {
-        const response = await network.request({
-          ...resources[resource],
-          cancelToken: _cancelToken,
-          onDownloadProgress: (progress) => setResourceProgress(resource, progress),
-        });
-        setResource(resource, { response, error: undefined, loading: false });
-      } catch (error) {
-        setResource(resource, { response: undefined, error: error as Error, loading: false });
-      }
-    },
-    debounce,
-    [network, setState, useEquivalent(resources)]
-  );
+    try {
+      const response = await network.request({
+        ...resources[resource],
+        cancelToken: _cancelToken,
+        onDownloadProgress: (progress) => setResourceProgress(resource, progress),
+      });
+      setResource(resource, { response, error: undefined, loading: false });
+    } catch (error) {
+      setResource(resource, { response: undefined, error: error as Error, loading: false });
+    }
+  }, debounce, [network, setState, useEquivalent(resources)]);
 
   React.useEffect(() => {
     const cancelToken = network.createCancelToken();
