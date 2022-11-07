@@ -120,10 +120,12 @@ const FetchBase = <C extends {} = DefaultRequestConfig, R extends unknown = Defa
   debounce: _.DebounceSettings & { wait?: number; };
   children: React.ReactNode | ((state: Record<string, ReturnType<typeof fetchResult<R>>>) => React.ReactNode);
 }) => {
-  const parent = React.useContext(FetchStateContext);
   const { state, progress } = _useFetch<C, R>(resources, debounce);
-  const merged = React.useMemo(() => ({ ...parent, ...state }), [parent, state]);
-  return <FetchStateContext.Provider value={merged}><ProgressContext.Provider value={progress}>
+  const parent_state = React.useContext(FetchStateContext);
+  const parent_progress = React.useContext(ProgressContext);
+  const merged_state = React.useMemo(() => ({ ...parent_state, ...state }), [parent_state, state]);
+  const merged_progress = React.useMemo(() => ({ ...parent_progress, ...progress }), [parent_progress, progress]);
+  return <FetchStateContext.Provider value={merged_state}><ProgressContext.Provider value={merged_progress}>
     {_.isFunction(children) ? children(_.mapValues(state, (state, resource) => fetchResult(state, progress[resource]))) : children}
   </ProgressContext.Provider></FetchStateContext.Provider>;
 }
