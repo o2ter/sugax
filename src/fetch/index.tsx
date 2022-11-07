@@ -121,6 +121,4 @@ const FetchProvider = <C extends {} = DefaultRequestConfig, R extends unknown = 
   service: NetworkService<C, R>;
 }>) => <NetworkContext.Provider value={service}>{children}</NetworkContext.Provider>;
 
-export const Fetch = _.assign(FetchBase, {
-  Provider: FetchProvider,
-})
+export const Fetch = _.assign(FetchBase, { Provider: FetchProvider });
