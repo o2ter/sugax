@@ -33,8 +33,9 @@ import { CancelToken, NetworkService } from './types';
 type FetchResult<R> = ReturnType<typeof _useFetch<any, R>>;
 
 type ResponseState<R> = {
-  response?: R | undefined;
-  error?: Error | undefined;
+  response?: R;
+  error?: Error;
+  cancelToken?: CancelToken;
 }
 
 const NetworkContext = React.createContext<NetworkService<any, any>>(defaultService);
@@ -42,13 +43,13 @@ const Storage = React.createContext<FetchResult<any>>({});
 
 const fetch = async <C, R>(
   network: NetworkService<C, R>,
-  config: C & { cancelToken?: CancelToken; },
-  setState: (state: ResponseState<R>) => void
+  config: C & { cancelToken?: CancelToken; }
 ) => {
   try {
-    setState({ response: await network.request(config) });
+    const response = await network.request(config);
+    return { response };
   } catch (error) {
-    setState({ error: error as Error });
+    return { error: error as Error };
   }
 }
 
@@ -58,35 +59,32 @@ const _useFetch = <C, R>(
 ) => {
 
   const network = React.useContext(NetworkContext);
-  const cancelToken = React.useRef(network.createCancelToken()).current;
 
   const [state, setState] = React.useState<Record<string, ResponseState<R>>>({});
+  const setResource = (resource: string, next: ResponseState<R>) => setState(state => ({ ...state, [resource]: _.assign({}, state[resource], next) }));
+
   const refresh = useDebounce(
-    (resource?: string) => {
-      const _setState = (resource: string) => (next: ResponseState<R>) => setState(state => ({ ...state, [resource]: next }));
-      const _fetch = (resource: string) => {
-        if (!_.isNil(resources[resource])) fetch(network, { ...resources[resource], cancelToken }, _setState(resource));
-      }
-      if (_.isString(resource)) {
-        _fetch(resource);
-      } else {
-        for (const resource of _.keys(resources)) {
-          _fetch(resource);
-        }
-      }
+    async (resource: string, cancelToken?: CancelToken) => {
+      if (_.isNil(resources[resource])) return;
+      const _cancelToken = cancelToken ?? network.createCancelToken();
+      setResource(resource, { cancelToken: _cancelToken });
+      const response = await fetch<C, R>(network, { ...resources[resource], cancelToken: _cancelToken });
+      setResource(resource, response);
     },
     debounce,
     [network, setState, useEquivalent(resources)]
   );
 
   React.useEffect(() => {
-    refresh();
+    const cancelToken = network.createCancelToken();
+    for (const resource of _.keys(resources)) {
+      refresh(resource, cancelToken);
+    }
     return () => cancelToken.cancel();
   }, []);
 
   return _.mapValues(state, (state, resource) => ({
     ...state,
-    cancelToken,
     refresh: () => refresh(resource),
   }));
 }
