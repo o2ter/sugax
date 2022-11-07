@@ -83,10 +83,10 @@ const _useFetch = <C, R>(
     return () => cancelToken.cancel();
   }, []);
 
-  return _.mapValues(state, (state, resource) => ({
+  return React.useMemo(() => _.mapValues(state, (state, resource) => ({
     ...state,
     refresh: () => refresh(resource),
-  }));
+  })), [state, refresh]);
 }
 
 export const useFetch = <R = DefaultResponse>(resource: string) => {
