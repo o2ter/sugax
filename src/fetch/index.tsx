@@ -106,7 +106,7 @@ const FetchBase = <C = DefaultRequestConfig, R = DefaultResponse>({
   return <Storage.Provider value={fetch}>{_.isFunction(children) ? children(fetch) : children}</Storage.Provider>;
 }
 
-const NetworkProvider = <C = DefaultRequestConfig, R = DefaultResponse>({
+const FetchProvider = <C = DefaultRequestConfig, R = DefaultResponse>({
   service,
   children,
 }: React.PropsWithChildren<{
@@ -119,5 +119,5 @@ const NetworkProvider = <C = DefaultRequestConfig, R = DefaultResponse>({
 }
 
 export const Fetch = _.assign(FetchBase, {
-  Provider: NetworkProvider,
+  Provider: FetchProvider,
 })
