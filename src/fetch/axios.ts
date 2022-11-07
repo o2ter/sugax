@@ -30,7 +30,10 @@ import { CancelToken, NetworkService } from './types';
 const axiosInstance = axios.create({ withCredentials: true });
 const tokenMap = new WeakMap<CancelToken, AbortController>();
 
-export const service: NetworkService<AxiosRequestConfig<any>, AxiosResponse<any, any>> = {
+export type DefaultRequestConfig = AxiosRequestConfig;
+export type DefaultResponse = AxiosResponse;
+
+export const service: NetworkService<AxiosRequestConfig, AxiosResponse> = {
 
   createCancelToken() {
     const controller = new AbortController();

@@ -1,5 +1,5 @@
 //
-//  network.tsx
+//  index.js
 //
 //  The MIT License
 //  Copyright (c) 2021 - 2022 O2ter Limited. All rights reserved.
@@ -25,9 +25,9 @@
 
 import _ from 'lodash';
 import React from 'react';
+import defaultService, { DefaultRequestConfig, DefaultResponse } from './axios';
 import { useDebounce } from '../debounce';
 import { useEquivalent } from '../equivalent';
-import { useNetwork } from './network';
 import { CancelToken, NetworkService } from './types';
 
 type FetchResult<R> = ReturnType<typeof _useFetch<any, R>>;
@@ -37,6 +37,7 @@ type ResponseState<R> = {
   error?: Error | undefined;
 }
 
+const NetworkContext = React.createContext<NetworkService<any, any>>(defaultService);
 const Storage = React.createContext<FetchResult<any>>({});
 
 const fetch = async <C, R>(
@@ -56,7 +57,7 @@ const _useFetch = <C, R>(
   debounce: _.DebounceSettings & { wait?: number; },
 ) => {
 
-  const network = useNetwork();
+  const network = React.useContext(NetworkContext);
   const cancelToken = React.useRef(network.createCancelToken()).current;
 
   const [state, setState] = React.useState<Record<string, ResponseState<R>>>({});
@@ -90,9 +91,9 @@ const _useFetch = <C, R>(
   }));
 }
 
-export const useFetch = <R extends unknown>(resource: string) => React.useContext(Storage)[resource] as FetchResult<R>[string] | undefined;
+export const useFetch = <R = DefaultResponse>(resource: string) => React.useContext(Storage)[resource] as FetchResult<R>[string] | undefined;
 
-export const Fetch = <C, R>({
+const FetchBase = <C = DefaultRequestConfig, R = DefaultResponse>({
   resources,
   debounce,
   children,
@@ -104,3 +105,19 @@ export const Fetch = <C, R>({
   const fetch = _useFetch<C, R>(resources, debounce);
   return <Storage.Provider value={fetch}>{_.isFunction(children) ? children(fetch) : children}</Storage.Provider>;
 }
+
+const NetworkProvider = <C = DefaultRequestConfig, R = DefaultResponse>({
+  service,
+  children,
+}: React.PropsWithChildren<{
+  service?: NetworkService<C, R>;
+}>) => {
+  const parent = React.useContext(NetworkContext);
+  return (
+    <NetworkContext.Provider value={service ?? parent}>{children}</NetworkContext.Provider>
+  );
+}
+
+export const Fetch = _.assign(FetchBase, {
+  Provider: NetworkProvider,
+})
