@@ -1,5 +1,5 @@
 //
-//  index.js
+//  network.tsx
 //
 //  The MIT License
 //  Copyright (c) 2021 - 2022 O2ter Limited. All rights reserved.
@@ -23,15 +23,23 @@
 //  THE SOFTWARE.
 //
 
-export * from './callbackRef';
-export * from './channel';
-export * from './debounce';
-export * from './equivalent';
-export * from './fetch';
-export * from './i18n';
-export * from './mergeRefs';
-export * from './mount';
-export * from './previous';
-export * from './schema';
-export * from './state';
-export * from './throttle';
+import _ from 'lodash';
+import React from 'react';
+import defaultService from './axios';
+import { NetworkService } from './types';
+
+const NetworkContext = React.createContext<NetworkService<any, any>>(defaultService);
+
+export const useNetwork = () => React.useContext(NetworkContext);
+
+export const NetworkProvider = <C, R>({
+  service,
+  children,
+}: React.PropsWithChildren<{
+  service?: NetworkService<C, R>;
+}>) => {
+  const parent = useNetwork();
+  return (
+    <NetworkContext.Provider value={service ?? parent}>{children}</NetworkContext.Provider>
+  );
+}

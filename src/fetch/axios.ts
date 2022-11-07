@@ -1,5 +1,5 @@
 //
-//  index.js
+//  axios.ts
 //
 //  The MIT License
 //  Copyright (c) 2021 - 2022 O2ter Limited. All rights reserved.
@@ -23,15 +23,45 @@
 //  THE SOFTWARE.
 //
 
-export * from './callbackRef';
-export * from './channel';
-export * from './debounce';
-export * from './equivalent';
-export * from './fetch';
-export * from './i18n';
-export * from './mergeRefs';
-export * from './mount';
-export * from './previous';
-export * from './schema';
-export * from './state';
-export * from './throttle';
+import _ from 'lodash';
+import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
+import { CancelToken, NetworkService } from './types';
+
+const axiosInstance = axios.create({ withCredentials: true });
+const tokenMap = new WeakMap<CancelToken, AbortController>();
+
+export const service: NetworkService<AxiosRequestConfig<any>, AxiosResponse<any, any>> = {
+
+  createCancelToken() {
+    const controller = new AbortController();
+    const token = {
+      get cancelled() {
+        return controller.signal.aborted;
+      },
+      cancel() {
+        controller.abort();
+      },
+    };
+    tokenMap.set(token, controller);
+    return token;
+  },
+
+  request: async (config) => {
+
+    const controller = _.isNil(config.cancelToken) ? undefined : tokenMap.get(config.cancelToken);
+
+    const res = await axiosInstance.request({
+      url: config.url,
+      method: config.method,
+      baseURL: config.baseURL,
+      headers: config.headers,
+      params: config.params,
+      data: config.data,
+      signal: controller?.signal,
+    });
+
+    return res;
+  },
+};
+
+export default service;

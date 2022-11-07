@@ -1,5 +1,5 @@
 //
-//  index.js
+//  types.ts
 //
 //  The MIT License
 //  Copyright (c) 2021 - 2022 O2ter Limited. All rights reserved.
@@ -23,15 +23,12 @@
 //  THE SOFTWARE.
 //
 
-export * from './callbackRef';
-export * from './channel';
-export * from './debounce';
-export * from './equivalent';
-export * from './fetch';
-export * from './i18n';
-export * from './mergeRefs';
-export * from './mount';
-export * from './previous';
-export * from './schema';
-export * from './state';
-export * from './throttle';
+export type CancelToken = {
+  readonly cancelled: boolean;
+  cancel(): void;
+}
+
+export type NetworkService<Config, Response> = {
+  createCancelToken: () => CancelToken;
+  request: (config: Config & { cancelToken?: CancelToken; }) => Promise<Response>;
+}
