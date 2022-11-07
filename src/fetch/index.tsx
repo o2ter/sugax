@@ -89,7 +89,7 @@ const _useFetch = <C, R>(
   })), [state, refresh]);
 }
 
-export const useFetch = <R = DefaultResponse>(resource: string) => {
+export const useFetch = <R extends unknown = DefaultResponse>(resource: string) => {
   const fetch: FetchResult<R>[string] = React.useContext(Storage)[resource];
   if (_.isNil(fetch)) return;
   return {
@@ -99,7 +99,7 @@ export const useFetch = <R = DefaultResponse>(resource: string) => {
   };
 }
 
-const FetchBase = <C = DefaultRequestConfig, R = DefaultResponse>({
+const FetchBase = <C extends {} = DefaultRequestConfig, R extends unknown = DefaultResponse>({
   resources,
   debounce,
   children,
@@ -112,7 +112,7 @@ const FetchBase = <C = DefaultRequestConfig, R = DefaultResponse>({
   return <Storage.Provider value={fetch}>{_.isFunction(children) ? children(fetch) : children}</Storage.Provider>;
 }
 
-const FetchProvider = <C = DefaultRequestConfig, R = DefaultResponse>({
+const FetchProvider = <C extends {} = DefaultRequestConfig, R extends unknown = DefaultResponse>({
   service,
   children,
 }: React.PropsWithChildren<{
