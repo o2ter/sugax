@@ -108,8 +108,10 @@ const FetchBase = <C extends {} = DefaultRequestConfig, R extends unknown = Defa
   debounce: _.DebounceSettings & { wait?: number; };
   children: React.ReactNode | ((state: FetchResult<R>) => React.ReactNode);
 }) => {
+  const parent = React.useContext(Storage);
   const fetch = _useFetch<C, R>(resources, debounce);
-  return <Storage.Provider value={fetch}>{_.isFunction(children) ? children(fetch) : children}</Storage.Provider>;
+  const merged = React.useMemo(() => ({ ...parent, ...fetch }), [parent, fetch]);
+  return <Storage.Provider value={merged}>{_.isFunction(children) ? children(fetch) : children}</Storage.Provider>;
 }
 
 const FetchProvider = <C extends {} = DefaultRequestConfig, R extends unknown = DefaultResponse>({
@@ -119,9 +121,7 @@ const FetchProvider = <C extends {} = DefaultRequestConfig, R extends unknown = 
   service?: NetworkService<C, R>;
 }>) => {
   const parent = React.useContext(NetworkContext);
-  return (
-    <NetworkContext.Provider value={service ?? parent}>{children}</NetworkContext.Provider>
-  );
+  return <NetworkContext.Provider value={service ?? parent}>{children}</NetworkContext.Provider>;
 }
 
 export const Fetch = _.assign(FetchBase, {
