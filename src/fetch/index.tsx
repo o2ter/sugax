@@ -28,22 +28,10 @@ import React from 'react';
 import defaultService, { DefaultRequestConfig, DefaultResponse } from './axios';
 import { useDebounce } from '../debounce';
 import { useEquivalent } from '../equivalent';
-import { CancelToken, NetworkService } from './types';
+import { CancelToken, NetworkService, ProgressEvent } from './types';
 
 const NetworkContext = React.createContext<NetworkService<any, any>>(defaultService);
 const Storage = React.createContext<ReturnType<typeof _useFetch<any, any>>>({});
-
-const fetch = async <C, R>(
-  network: NetworkService<C, R>,
-  config: C & { cancelToken?: CancelToken; }
-) => {
-  try {
-    const response = await network.request(config);
-    return { response };
-  } catch (error) {
-    return { error: error as Error };
-  }
-}
 
 const _useFetch = <C, R>(
   resources: Record<string, C>,
@@ -64,11 +52,18 @@ const _useFetch = <C, R>(
 
   const refresh = useDebounce(
     async (resource: string, cancelToken?: CancelToken) => {
+
       if (_.isNil(resources[resource])) return;
+
       const _cancelToken = cancelToken ?? network.createCancelToken();
       setResource(resource, { cancelToken: _cancelToken, loading: true });
-      const response = await fetch<C, R>(network, { ...resources[resource], cancelToken: _cancelToken });
-      setResource(resource, { ...response, loading: false });
+
+      try {
+        const response = await network.request({ ...resources[resource], cancelToken: _cancelToken });
+        setResource(resource, { response, error: undefined, loading: false });
+      } catch (error) {
+        setResource(resource, { response: undefined, error: error as Error, loading: false });
+      }
     },
     debounce,
     [network, setState, useEquivalent(resources)]

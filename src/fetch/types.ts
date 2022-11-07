@@ -28,7 +28,7 @@ export type CancelToken = {
   cancel(): void;
 }
 
-interface ProgressEvent {
+export type ProgressEvent = {
   loaded: number;
   total?: number;
   bytes: number;
