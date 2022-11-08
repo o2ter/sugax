@@ -30,16 +30,13 @@ import { useDebounce } from '../debounce';
 import { useEquivalent } from '../equivalent';
 import { CancelToken, NetworkService, ProgressEvent } from './types';
 
-const NetworkContext = React.createContext<NetworkService<any, any>>(defaultService);
-const FetchStateContext = React.createContext<ReturnType<typeof _useFetch<any, any>>['state']>({});
-const ProgressContext = React.createContext<Record<string, ProgressEvent>>({});
+type FetchState<R> = ReturnType<typeof _request<{}, R, Record<string, any>>>['state'];
 
-const _useFetch = <C, R>(
-  resources: Record<string, C>,
-  debounce: _.DebounceSettings & { wait?: number; },
+const _request = <C extends {}, R, Resources extends { [K in string]: C }>(
+  service: NetworkService<C, R>,
+  resources: Resources,
+  debounce?: _.DebounceSettings & { wait?: number; },
 ) => {
-
-  const network: NetworkService<C, R> = React.useContext(NetworkContext);
 
   type ResourceState = {
     response?: R;
@@ -48,8 +45,8 @@ const _useFetch = <C, R>(
     loading?: boolean;
   }
 
-  const [state, setState] = React.useState<Record<string, ResourceState>>({});
-  const [progress, setProgress] = React.useState<Record<string, ProgressEvent>>({});
+  const [state, setState] = React.useState<{ [P in keyof Resources]: ResourceState }>(_.mapValues(resources, () => ({})));
+  const [progress, setProgress] = React.useState<{ [P in keyof Resources]?: ProgressEvent }>({});
   const setResource = (resource: string, next: ResourceState) => setState(state => ({ ...state, [resource]: _.assign({}, state[resource], next) }));
   const setResourceProgress = (resource: string, next: ProgressEvent) => setProgress(progress => ({ ...progress, [resource]: _.assign({}, progress[resource], next) }));
 
@@ -57,11 +54,11 @@ const _useFetch = <C, R>(
 
     if (_.isNil(resources[resource])) return;
 
-    const _cancelToken = cancelToken ?? network.createCancelToken();
+    const _cancelToken = cancelToken ?? service.createCancelToken();
     setResource(resource, { cancelToken: _cancelToken, loading: true });
 
     try {
-      const response = await network.request({
+      const response = await service.request({
         ...resources[resource],
         cancelToken: _cancelToken,
         onDownloadProgress: (progress) => setResourceProgress(resource, progress),
@@ -70,10 +67,10 @@ const _useFetch = <C, R>(
     } catch (error) {
       setResource(resource, { response: undefined, error: error as Error, loading: false });
     }
-  }, debounce, [network, setState, useEquivalent(resources)]);
+  }, debounce ?? {}, [service, setState, useEquivalent(resources)]);
 
   React.useEffect(() => {
-    const cancelToken = network.createCancelToken();
+    const cancelToken = service.createCancelToken();
     for (const resource of _.keys(resources)) {
       refresh(resource, cancelToken);
     }
@@ -82,55 +79,69 @@ const _useFetch = <C, R>(
 
   const _state = React.useMemo(() => _.mapValues(state, (state, resource) => ({
     ...state,
-    refresh: () => refresh(resource),
+    refresh: () => refresh(resource) ?? (async () => {})(),
   })), [state, refresh]);
 
   return { state: _state, progress };
 }
 
-const fetchResult = <R extends unknown = DefaultResponse>(
-  fetch: ReturnType<typeof _useFetch<any, R>>['state'][string],
+const fetchResult = <R extends unknown>(
+  fetch: FetchState<R>[string],
   progress?: ProgressEvent,
-) => {
-  if (_.isNil(fetch)) return;
-  return {
-    ...fetch,
-    progress,
-    get cancelled() { return fetch.cancelToken?.cancelled ?? false; },
-    get loading() { return fetch.loading ?? false; },
-    cancel: () => { fetch.cancelToken?.cancel(); },
-  };
-}
+) => ({
+  ...fetch,
+  progress,
+  get cancelled() { return fetch.cancelToken?.cancelled ?? false; },
+  get loading() { return fetch.loading ?? false; },
+  cancel: () => { fetch.cancelToken?.cancel(); },
+  refresh: fetch.refresh ?? (async () => {}),
+});
 
-export const useFetch = <R extends unknown = DefaultResponse>(resource: string) => fetchResult<R>(
-  React.useContext(FetchStateContext)[resource],
-  React.useContext(ProgressContext)[resource]
-);
-
-const FetchBase = <C extends {} = DefaultRequestConfig, R extends unknown = DefaultResponse>({
-  resources,
-  debounce,
-  children,
-}: {
-  resources: Record<string, C>;
-  debounce: _.DebounceSettings & { wait?: number; };
-  children: React.ReactNode | ((state: Record<string, ReturnType<typeof fetchResult<R>>>) => React.ReactNode);
-}) => {
-  const { state, progress } = _useFetch<C, R>(resources, debounce);
-  const parent_state = React.useContext(FetchStateContext);
-  const parent_progress = React.useContext(ProgressContext);
-  const merged_state = React.useMemo(() => ({ ...parent_state, ...state }), [parent_state, state]);
-  const merged_progress = React.useMemo(() => ({ ...parent_progress, ...progress }), [parent_progress, progress]);
-  return <FetchStateContext.Provider value={merged_state}><ProgressContext.Provider value={merged_progress}>
-    {_.isFunction(children) ? children(_.mapValues(state, (state, resource) => fetchResult(state, progress[resource]))) : children}
-  </ProgressContext.Provider></FetchStateContext.Provider>;
-}
-
-const FetchProvider = <C extends {} = DefaultRequestConfig, R extends unknown = DefaultResponse>({
-  service,
-  children,
-}: React.PropsWithChildren<{
+export const createFetch = <C extends {}, R>(config: {
   service: NetworkService<C, R>;
-}>) => <NetworkContext.Provider value={service}>{children}</NetworkContext.Provider>;
+}) => {
 
-export const Fetch = _.assign(FetchBase, { Provider: FetchProvider });
+  const FetchStateContext = React.createContext<FetchState<R>>({});
+  const ProgressContext = React.createContext<Record<string, ProgressEvent>>({});
+
+  const Fetch = <Resources extends { [K in string]: C }>({
+    resources,
+    debounce,
+    children,
+  }: {
+    resources: Resources;
+    debounce?: _.DebounceSettings & { wait?: number; };
+    children: React.ReactNode | ((state: { [P in keyof Resources]: ReturnType<typeof fetchResult<R>> }) => React.ReactNode);
+  }) => {
+    const { state, progress } = _request(config.service, resources, debounce);
+    const parent_state = React.useContext(FetchStateContext);
+    const parent_progress = React.useContext(ProgressContext);
+    const merged_state = React.useMemo(() => ({ ...parent_state, ...state }), [parent_state, state]);
+    const merged_progress = React.useMemo(() => ({ ...parent_progress, ...progress }), [parent_progress, progress]);
+    return <FetchStateContext.Provider value={merged_state}><ProgressContext.Provider value={merged_progress}>
+      {_.isFunction(children) ? children(_.mapValues(state, (state, resource) => fetchResult(state, progress[resource]))) : children}
+    </ProgressContext.Provider></FetchStateContext.Provider>;
+  };
+
+  const useFetch = (resource: string) => {
+    const state = React.useContext(FetchStateContext)[resource];
+    const progress = React.useContext(ProgressContext)[resource];
+    return fetchResult(state ?? {}, progress);
+  };
+
+  const useRequest = (
+    setting: C,
+    debounce?: _.DebounceSettings & { wait?: number; },
+  ) => {
+    const { state, progress } = _request(config.service, { resource: setting }, debounce);
+    return fetchResult(state.resource, progress.resource);
+  };
+
+  return { Fetch, useFetch, useRequest };
+}
+
+export const {
+  Fetch,
+  useFetch,
+  useRequest,
+} = createFetch<DefaultRequestConfig, DefaultResponse>({ service: defaultService });
