@@ -111,7 +111,7 @@ export const createFetch = <C extends {}, R>(config: {
   }: {
     resources: Resources;
     debounce?: _.DebounceSettings & { wait?: number; };
-    children: React.ReactNode | ((state: { [P in keyof Resources]: ReturnType<typeof fetchResult> }) => React.ReactNode);
+    children: React.ReactNode | ((state: { [P in keyof Resources]: ReturnType<typeof fetchResult<R>> }) => React.ReactNode);
   }) => {
     const { state, progress } = _request(config.service, resources, debounce);
     const parent_state = React.useContext(FetchStateContext);
