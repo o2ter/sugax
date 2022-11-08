@@ -32,9 +32,9 @@ import { CancelToken, NetworkService, ProgressEvent } from './types';
 
 type FetchState = ReturnType<typeof _request>['state'];
 
-const _request = <C extends {}, R extends unknown>(
+const _request = <C extends {}, R extends unknown, Resources extends { [K in string]: C }>(
   service: NetworkService<C, R>,
-  resources: Record<string, C>,
+  resources: Resources,
   debounce?: _.DebounceSettings & { wait?: number; },
 ) => {
 
@@ -45,8 +45,8 @@ const _request = <C extends {}, R extends unknown>(
     loading?: boolean;
   }
 
-  const [state, setState] = React.useState<Record<string, ResourceState>>({});
-  const [progress, setProgress] = React.useState<Record<string, ProgressEvent>>({});
+  const [state, setState] = React.useState<{ [P in keyof Resources]?: ResourceState }>({});
+  const [progress, setProgress] = React.useState<{ [P in keyof Resources]?: ProgressEvent }>({});
   const setResource = (resource: string, next: ResourceState) => setState(state => ({ ...state, [resource]: _.assign({}, state[resource], next) }));
   const setResourceProgress = (resource: string, next: ProgressEvent) => setProgress(progress => ({ ...progress, [resource]: _.assign({}, progress[resource], next) }));
 
@@ -103,14 +103,14 @@ export const createFetch = <C extends {}, R extends unknown>(config: {
   const FetchStateContext = React.createContext<FetchState>({});
   const ProgressContext = React.createContext<Record<string, ProgressEvent>>({});
 
-  const Fetch: React.FC<{
-    resources: Record<string, C>;
-    debounce?: _.DebounceSettings & { wait?: number; };
-    children: React.ReactNode | ((state: Record<string, ReturnType<typeof fetchResult>>) => React.ReactNode);
-  }> = ({
+  const Fetch = <Resources extends { [K in string]: C }>({
     resources,
     debounce,
     children,
+  }: {
+    resources: Resources;
+    debounce?: _.DebounceSettings & { wait?: number; };
+    children: React.ReactNode | ((state: { [P in keyof Resources]: ReturnType<typeof fetchResult> }) => React.ReactNode);
   }) => {
     const { state, progress } = _request(config.service, resources, debounce);
     const parent_state = React.useContext(FetchStateContext);
@@ -133,7 +133,7 @@ export const createFetch = <C extends {}, R extends unknown>(config: {
     debounce?: _.DebounceSettings & { wait?: number; },
   ) => {
     const { state, progress } = _request(config.service, { resource: setting }, debounce);
-    return fetchResult(state.resource, progress.resource);
+    return _.isNil(state.resource) ? undefined : fetchResult(state.resource, progress.resource);
   };
 
   return { Fetch, useFetch, useRequest };
