@@ -30,9 +30,9 @@ import { useDebounce } from '../debounce';
 import { useEquivalent } from '../equivalent';
 import { CancelToken, NetworkService, ProgressEvent } from './types';
 
-type FetchState = ReturnType<typeof _request>['state'];
+type FetchState<R> = ReturnType<typeof _request<{}, R, Record<string, any>>>['state'];
 
-const _request = <C extends {}, R extends unknown, Resources extends { [K in string]: C }>(
+const _request = <C extends {}, R, Resources extends { [K in string]: C }>(
   service: NetworkService<C, R>,
   resources: Resources,
   debounce?: _.DebounceSettings & { wait?: number; },
@@ -85,8 +85,8 @@ const _request = <C extends {}, R extends unknown, Resources extends { [K in str
   return { state: _state, progress };
 }
 
-const fetchResult = (
-  fetch: FetchState[string],
+const fetchResult = <R extends unknown>(
+  fetch: FetchState<R>[string],
   progress?: ProgressEvent,
 ) => ({
   ...fetch,
@@ -96,11 +96,11 @@ const fetchResult = (
   cancel: () => { fetch.cancelToken?.cancel(); },
 });
 
-export const createFetch = <C extends {}, R extends unknown>(config: {
+export const createFetch = <C extends {}, R>(config: {
   service: NetworkService<C, R>;
 }) => {
 
-  const FetchStateContext = React.createContext<FetchState>({});
+  const FetchStateContext = React.createContext<FetchState<R>>({});
   const ProgressContext = React.createContext<Record<string, ProgressEvent>>({});
 
   const Fetch = <Resources extends { [K in string]: C }>({
