@@ -79,7 +79,7 @@ const _request = <C extends {}, R, Resources extends { [K in string]: C }>(
 
   const _state = React.useMemo(() => _.mapValues(state, (state, resource) => ({
     ...state,
-    refresh: () => refresh(resource),
+    refresh: () => refresh(resource) ?? (async () => {})(),
   })), [state, refresh]);
 
   return { state: _state, progress };
