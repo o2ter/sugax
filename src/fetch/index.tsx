@@ -86,14 +86,14 @@ const _request = <C extends {}, R, Resources extends { [K in string]: C }>(
 }
 
 const fetchResult = <R extends unknown>(
-  fetch: FetchState<R>[string],
+  fetch?: FetchState<R>[string],
   progress?: ProgressEvent,
 ) => ({
-  ...fetch,
+  ...(fetch ?? {}),
   progress,
-  get cancelled() { return fetch.cancelToken?.cancelled ?? false; },
-  get loading() { return fetch.loading ?? false; },
-  cancel: () => { fetch.cancelToken?.cancel(); },
+  get cancelled() { return fetch?.cancelToken?.cancelled ?? false; },
+  get loading() { return fetch?.loading ?? false; },
+  cancel: () => { fetch?.cancelToken?.cancel(); },
 });
 
 export const createFetch = <C extends {}, R>(config: {
@@ -125,7 +125,7 @@ export const createFetch = <C extends {}, R>(config: {
   const useFetch = (resource: string) => {
     const state = React.useContext(FetchStateContext)[resource];
     const progress = React.useContext(ProgressContext)[resource];
-    return _.isNil(state) ? undefined : fetchResult(state, progress);
+    return fetchResult(state, progress);
   };
 
   const useRequest = (
@@ -133,7 +133,7 @@ export const createFetch = <C extends {}, R>(config: {
     debounce?: _.DebounceSettings & { wait?: number; },
   ) => {
     const { state, progress } = _request(config.service, { resource: setting }, debounce);
-    return _.isNil(state.resource) ? undefined : fetchResult(state.resource, progress.resource);
+    return fetchResult(state.resource, progress.resource);
   };
 
   return { Fetch, useFetch, useRequest };
