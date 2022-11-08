@@ -28,7 +28,6 @@ export * from './channel';
 export * from './debounce';
 export * from './equivalent';
 export * from './fetch';
-export * from './i18n';
 export * from './mergeRefs';
 export * from './mount';
 export * from './previous';
