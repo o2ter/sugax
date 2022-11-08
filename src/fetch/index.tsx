@@ -30,82 +30,81 @@ import { useDebounce } from '../debounce';
 import { useEquivalent } from '../equivalent';
 import { CancelToken, NetworkService, ProgressEvent } from './types';
 
+type FetchState = ReturnType<typeof _request>['state'];
+
+const _request = <C extends {}, R extends unknown>(
+  service: NetworkService<C, R>,
+  resources: Record<string, C>,
+  debounce: _.DebounceSettings & { wait?: number; },
+) => {
+
+  type ResourceState = {
+    response?: R;
+    error?: Error;
+    cancelToken?: CancelToken;
+    loading?: boolean;
+  }
+
+  const [state, setState] = React.useState<Record<string, ResourceState>>({});
+  const [progress, setProgress] = React.useState<Record<string, ProgressEvent>>({});
+  const setResource = (resource: string, next: ResourceState) => setState(state => ({ ...state, [resource]: _.assign({}, state[resource], next) }));
+  const setResourceProgress = (resource: string, next: ProgressEvent) => setProgress(progress => ({ ...progress, [resource]: _.assign({}, progress[resource], next) }));
+
+  const refresh = useDebounce(async (resource: string, cancelToken?: CancelToken) => {
+
+    if (_.isNil(resources[resource])) return;
+
+    const _cancelToken = cancelToken ?? service.createCancelToken();
+    setResource(resource, { cancelToken: _cancelToken, loading: true });
+
+    try {
+      const response = await service.request({
+        ...resources[resource],
+        cancelToken: _cancelToken,
+        onDownloadProgress: (progress) => setResourceProgress(resource, progress),
+      });
+      setResource(resource, { response, error: undefined, loading: false });
+    } catch (error) {
+      setResource(resource, { response: undefined, error: error as Error, loading: false });
+    }
+  }, debounce, [service, setState, useEquivalent(resources)]);
+
+  React.useEffect(() => {
+    const cancelToken = service.createCancelToken();
+    for (const resource of _.keys(resources)) {
+      refresh(resource, cancelToken);
+    }
+    return () => cancelToken.cancel();
+  }, []);
+
+  const _state = React.useMemo(() => _.mapValues(state, (state, resource) => ({
+    ...state,
+    refresh: () => refresh(resource),
+  })), [state, refresh]);
+
+  return { state: _state, progress };
+}
+
+const fetchResult = (
+  fetch: FetchState[string],
+  progress?: ProgressEvent,
+) => {
+  if (_.isNil(fetch)) return;
+  return {
+    ...fetch,
+    progress,
+    get cancelled() { return fetch.cancelToken?.cancelled ?? false; },
+    get loading() { return fetch.loading ?? false; },
+    cancel: () => { fetch.cancelToken?.cancel(); },
+  };
+};
+
 export const createFetch = <C extends {}, R extends unknown>(config: {
   service: NetworkService<C, R>;
 }) => {
 
-  const service = config.service;
-
-  const _request = (
-    resources: Record<string, C>,
-    debounce: _.DebounceSettings & { wait?: number; },
-  ) => {
-
-    type ResourceState = {
-      response?: R;
-      error?: Error;
-      cancelToken?: CancelToken;
-      loading?: boolean;
-    }
-
-    const [state, setState] = React.useState<Record<string, ResourceState>>({});
-    const [progress, setProgress] = React.useState<Record<string, ProgressEvent>>({});
-    const setResource = (resource: string, next: ResourceState) => setState(state => ({ ...state, [resource]: _.assign({}, state[resource], next) }));
-    const setResourceProgress = (resource: string, next: ProgressEvent) => setProgress(progress => ({ ...progress, [resource]: _.assign({}, progress[resource], next) }));
-
-    const refresh = useDebounce(async (resource: string, cancelToken?: CancelToken) => {
-
-      if (_.isNil(resources[resource])) return;
-
-      const _cancelToken = cancelToken ?? service.createCancelToken();
-      setResource(resource, { cancelToken: _cancelToken, loading: true });
-
-      try {
-        const response = await service.request({
-          ...resources[resource],
-          cancelToken: _cancelToken,
-          onDownloadProgress: (progress) => setResourceProgress(resource, progress),
-        });
-        setResource(resource, { response, error: undefined, loading: false });
-      } catch (error) {
-        setResource(resource, { response: undefined, error: error as Error, loading: false });
-      }
-    }, debounce, [service, setState, useEquivalent(resources)]);
-
-    React.useEffect(() => {
-      const cancelToken = service.createCancelToken();
-      for (const resource of _.keys(resources)) {
-        refresh(resource, cancelToken);
-      }
-      return () => cancelToken.cancel();
-    }, []);
-
-    const _state = React.useMemo(() => _.mapValues(state, (state, resource) => ({
-      ...state,
-      refresh: () => refresh(resource),
-    })), [state, refresh]);
-
-    return { state: _state, progress };
-  }
-
-  type FetchState = ReturnType<typeof _request>['state'];
-
   const FetchStateContext = React.createContext<FetchState>({});
   const ProgressContext = React.createContext<Record<string, ProgressEvent>>({});
-
-  const fetchResult = (
-    fetch: FetchState[string],
-    progress?: ProgressEvent,
-  ) => {
-    if (_.isNil(fetch)) return;
-    return {
-      ...fetch,
-      progress,
-      get cancelled() { return fetch.cancelToken?.cancelled ?? false; },
-      get loading() { return fetch.loading ?? false; },
-      cancel: () => { fetch.cancelToken?.cancel(); },
-    };
-  };
 
   const Fetch: React.FC<{
     resources: Record<string, C>;
@@ -116,7 +115,7 @@ export const createFetch = <C extends {}, R extends unknown>(config: {
     debounce,
     children,
   }) => {
-    const { state, progress } = _request(resources, debounce);
+    const { state, progress } = _request(config.service, resources, debounce);
     const parent_state = React.useContext(FetchStateContext);
     const parent_progress = React.useContext(ProgressContext);
     const merged_state = React.useMemo(() => ({ ...parent_state, ...state }), [parent_state, state]);
