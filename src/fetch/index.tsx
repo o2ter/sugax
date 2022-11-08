@@ -45,7 +45,7 @@ const _request = <C extends {}, R, Resources extends { [K in string]: C }>(
     loading?: boolean;
   }
 
-  const [state, setState] = React.useState<{ [P in keyof Resources]?: ResourceState }>({});
+  const [state, setState] = React.useState<{ [P in keyof Resources]: ResourceState }>(_.mapValues(resources, () => ({})));
   const [progress, setProgress] = React.useState<{ [P in keyof Resources]?: ProgressEvent }>({});
   const setResource = (resource: string, next: ResourceState) => setState(state => ({ ...state, [resource]: _.assign({}, state[resource], next) }));
   const setResourceProgress = (resource: string, next: ProgressEvent) => setProgress(progress => ({ ...progress, [resource]: _.assign({}, progress[resource], next) }));
@@ -94,6 +94,7 @@ const fetchResult = <R extends unknown>(
   get cancelled() { return fetch?.cancelToken?.cancelled ?? false; },
   get loading() { return fetch?.loading ?? false; },
   cancel: () => { fetch?.cancelToken?.cancel(); },
+  refresh: fetch?.refresh ?? (async () => {}),
 });
 
 export const createFetch = <C extends {}, R>(config: {
