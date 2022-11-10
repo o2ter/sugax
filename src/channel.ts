@@ -25,42 +25,30 @@
 
 import _ from 'lodash';
 import React from 'react';
-import EventEmitter from 'events';
 import { IState } from './types';
 
-const emitter_maps = new WeakMap();
+export interface IChannel<T = any> extends IState<T> {
+  subscribe: (callback: () => void) => () => void
+}
 
-export const createChannel = <T = any>(initialValue: T): IState<T> => {
+export const createChannel = <T = any>(initialValue: T): IChannel<T> => {
 
-  const emitter = new EventEmitter();
+  const listeners = new Set<() => void>();
   let current = initialValue;
 
-  return new class implements IState<T> {
-
-    constructor() {
-      emitter_maps.set(this, emitter);
-    }
-
+  return {
     get current() {
       return current;
-    }
-
+    },
     setValue(value: React.SetStateAction<T>) {
       current = _.isFunction(value) ? value(current) : value;
-      emitter.emit('update', current);
-    }
+      listeners.forEach(listener => { listener(); });
+    },
+    subscribe: (callback: () => void) => {
+      listeners.add(callback);
+      return () => { listeners.delete(callback); };
+    },
   };
 }
 
-export const useChannel = <T = any>(channel: IState<T>) => {
-
-  const [value, setValue] = React.useState(channel.current);
-
-  React.useEffect(() => {
-    const emitter = emitter_maps.get(channel);
-    emitter.addListener('update', setValue);
-    return () => { emitter.removeListener('update', setValue); }
-  }, [setValue]);
-
-  return value;
-}
+export const useChannel = <T = any>(channel: IChannel<T>) => React.useSyncExternalStore(channel.subscribe, () => channel.current);
