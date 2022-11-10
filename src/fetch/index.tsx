@@ -67,7 +67,7 @@ const _request = <C extends {}, R, Resources extends { [K in string]: C }>(
     } catch (error) {
       setResource(resource, { response: undefined, error: error as Error, loading: false });
     }
-  }, debounce ?? {}, [service, setState, useEquivalent(resources)]);
+  }, debounce ?? {}, [useEquivalent(resources)]);
 
   React.useEffect(() => {
     const cancelToken = service.createCancelToken();
