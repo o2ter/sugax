@@ -47,7 +47,7 @@ export const selector = <T extends any[] | object>(
   setValue(value) {
     state.setValue(state => replace_key(state, key, _.isFunction(value) ? value(state[key]) : value));
   }
-})
+});
 
 export const selectElements = <T extends any[] | object>(state: IState<T>) => {
   if (_.isArrayLike(state.current)) {
@@ -55,7 +55,7 @@ export const selectElements = <T extends any[] | object>(state: IState<T>) => {
   } else {
     return _.mapValues(state.current, (_value, key) => selector(state, key as keyof T));
   }
-}
+};
 
 export const useMapState = <T extends object>(initialState: T) => {
 
@@ -65,4 +65,4 @@ export const useMapState = <T extends object>(initialState: T) => {
     get current() { return value; },
     setValue: (value) => _setState(state => ({ ...state, [key]: _.isFunction(value) ? value(state[key as keyof T]) : value })),
   })));
-}
+};
