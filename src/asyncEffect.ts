@@ -1,5 +1,5 @@
 //
-//  index.js
+//  asyncEffect.ts
 //
 //  The MIT License
 //  Copyright (c) 2021 - 2022 O2ter Limited. All rights reserved.
@@ -23,15 +23,18 @@
 //  THE SOFTWARE.
 //
 
-export * from './asyncEffect';
-export * from './callbackRef';
-export * from './channel';
-export * from './debounce';
-export * from './equivalent';
-export * from './fetch';
-export * from './mergeRefs';
-export * from './mount';
-export * from './previous';
-export * from './schema';
-export * from './state';
-export * from './throttle';
+import _ from 'lodash';
+import React from 'react';
+
+export const useAsyncEffect = (
+  effect: () => Promise<void | (() => Promise<void>)>, 
+  deps?: React.DependencyList | undefined
+) => React.useEffect(() => {
+  const destructor = effect();
+  return () => {
+    (async () => {
+      const _destructor = await destructor;
+      if (_.isFunction(_destructor)) _destructor();
+    })();
+  };
+}, deps);
