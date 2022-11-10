@@ -47,10 +47,11 @@ const _request = <C extends {}, R, Resources extends { [key: string]: C }>(
 
   const [state, setState] = React.useState<{ [P in keyof Resources]: ResourceState }>(_.mapValues(resources, () => ({})));
   const [progress, setProgress] = React.useState<{ [P in keyof Resources]?: ProgressEvent }>({});
-  const setResource = (resource: string, next: ResourceState) => setState(state => ({ ...state, [resource]: _.assign({}, state[resource], next) }));
-  const setResourceProgress = (resource: string, next: ProgressEvent) => setProgress(progress => ({ ...progress, [resource]: _.assign({}, progress[resource], next) }));
 
   const refresh = useDebounce(async (resource: string, cancelToken?: CancelToken) => {
+    
+    const setResource = (resource: string, next: ResourceState) => setState(state => ({ ...state, [resource]: _.assign({}, state[resource], next) }));
+    const setResourceProgress = (resource: string, next: ProgressEvent) => setProgress(progress => ({ ...progress, [resource]: _.assign({}, progress[resource], next) }));
 
     if (_.isNil(resources[resource])) return;
 
