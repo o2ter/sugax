@@ -1,6 +1,7 @@
 {
   "mixed": {
     "required": "${field}为必填",
+    "where": "${message}",
     "oneOf": "${field}必须为以下之一: ${values}",
     "notOneOf": "${field}不得是以下之一: ${values}",
     "type": "${field}必须为\"${type}\"类"

@@ -30,3 +30,10 @@ export const required = (
   value: any,
   error: (attrs: Record<string, string>) => ValidateError
 ) => _.isNil(value) ? error({}) : undefined;
+
+export const where = (
+  value: any,
+  error: (attrs: Record<string, string>) => ValidateError,
+  condition: (value: any) => boolean,
+  message: string
+) => condition(value) ? undefined : error({ message });
