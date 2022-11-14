@@ -80,7 +80,7 @@ const _request = <C extends {}, R, Resources extends { [key: string]: C }>(
 
   const _state = React.useMemo(() => _.mapValues(state, (state, resource) => ({
     ...state,
-    refresh: () => refresh(resource) ?? (async () => {})(),
+    refresh: () => refresh(resource) ?? Promise.resolve(),
   })), [state, refresh]);
 
   return { state: _state, progress };
@@ -95,7 +95,6 @@ const fetchResult = <R extends unknown>(
   get cancelled() { return fetch.cancelToken?.cancelled ?? false; },
   get loading() { return fetch.loading ?? false; },
   cancel: () => { fetch.cancelToken?.cancel(); },
-  refresh: fetch.refresh ?? (async () => {}),
 });
 
 export const createFetch = <C extends {}, R>(config: {
