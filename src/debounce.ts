@@ -29,14 +29,10 @@ import { useCallbackRef } from './callbackRef';
 
 export const useDebounce = <T extends (...args: any) => any>(
   callback: T,
-  settings: _.DebounceSettings & { wait?: number; },
+  settings: _.ThrottleSettings & { wait?: number; },
   deps: React.DependencyList,
 ) => {
-  const { wait, leading, trailing, ...options } = settings;
+  const { wait, ...options } = settings;
   const callbackRef = useCallbackRef(callback, deps);
-  return React.useCallback(_.debounce(((...args) => callbackRef.current(...args)) as T, wait, {
-    ...options,
-    leading: leading ?? true,
-    trailing: trailing ?? true,
-  }), []);
+  return React.useCallback(_.throttle(((...args) => callbackRef.current(...args)) as T, wait, options), []);
 }

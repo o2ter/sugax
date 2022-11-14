@@ -36,7 +36,7 @@ type FetchState<R> = ReturnType<typeof _request<{}, R, Record<string, any>>>['st
 const _request = <C extends {}, R, Resources extends { [key: string]: C }>(
   service: NetworkService<C, R>,
   resources: Resources,
-  debounce?: _.DebounceSettings & { wait?: number; },
+  debounce?: _.ThrottleSettings & { wait?: number; },
 ) => {
 
   type UpdateToken = {
