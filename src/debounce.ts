@@ -32,7 +32,11 @@ export const useDebounce = <T extends (...args: any) => any>(
   settings: _.DebounceSettings & { wait?: number; },
   deps: React.DependencyList,
 ) => {
-  const { wait, ...options } = settings;
+  const { wait, leading, trailing, ...options } = settings;
   const callbackRef = useCallbackRef(callback, deps);
-  return React.useCallback(_.debounce(((...args) => callbackRef.current(...args)) as T, wait, options), []);
+  return React.useCallback(_.debounce(((...args) => callbackRef.current(...args)) as T, wait, {
+    ...options,
+    leading: leading ?? true,
+    trailing: trailing ?? true,
+  }), []);
 }
