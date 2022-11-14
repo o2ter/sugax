@@ -34,5 +34,5 @@ export const useDebounce = <T extends (...args: any) => any>(
   const { wait, ...options } = settings;
   const callbackRef = React.useRef(callback);
   React.useEffect(() => { callbackRef.current = callback; }, deps);
-  return React.useCallback(_.debounce(callbackRef.current, wait, options), deps);
+  return React.useCallback(_.debounce(((...args) => callbackRef.current(...args)) as T, wait, options), []);
 }

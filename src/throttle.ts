@@ -34,5 +34,5 @@ export const useThrottle = <T extends (...args: any) => any>(
   const { wait, ...options } = setting;
   const callbackRef = React.useRef(callback);
   React.useEffect(() => { callbackRef.current = callback; }, deps);
-  return React.useCallback(_.throttle(callbackRef.current, wait, options), deps);
+  return React.useCallback(_.throttle(((...args) => callbackRef.current(...args)) as T, wait, options), []);
 }
