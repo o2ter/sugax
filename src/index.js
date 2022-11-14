@@ -34,4 +34,3 @@ export * from './mount';
 export * from './previous';
 export * from './schema';
 export * from './state';
-export * from './throttle';
