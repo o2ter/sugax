@@ -29,6 +29,7 @@ import defaultService, { DefaultRequestConfig, DefaultResponse } from './axios';
 import { useDebounce } from '../debounce';
 import { useEquivalent } from '../equivalent';
 import { CancelToken, NetworkService, ProgressEvent } from './types';
+import { useUnmount } from '../mount';
 
 type FetchState<R> = ReturnType<typeof _request<{}, R, Record<string, any>>>['state'];
 
@@ -91,6 +92,12 @@ const _request = <C extends {}, R, Resources extends { [key: string]: C }>(
     }
     return () => cancelToken.cancel();
   }, []);
+
+  useUnmount(() => {
+    for (const { cancelToken } of _.values(state)) {
+      cancelToken?.cancel();
+    }
+  });
 
   const _state = React.useMemo(() => _.mapValues(state, (state, resource) => ({
     ..._.omit(state, 'token'),
