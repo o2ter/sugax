@@ -32,5 +32,7 @@ export const useThrottle = <T extends (...args: any) => any>(
   deps: React.DependencyList,
 ) => {
   const { wait, ...options } = setting;
-  return React.useCallback(_.throttle(callback, wait, options), deps);
+  const callbackRef = React.useRef(callback);
+  React.useEffect(() => { callbackRef.current = callback; }, deps);
+  return React.useCallback(_.throttle(callbackRef.current, wait, options), deps);
 }

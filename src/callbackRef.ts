@@ -27,7 +27,7 @@ import _ from 'lodash';
 import React from 'react';
 
 export const useCallbackRef = <TArgs extends any[] = any[], TResult = any>(callback: (...args: TArgs) => TResult) => {
-  const callbackRef = React.useRef<(...args: TArgs) => TResult>();
+  const callbackRef = React.useRef<(...args: TArgs) => TResult>(callback);
   React.useEffect(() => { callbackRef.current = callback; }, [callback]);
   return callbackRef;
 }
