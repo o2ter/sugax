@@ -59,13 +59,14 @@ const _request = <C extends {}, R, Resources extends { [key: string]: C }>(
     const token = _.uniqueId();
     state[resource]?.cancelToken?.cancel();
 
+    const shouldUpdate = (state: Record<string, UpdateToken | undefined>, token?: string) => _.isNil(token) || state[resource]?.token === token;
     const setResource = (next: UpdateToken & ResourceState, token?: string) => setState(state => ({
       ...state,
-      [resource]: _.isNil(token) || state[resource]?.token === token ? _.assign({}, state[resource], next) : state[resource],
+      [resource]: shouldUpdate(state, token) ? _.assign({}, state[resource], next) : state[resource],
     }));
     const setResourceProgress = (next: UpdateToken & ProgressEvent, token?: string) => setProgress(progress => ({
       ...progress,
-      [resource]: _.isNil(token) || progress[resource]?.token === token ? _.assign({}, progress[resource], next) : progress[resource],
+      [resource]: shouldUpdate(progress, token) ? _.assign({}, progress[resource], next) : progress[resource],
     }));
 
     const _cancelToken = cancelToken ?? service.createCancelToken();
