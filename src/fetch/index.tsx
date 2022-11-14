@@ -38,6 +38,10 @@ const _request = <C extends {}, R, Resources extends { [key: string]: C }>(
   debounce?: _.DebounceSettings & { wait?: number; },
 ) => {
 
+  type UpdateToken = {
+    token?: string;
+  }
+
   type ResourceState = {
     response?: R;
     error?: Error;
@@ -45,28 +49,37 @@ const _request = <C extends {}, R, Resources extends { [key: string]: C }>(
     loading?: boolean;
   }
 
-  const [state, setState] = React.useState<{ [P in keyof Resources]: ResourceState }>(_.mapValues(resources, () => ({})));
-  const [progress, setProgress] = React.useState<{ [P in keyof Resources]?: ProgressEvent }>({});
+  const [state, setState] = React.useState<{ [P in keyof Resources]: UpdateToken & ResourceState }>(_.mapValues(resources, () => ({})));
+  const [progress, setProgress] = React.useState<{ [P in keyof Resources]?: UpdateToken & ProgressEvent }>({});
 
   const refresh = useDebounce(async (resource: string, cancelToken?: CancelToken) => {
-    
-    const setResource = (resource: string, next: ResourceState) => setState(state => ({ ...state, [resource]: _.assign({}, state[resource], next) }));
-    const setResourceProgress = (resource: string, next: ProgressEvent) => setProgress(progress => ({ ...progress, [resource]: _.assign({}, progress[resource], next) }));
+
+    const setResource = (resource: string, next: UpdateToken & ResourceState, token?: string) => setState(state => ({
+      ...state,
+      [resource]: _.isNil(token) || state[resource]?.token === token ? _.assign({}, state[resource], next) : state[resource],
+    }));
+    const setResourceProgress = (resource: string, next: UpdateToken & ProgressEvent, token?: string) => setProgress(progress => ({
+      ...progress,
+      [resource]: _.isNil(token) || progress[resource]?.token === token ? _.assign({}, progress[resource], next) : progress[resource],
+    }));
 
     if (_.isNil(resources[resource])) return;
 
+    const token = _.uniqueId();
+    state[resource]?.cancelToken?.cancel();
+
     const _cancelToken = cancelToken ?? service.createCancelToken();
-    setResource(resource, { cancelToken: _cancelToken, loading: true });
+    setResource(resource, { token, cancelToken: _cancelToken, loading: true });
 
     try {
       const response = await service.request({
         ...resources[resource],
         cancelToken: _cancelToken,
-        onDownloadProgress: (progress) => setResourceProgress(resource, progress),
+        onDownloadProgress: (progress) => setResourceProgress(resource, progress, token),
       });
-      setResource(resource, { response, error: undefined, loading: false });
+      setResource(resource, { response, error: undefined, loading: false }, token);
     } catch (error) {
-      setResource(resource, { response: undefined, error: error as Error, loading: false });
+      setResource(resource, { response: undefined, error: error as Error, loading: false }, token);
     }
   }, debounce ?? {}, [useEquivalent(resources)]);
 
@@ -79,7 +92,7 @@ const _request = <C extends {}, R, Resources extends { [key: string]: C }>(
   }, []);
 
   const _state = React.useMemo(() => _.mapValues(state, (state, resource) => ({
-    ...state,
+    ..._.omit(state, 'token'),
     refresh: () => refresh(resource) ?? Promise.resolve(),
   })), [state, refresh]);
 
