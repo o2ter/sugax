@@ -28,9 +28,9 @@ import React from 'react';
 
 export const useDebounce = <T extends (...args: any) => any>(
   callback: T,
-  setting: _.DebounceSettings & { wait?: number; },
+  settings: _.DebounceSettings & { wait?: number; },
   deps: React.DependencyList,
 ) => {
-  const { wait, ...options } = setting;
+  const { wait, ...options } = settings;
   return React.useCallback(_.debounce(callback, wait, options), deps);
 }
