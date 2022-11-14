@@ -25,6 +25,7 @@
 
 import _ from 'lodash';
 import React from 'react';
+import { useCallbackRef } from './callbackRef';
 
 export const useThrottle = <T extends (...args: any) => any>(
   callback: T,
@@ -32,7 +33,6 @@ export const useThrottle = <T extends (...args: any) => any>(
   deps: React.DependencyList,
 ) => {
   const { wait, ...options } = setting;
-  const callbackRef = React.useRef(callback);
-  React.useEffect(() => { callbackRef.current = callback; }, deps);
+  const callbackRef = useCallbackRef(callback, deps);
   return React.useCallback(_.throttle(((...args) => callbackRef.current(...args)) as T, wait, options), []);
 }
