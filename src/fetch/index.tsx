@@ -54,32 +54,32 @@ const _request = <C extends {}, R, Resources extends { [key: string]: C }>(
 
   const refresh = useDebounce(async (resource: string, cancelToken?: CancelToken) => {
 
-    const setResource = (resource: string, next: UpdateToken & ResourceState, token?: string) => setState(state => ({
-      ...state,
-      [resource]: _.isNil(token) || state[resource]?.token === token ? _.assign({}, state[resource], next) : state[resource],
-    }));
-    const setResourceProgress = (resource: string, next: UpdateToken & ProgressEvent, token?: string) => setProgress(progress => ({
-      ...progress,
-      [resource]: _.isNil(token) || progress[resource]?.token === token ? _.assign({}, progress[resource], next) : progress[resource],
-    }));
-
     if (_.isNil(resources[resource])) return;
 
     const token = _.uniqueId();
     state[resource]?.cancelToken?.cancel();
 
+    const setResource = (next: UpdateToken & ResourceState, token?: string) => setState(state => ({
+      ...state,
+      [resource]: _.isNil(token) || state[resource]?.token === token ? _.assign({}, state[resource], next) : state[resource],
+    }));
+    const setResourceProgress = (next: UpdateToken & ProgressEvent, token?: string) => setProgress(progress => ({
+      ...progress,
+      [resource]: _.isNil(token) || progress[resource]?.token === token ? _.assign({}, progress[resource], next) : progress[resource],
+    }));
+
     const _cancelToken = cancelToken ?? service.createCancelToken();
-    setResource(resource, { token, cancelToken: _cancelToken, loading: true });
+    setResource({ token, cancelToken: _cancelToken, loading: true });
 
     try {
       const response = await service.request({
         ...resources[resource],
         cancelToken: _cancelToken,
-        onDownloadProgress: (progress) => setResourceProgress(resource, progress, token),
+        onDownloadProgress: (progress) => setResourceProgress(progress, token),
       });
-      setResource(resource, { response, error: undefined, loading: false }, token);
+      setResource({ response, error: undefined, loading: false }, token);
     } catch (error) {
-      setResource(resource, { response: undefined, error: error as Error, loading: false }, token);
+      setResource({ response: undefined, error: error as Error, loading: false }, token);
     }
   }, debounce ?? {}, [useEquivalent(resources)]);
 
