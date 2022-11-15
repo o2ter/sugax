@@ -25,7 +25,7 @@
 
 import _ from 'lodash';
 import React from 'react';
-import { useCallbackRef } from './callbackRef';
+import { useStableRef } from './stableRef';
 
 export const useDebounce = <T extends (...args: any) => any>(
   callback: T,
@@ -33,6 +33,6 @@ export const useDebounce = <T extends (...args: any) => any>(
   deps: React.DependencyList,
 ) => {
   const { wait, ...options } = settings;
-  const callbackRef = useCallbackRef(callback, deps);
+  const callbackRef = useStableRef(callback, deps);
   return React.useCallback(_.throttle(((...args) => callbackRef.current(...args)) as T, wait, options), []);
 }

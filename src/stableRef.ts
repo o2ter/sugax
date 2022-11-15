@@ -1,5 +1,5 @@
 //
-//  callbackRef.ts
+//  stableRef.ts
 //
 //  The MIT License
 //  Copyright (c) 2021 - 2022 O2ter Limited. All rights reserved.
@@ -26,11 +26,11 @@
 import _ from 'lodash';
 import React from 'react';
 
-export const useCallbackRef = <T extends (...args: any) => any>(
-  callback: T,
+export const useStableRef = <T>(
+  value: T,
   deps?: React.DependencyList,
 ) => {
-  const callbackRef = React.useRef(callback);
-  React.useEffect(() => { callbackRef.current = callback; }, deps ?? [callback]);
+  const callbackRef = React.useRef(value);
+  React.useEffect(() => { callbackRef.current = value; }, deps ?? [value]);
   return callbackRef;
 }
