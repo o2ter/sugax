@@ -26,10 +26,10 @@
 import _ from 'lodash';
 import React from 'react';
 
-export const useMount = (callback: () => void) => {
+export const useMount = (callback: VoidFunction) => {
   React.useEffect(() => { if (_.isFunction(callback)) callback(); }, []);
 }
 
-export const useUnmount = (callback: () => void) => {
+export const useUnmount = (callback: VoidFunction) => {
   React.useEffect(() => () => { if (_.isFunction(callback)) callback(); }, []);
 }

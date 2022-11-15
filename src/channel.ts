@@ -28,12 +28,12 @@ import React from 'react';
 import { IState } from './types';
 
 export interface IChannel<T = any> extends IState<T> {
-  subscribe: (callback: () => void) => () => void
+  subscribe: (callback: VoidFunction) => VoidFunction
 }
 
 export const createChannel = <T = any>(initialValue: T): IChannel<T> => {
 
-  const listeners = new Set<() => void>();
+  const listeners = new Set<VoidFunction>();
   let current = initialValue;
 
   return {
@@ -44,7 +44,7 @@ export const createChannel = <T = any>(initialValue: T): IChannel<T> => {
       current = _.isFunction(value) ? value(current) : value;
       listeners.forEach(listener => { listener(); });
     },
-    subscribe: (callback: () => void) => {
+    subscribe: (callback: VoidFunction) => {
       listeners.add(callback);
       return () => { listeners.delete(callback); };
     },
