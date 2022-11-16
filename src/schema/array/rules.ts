@@ -28,23 +28,27 @@ import { ValidateError } from '../error';
 
 export const notEmpty = (
   value: any,
-  error: (attrs: Record<string, string>) => ValidateError,
-) => _.isArray(value) && !_.isEmpty(value) ? undefined : error({});
+  error: (attrs: Record<string, string>, msg?: string) => ValidateError,
+  msg?: string,
+) => _.isArray(value) && !_.isEmpty(value) ? undefined : error({}, msg);
 
 export const min = (
   value: any,
-  error: (attrs: Record<string, string>) => ValidateError,
-  min: number
-) => _.isArray(value) && value.length >= min ? undefined : error({ min: `${min}` });
+  error: (attrs: Record<string, string>, msg?: string) => ValidateError,
+  min: number,
+  msg?: string,
+) => _.isArray(value) && value.length >= min ? undefined : error({ min: `${min}` }, msg);
 
 export const max = (
   value: any,
-  error: (attrs: Record<string, string>) => ValidateError,
-  max: number
-) => _.isArray(value) && value.length <= max ? undefined : error({ max: `${max}` });
+  error: (attrs: Record<string, string>, msg?: string) => ValidateError,
+  max: number,
+  msg?: string,
+) => _.isArray(value) && value.length <= max ? undefined : error({ max: `${max}` }, msg);
 
 export const length = (
   value: any,
-  error: (attrs: Record<string, string>) => ValidateError,
-  length: number
-) => _.isArray(value) && value.length === length ? undefined : error({ length: `${length}` });
+  error: (attrs: Record<string, string>, msg?: string) => ValidateError,
+  length: number,
+  msg?: string,
+) => _.isArray(value) && value.length === length ? undefined : error({ length: `${length}` }, msg);

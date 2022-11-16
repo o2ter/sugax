@@ -34,11 +34,14 @@ export class ValidateError extends Error {
   path: string[];
   attrs: Record<string, string>;
 
+  #msg?: string;
+
   constructor(
     type: string,
     rule: string,
     path?: string[],
     attrs?: Record<string, string>,
+    msg?: string,
   ) {
     super();
     Object.setPrototypeOf(this, ValidateError.prototype);
@@ -46,6 +49,7 @@ export class ValidateError extends Error {
     this.rule = rule;
     this.path = path ?? [];
     this.attrs = attrs ?? {};
+    this.#msg = msg;
   }
 
   static get _locales() {
@@ -68,6 +72,6 @@ export class ValidateError extends Error {
   }
 
   get message() {
-    return this.locales.en;
+    return this.#msg ?? this.locales.en;
   }
 }

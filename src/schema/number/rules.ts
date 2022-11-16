@@ -28,51 +28,60 @@ import { ValidateError } from '../error';
 
 export const min = (
   value: any,
-  error: (attrs: Record<string, string>) => ValidateError,
-  min: number
-) => _.isNumber(value) && value >= min ? undefined : error({ min: `${min}` });
+  error: (attrs: Record<string, string>, msg?: string) => ValidateError,
+  min: number,
+  msg?: string,
+) => _.isNumber(value) && value >= min ? undefined : error({ min: `${min}` }, msg);
 
 export const max = (
   value: any,
-  error: (attrs: Record<string, string>) => ValidateError,
-  max: number
-) => _.isNumber(value) && value <= max ? undefined : error({ max: `${max}` });
+  error: (attrs: Record<string, string>, msg?: string) => ValidateError,
+  max: number,
+  msg?: string,
+) => _.isNumber(value) && value <= max ? undefined : error({ max: `${max}` }, msg);
 
 export const lessThan = (
   value: any,
-  error: (attrs: Record<string, string>) => ValidateError,
-  less: number
-) => _.isNumber(value) && value < less ? undefined : error({ less: `${less}` });
+  error: (attrs: Record<string, string>, msg?: string) => ValidateError,
+  less: number,
+  msg?: string,
+) => _.isNumber(value) && value < less ? undefined : error({ less: `${less}` }, msg);
 
 export const moreThan = (
   value: any,
-  error: (attrs: Record<string, string>) => ValidateError,
-  more: number
-) => _.isNumber(value) && value > more ? undefined : error({ more: `${more}` });
+  error: (attrs: Record<string, string>, msg?: string) => ValidateError,
+  more: number,
+  msg?: string,
+) => _.isNumber(value) && value > more ? undefined : error({ more: `${more}` }, msg);
 
 export const positive = (
   value: any,
-  error: (attrs: Record<string, string>) => ValidateError
-) => _.isNumber(value) && value > 0 ? undefined : error({});
+  error: (attrs: Record<string, string>, msg?: string) => ValidateError,
+  msg?: string,
+) => _.isNumber(value) && value > 0 ? undefined : error({}, msg);
 
 export const negative = (
   value: any,
-  error: (attrs: Record<string, string>) => ValidateError
-) => _.isNumber(value) && value < 0 ? undefined : error({});
+  error: (attrs: Record<string, string>, msg?: string) => ValidateError,
+  msg?: string,
+) => _.isNumber(value) && value < 0 ? undefined : error({}, msg);
 
 export const integer = (
   value: any,
-  error: (attrs: Record<string, string>) => ValidateError
-) => _.isSafeInteger(value) ? undefined : error({});
+  error: (attrs: Record<string, string>, msg?: string) => ValidateError,
+  msg?: string,
+) => _.isSafeInteger(value) ? undefined : error({}, msg);
 
 export const oneOf = (
   value: any,
-  error: (attrs: Record<string, string>) => ValidateError,
-  values: number[]
-) => _.isNumber(value) && values.includes(value) ? undefined : error({ values: `${values}` });
+  error: (attrs: Record<string, string>, msg?: string) => ValidateError,
+  values: number[],
+  msg?: string,
+) => _.isNumber(value) && values.includes(value) ? undefined : error({ values: `${values}` }, msg);
 
 export const notOneOf = (
   value: any,
-  error: (attrs: Record<string, string>) => ValidateError,
-  values: number[]
-) => _.isNumber(value) && !values.includes(value) ? undefined : error({ values: `${values}` });
+  error: (attrs: Record<string, string>, msg?: string) => ValidateError,
+  values: number[],
+  msg?: string,
+) => _.isNumber(value) && !values.includes(value) ? undefined : error({ values: `${values}` }, msg);

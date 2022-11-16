@@ -36,7 +36,7 @@ type Internals<T> = {
     rule: string,
     validate: (
       value: any,
-      error: (attrs: Record<string, string>) => ValidateError
+      error: (attrs: Record<string, string>, msg?: string) => ValidateError
     ) => ValidateError | undefined,
   })[];
 
@@ -97,7 +97,7 @@ export const SchemaBuilder = <T, R extends RuleType>(
     const _value = cast(value);
 
     for (const rule of internals.rules) {
-      const error = rule.validate(_value, (attrs) => new ValidateError(internals.type, rule.rule, [], attrs));
+      const error = rule.validate(_value, (attrs, msg) => new ValidateError(internals.type, rule.rule, [], attrs, msg));
       if (!_.isNil(error)) errors.push(error);
     };
 

@@ -28,36 +28,42 @@ import { ValidateError } from '../error';
 
 export const min = (
   value: any,
-  error: (attrs: Record<string, string>) => ValidateError,
-  min: Date
-) => _.isDate(value) && value >= min ? undefined : error({ min: `${min}` });
+  error: (attrs: Record<string, string>, msg?: string) => ValidateError,
+  min: Date,
+  msg?: string,
+) => _.isDate(value) && value >= min ? undefined : error({ min: `${min}` }, msg);
 
 export const max = (
   value: any,
-  error: (attrs: Record<string, string>) => ValidateError,
-  max: Date
-) => _.isDate(value) && value <= max ? undefined : error({ max: `${max}` });
+  error: (attrs: Record<string, string>, msg?: string) => ValidateError,
+  max: Date,
+  msg?: string,
+) => _.isDate(value) && value <= max ? undefined : error({ max: `${max}` }, msg);
 
 export const lessThan = (
   value: any,
-  error: (attrs: Record<string, string>) => ValidateError,
-  less: Date
-) => _.isDate(value) && value < less ? undefined : error({ less: `${less}` });
+  error: (attrs: Record<string, string>, msg?: string) => ValidateError,
+  less: Date,
+  msg?: string,
+) => _.isDate(value) && value < less ? undefined : error({ less: `${less}` }, msg);
 
 export const moreThan = (
   value: any,
-  error: (attrs: Record<string, string>) => ValidateError,
-  more: Date
-) => _.isDate(value) && value > more ? undefined : error({ more: `${more}` });
+  error: (attrs: Record<string, string>, msg?: string) => ValidateError,
+  more: Date,
+  msg?: string,
+) => _.isDate(value) && value > more ? undefined : error({ more: `${more}` }, msg);
 
 export const oneOf = (
   value: any,
-  error: (attrs: Record<string, string>) => ValidateError,
-  values: Date[]
-) => _.isDate(value) && values.includes(value) ? undefined : error({ values: `${values}` });
+  error: (attrs: Record<string, string>, msg?: string) => ValidateError,
+  values: Date[],
+  msg?: string,
+) => _.isDate(value) && values.includes(value) ? undefined : error({ values: `${values}` }, msg);
 
 export const notOneOf = (
   value: any,
-  error: (attrs: Record<string, string>) => ValidateError,
-  values: Date[]
-) => _.isDate(value) && !values.includes(value) ? undefined : error({ values: `${values}` });
+  error: (attrs: Record<string, string>, msg?: string) => ValidateError,
+  values: Date[],
+  msg?: string,
+) => _.isDate(value) && !values.includes(value) ? undefined : error({ values: `${values}` }, msg);
