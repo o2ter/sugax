@@ -24,7 +24,7 @@
 //
 
 import _ from 'lodash';
-import { ValidateError } from '../error';
+import { ValidateError } from './error';
 
 export const required = (
   value: any,

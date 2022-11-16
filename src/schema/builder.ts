@@ -24,8 +24,8 @@
 //
 
 import _ from 'lodash';
-import * as common_rules from './rules';
-import { ValidateError } from '../error';
+import * as common_rules from './common_rules';
+import { ValidateError } from './error';
 
 type Internals<T> = {
 

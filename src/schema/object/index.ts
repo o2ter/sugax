@@ -24,7 +24,7 @@
 //
 
 import _ from 'lodash';
-import { ISchema, TypeOfSchema, SchemaBuilder } from '../internals/builder';
+import { ISchema, TypeOfSchema, SchemaBuilder } from '../builder';
 import { ValidateError } from '../error';
 
 export const object = <S extends Record<string, ISchema<any, any>>>(shape: S) => SchemaBuilder<{ [K in keyof S]?: TypeOfSchema<S[K]>; }>({

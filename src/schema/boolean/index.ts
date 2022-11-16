@@ -24,7 +24,7 @@
 //
 
 import _ from 'lodash';
-import { SchemaBuilder } from '../internals/builder';
+import { SchemaBuilder } from '../builder';
 
 export const boolean = () => SchemaBuilder<boolean>({
   type: 'boolean',
