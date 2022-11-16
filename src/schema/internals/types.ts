@@ -47,30 +47,29 @@ type Internals<T> = {
 }
 
 type OmitFirstArg<F> = F extends (x: any, ...args: infer P) => infer R ? (...args: P) => R : never;
-
-type RuleType = Record<string, (...args: any) => ValidateError | undefined>
-
-type MappedRules<T, R extends RuleType> = {
-  [K in keyof R]: (...args: Parameters<OmitFirstArg<OmitFirstArg<R[K]>>>) => ISchema<T, R>;
-}
+type RuleType = Record<string, (...args: any) => ValidateError | undefined>;
 
 export type ISchema<T, R extends RuleType = {}> = {
 
-  strict(): ISchema<T, R>
+  cast: (value: any) => any;
 
-  default(value: T): ISchema<T, R>
+  validate(value: any): ValidateError[];
 
-  getDefault(): T | undefined
+  strict(): ISchema<T, R>;
+
+  default(value: T): ISchema<T, R>;
+
+  getDefault(): T | undefined;
 
   transform(
     t: (value: any) => any
-  ): ISchema<T, R>
+  ): ISchema<T, R>;
 
-  cast: (value: any) => any;
-
-  validate(value: any): ValidateError[]
-
-} & MappedRules<T, typeof common_rules & R>
+} & {
+  [K in keyof typeof common_rules]: (...args: Parameters<OmitFirstArg<OmitFirstArg<R[K]>>>) => ISchema<T, R>;
+} & {
+  [K in keyof R]: (...args: Parameters<OmitFirstArg<OmitFirstArg<R[K]>>>) => ISchema<T, R>;
+};
 
 export type TypeOfSchema<S> = S extends ISchema<infer T, any> ? T : S;
 
