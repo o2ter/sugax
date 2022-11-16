@@ -24,7 +24,7 @@
 //
 
 import _ from 'lodash';
-import { ISchema, TypeOfSchema, SchemaBuilder } from '../internals/types';
+import { ISchema, TypeOfSchema, SchemaBuilder } from '../internals/builder';
 import { ValidateError } from '../error';
 import * as _rules from './rules';
 

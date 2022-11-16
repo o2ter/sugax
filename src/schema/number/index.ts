@@ -24,7 +24,7 @@
 //
 
 import _ from 'lodash';
-import { SchemaBuilder } from '../internals/types';
+import { SchemaBuilder } from '../internals/builder';
 import * as _rules from './rules';
 
 export const number = () => SchemaBuilder<number, typeof _rules>({
