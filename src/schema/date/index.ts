@@ -24,10 +24,10 @@
 //
 
 import _ from 'lodash';
-import { ISchema, SchemaBuilder } from '../internals/types';
+import { SchemaBuilder } from '../internals/types';
 import * as _rules from './rules';
 
-export const date = (): ISchema<Date, typeof _rules> => SchemaBuilder({
+export const date = () => SchemaBuilder<Date, typeof _rules>({
   type: 'date',
   rules: [],
   transform: (v) => {

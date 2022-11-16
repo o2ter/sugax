@@ -28,7 +28,7 @@ import { ISchema, TypeOfSchema, SchemaBuilder } from '../internals/types';
 import { ValidateError } from '../error';
 import * as _rules from './rules';
 
-export const array = <T extends ISchema<any, any>>(type?: T): ISchema<TypeOfSchema<T>[], typeof _rules> => SchemaBuilder({
+export const array = <T extends ISchema<any, any>>(type?: T) => SchemaBuilder<TypeOfSchema<T>[], typeof _rules>({
   type: 'array',
   default: [],
   rules: [],

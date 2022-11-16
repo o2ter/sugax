@@ -54,7 +54,7 @@ type MappedRules<T, R extends RuleType> = {
   [K in keyof R]: (...args: Parameters<OmitFirstArg<OmitFirstArg<R[K]>>>) => ISchema<T, R>;
 }
 
-export type ISchema<T, R extends RuleType = RuleType> = {
+export type ISchema<T, R extends RuleType = {}> = {
 
   strict(): ISchema<T, R>
 
@@ -74,7 +74,7 @@ export type ISchema<T, R extends RuleType = RuleType> = {
 
 export type TypeOfSchema<S> = S extends ISchema<infer T, any> ? T : S;
 
-export const SchemaBuilder = <T, R extends RuleType>(
+export const SchemaBuilder = <T, R extends RuleType = {}>(
   internals: Internals<T>,
   rules: R
 ): ISchema<T, R> => {

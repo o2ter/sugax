@@ -24,9 +24,9 @@
 //
 
 import _ from 'lodash';
-import { ISchema, SchemaBuilder } from '../internals/types';
+import { SchemaBuilder } from '../internals/types';
 
-export const boolean = (): ISchema<boolean> => SchemaBuilder({
+export const boolean = () => SchemaBuilder<boolean>({
   type: 'boolean',
   rules: [],
   transform: (v) => _.isBoolean(v) ? v : !!v,
