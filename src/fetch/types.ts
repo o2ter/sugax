@@ -39,6 +39,6 @@ export type NetworkService<Config, Response> = {
   createCancelToken: () => CancelToken;
   request: (config: Config & {
     cancelToken: CancelToken;
-    onDownloadProgress: (event: ProgressEvent) => void;
+    onDownloadProgress?: (event: ProgressEvent) => void;
   }) => Promise<Response>;
 }

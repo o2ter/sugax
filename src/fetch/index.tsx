@@ -158,11 +158,24 @@ export const createFetch = <C extends {}, R>(config: {
     return fetchResult(state.resource, progress.resource);
   };
 
-  return { Fetch, useFetch, useRequest };
+  const request = (setting: C) => {
+    const cancelToken = config.service.createCancelToken();
+    const response = config.service.request({
+      ...setting,
+      cancelToken,
+    });
+    return _.assign(response, {
+      cancelToken,
+      cancel: cancelToken.cancel,
+    });
+  };
+
+  return { Fetch, useFetch, useRequest, request };
 }
 
 export const {
   Fetch,
   useFetch,
   useRequest,
+  request,
 } = createFetch<DefaultRequestConfig, DefaultResponse>({ service: defaultService });
