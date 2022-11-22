@@ -46,22 +46,10 @@ export const service: NetworkService<AxiosRequestConfig, AxiosProgressEvent, Axi
     return token;
   },
 
-  request: async (config) => {
-
-    const controller = _.isNil(config.cancelToken) ? undefined : tokenMap.get(config.cancelToken);
-
-    const res = await axiosInstance.request({
-      url: config.url,
-      method: config.method,
-      baseURL: config.baseURL,
-      headers: config.headers,
-      params: config.params,
-      data: config.data,
-      onDownloadProgress: config.onDownloadProgress,
-      signal: controller?.signal,
-    });
-
-    return res;
+  request: (config) => {
+    const { cancelToken, ..._config } = config;
+    const controller = _.isNil(cancelToken) ? undefined : tokenMap.get(cancelToken);
+    return axiosInstance.request({ ..._config, signal: controller?.signal });
   },
 };
 
