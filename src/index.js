@@ -24,6 +24,7 @@
 //
 
 export * from './asyncEffect';
+export * from './asyncResource';
 export * from './channel';
 export * from './debounce';
 export * from './equivalent';
@@ -31,7 +32,6 @@ export * from './fetch';
 export * from './mergeRefs';
 export * from './mount';
 export * from './previous';
-export * from './resource';
 export * from './schema';
 export * from './stableRef';
 export * from './state';

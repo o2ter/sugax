@@ -1,5 +1,5 @@
 //
-//  resource.ts
+//  asyncResource.ts
 //
 //  The MIT License
 //  Copyright (c) 2021 - 2022 O2ter Limited. All rights reserved.
@@ -27,7 +27,7 @@ import _ from 'lodash';
 import React from 'react';
 import { useDebounce } from './debounce';
 
-export const useResource = <T>(
+export const useAsyncResource = <T>(
   fetch: () => Promise<T>,
   debounce?: _.ThrottleSettings & { wait?: number; },
   deps: React.DependencyList = [],
