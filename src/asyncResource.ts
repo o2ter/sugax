@@ -28,7 +28,7 @@ import React from 'react';
 import { useDebounce } from './debounce';
 
 export const useAsyncResource = <T>(
-  fetch: () => Promise<T>,
+  fetch: () => PromiseLike<T>,
   debounce?: _.ThrottleSettings & { wait?: number; },
   deps: React.DependencyList = [],
 ) => {

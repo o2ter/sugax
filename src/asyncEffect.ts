@@ -26,8 +26,10 @@
 import _ from 'lodash';
 import React from 'react';
 
+type Destructor = () => void | PromiseLike<void>;
+
 export const useAsyncEffect = (
-  effect: () => Promise<void | (() => Promise<void>)>, 
+  effect: () => PromiseLike<void | Destructor>, 
   deps?: React.DependencyList | undefined
 ) => React.useEffect(() => {
   const destructor = effect();
