@@ -29,7 +29,7 @@ import defaultService from './axios';
 import { useDebounce } from '../debounce';
 import { useEquivalent } from '../equivalent';
 import { CancelToken, NetworkService } from './types';
-import { useUnmount } from '../mount';
+import { useMount, useUnmount } from '../mount';
 
 export * from './types';
 
@@ -55,7 +55,7 @@ const _request = <C extends {}, P, R, Resources extends { [key: string]: C }>(
   const [state, setState] = React.useState<{ [K in keyof Resources]: UpdateToken & ResourceState }>(_.mapValues(resources, () => ({})));
   const [progress, setProgress] = React.useState<{ [K in keyof Resources]?: UpdateToken & { progress?: P } }>({});
 
-  const refresh = useDebounce(async (resource: string, cancelToken?: CancelToken) => {
+  const refresh = useDebounce(async (resource: string) => {
 
     if (_.isNil(resources[resource])) return;
 
@@ -72,7 +72,7 @@ const _request = <C extends {}, P, R, Resources extends { [key: string]: C }>(
       [resource]: _.assign({}, progress[resource], next),
     }) : progress);
 
-    const _cancelToken = cancelToken ?? service.createCancelToken();
+    const _cancelToken = service.createCancelToken();
     setResourceProgress({ token, progress: undefined });
     setResource({
       token,
@@ -102,12 +102,11 @@ const _request = <C extends {}, P, R, Resources extends { [key: string]: C }>(
 
   }, debounce ?? {}, [useEquivalent(resources)]);
 
-  React.useEffect(() => {
-    const cancelToken = service.createCancelToken();
+  useMount(() => {
     for (const resource of _.keys(resources)) {
-      refresh(resource, cancelToken);
+      refresh(resource);
     }
-  }, []);
+  });
 
   useUnmount(() => {
     for (const { cancelToken } of _.values(state)) {
