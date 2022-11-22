@@ -35,6 +35,14 @@ export * from './types';
 
 type FetchState<R> = ReturnType<typeof _request<{}, R, Record<string, any>>>['state'];
 
+const createCancelToken = <C extends {}, R>(service: NetworkService<C, R>) => {
+  const cancelToken = service.createCancelToken();
+  return {
+    get cancelled() { return cancelToken.cancelled },
+    cancel: _.once(() => cancelToken.cancel()),
+  }
+}
+
 const _request = <C extends {}, R, Resources extends { [key: string]: C }>(
   service: NetworkService<C, R>,
   resources: Resources,
@@ -72,7 +80,7 @@ const _request = <C extends {}, R, Resources extends { [key: string]: C }>(
       [resource]: _.assign({}, progress[resource], next),
     }) : progress);
 
-    const _cancelToken = cancelToken ?? service.createCancelToken();
+    const _cancelToken = cancelToken ?? createCancelToken(service);
     setResource({ token, cancelToken: _cancelToken, loading: true });
 
     const _state: ResourceState = {
@@ -95,7 +103,7 @@ const _request = <C extends {}, R, Resources extends { [key: string]: C }>(
   }, debounce ?? {}, [useEquivalent(resources)]);
 
   React.useEffect(() => {
-    const cancelToken = service.createCancelToken();
+    const cancelToken = createCancelToken(service);
     for (const resource of _.keys(resources)) {
       refresh(resource, cancelToken);
     }
