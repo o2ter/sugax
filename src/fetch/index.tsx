@@ -35,14 +35,6 @@ export * from './types';
 
 type FetchState<R> = ReturnType<typeof _request<{}, any, R, Record<string, any>>>['state'];
 
-const createCancelToken = <C extends {}, P, R>(service: NetworkService<C, P, R>) => {
-  const cancelToken = service.createCancelToken();
-  return {
-    get cancelled() { return cancelToken.cancelled },
-    cancel: _.once(() => cancelToken.cancel()),
-  }
-}
-
 const _request = <C extends {}, P, R, Resources extends { [key: string]: C }>(
   service: NetworkService<C, P, R>,
   resources: Resources,
@@ -80,9 +72,16 @@ const _request = <C extends {}, P, R, Resources extends { [key: string]: C }>(
       [resource]: _.assign({}, progress[resource], next),
     }) : progress);
 
-    const _cancelToken = cancelToken ?? createCancelToken(service);
-    setResource({ token, cancelToken: _cancelToken, loading: true });
+    const _cancelToken = cancelToken ?? service.createCancelToken();
     setResourceProgress({ token, progress: undefined });
+    setResource({
+      token,
+      loading: true,
+      cancelToken: {
+        get cancelled() { return _cancelToken.cancelled },
+        cancel: _.once(() => { _cancelToken.cancel() }),
+      },
+    });
 
     const _state: ResourceState = {
       response: undefined,
@@ -104,11 +103,10 @@ const _request = <C extends {}, P, R, Resources extends { [key: string]: C }>(
   }, debounce ?? {}, [useEquivalent(resources)]);
 
   React.useEffect(() => {
-    const cancelToken = createCancelToken(service);
+    const cancelToken = service.createCancelToken();
     for (const resource of _.keys(resources)) {
       refresh(resource, cancelToken);
     }
-    return () => cancelToken.cancel();
   }, []);
 
   useUnmount(() => {
