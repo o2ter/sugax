@@ -47,7 +47,10 @@ export const useAsyncResource = <T>(
     const token = _.uniqueId();
     setState(state => ({ ...state, token, loading: true }));
 
-    const _state: State = {};
+    const _state: State = {
+      resource: undefined,
+      error: undefined,
+    };
 
     try {
       _state.resource = await fetch();
