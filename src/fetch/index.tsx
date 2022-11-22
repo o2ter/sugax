@@ -30,7 +30,6 @@ import { useDebounce } from '../debounce';
 import { useEquivalent } from '../equivalent';
 import { CancelToken, NetworkService } from './types';
 import { useMount, useUnmount } from '../mount';
-import { useStableRef } from '../stableRef';
 
 export * from './types';
 
@@ -108,13 +107,11 @@ const _request = <C extends {}, P, R, Resources extends { [key: string]: C }>(
       refresh(resource);
     }
   });
-
-  const unmount = useStableRef(() => {
+  useUnmount(() => {
     for (const { cancelToken } of _.values(state)) {
       cancelToken?.cancel();
     }
-  }, [state]);
-  useUnmount(() => { unmount.current(); });
+  });
 
   const _state = React.useMemo(() => _.mapValues(state, (state, resource) => ({
     ..._.omit(state, 'token'),

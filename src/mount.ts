@@ -25,11 +25,13 @@
 
 import _ from 'lodash';
 import React from 'react';
+import { useStableRef } from './stableRef';
 
 export const useMount = (callback: VoidFunction) => {
   React.useEffect(() => { if (_.isFunction(callback)) callback(); }, []);
 }
 
 export const useUnmount = (callback: VoidFunction) => {
-  React.useEffect(() => () => { if (_.isFunction(callback)) callback(); }, []);
+  const callbackRef = useStableRef(callback);
+  React.useEffect(() => () => { if (_.isFunction(callbackRef.current)) callbackRef.current(); }, []);
 }
