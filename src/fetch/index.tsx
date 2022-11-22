@@ -75,16 +75,23 @@ const _request = <C extends {}, R, Resources extends { [key: string]: C }>(
     const _cancelToken = cancelToken ?? service.createCancelToken();
     setResource({ token, cancelToken: _cancelToken, loading: true });
 
+    const _state: ResourceState = {
+      response: undefined,
+      error: undefined,
+    };
+
     try {
-      const response = await service.request({
+      _state.response = await service.request({
         ...resources[resource],
         cancelToken: _cancelToken,
         onDownloadProgress: (progress) => setResourceProgress(progress, token),
       });
-      setResource({ response, error: undefined, loading: false }, token);
     } catch (error) {
-      setResource({ response: undefined, error: error as Error, loading: false }, token);
+      _state.error = error as Error;
     }
+
+    setResource({ ..._state, loading: false }, token);
+
   }, debounce ?? {}, [useEquivalent(resources)]);
 
   React.useEffect(() => {
