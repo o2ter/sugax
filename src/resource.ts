@@ -29,7 +29,8 @@ import { useDebounce } from './debounce';
 
 export const useResource = <T>(
   fetch: () => Promise<T>,
-  debounce?: _.ThrottleSettings & { wait?: number; }
+  debounce?: _.ThrottleSettings & { wait?: number; },
+  deps: React.DependencyList = [],
 ) => {
 
   type State = {
@@ -56,7 +57,7 @@ export const useResource = <T>(
 
     setState(state => state.token === token ? ({ ...state, ..._state, loading: false }) : state);
 
-  }, debounce ?? {}, []);
+  }, debounce ?? {}, deps);
 
   return {
     get loading() { return state.loading ?? false },
