@@ -30,7 +30,7 @@ export const useStableRef = <T>(
   value: T,
   deps?: React.DependencyList,
 ) => {
-  const callbackRef = React.useRef(value);
-  React.useEffect(() => { callbackRef.current = value; }, deps ?? [value]);
-  return callbackRef;
+  const ref = React.useRef(value);
+  React.useEffect(() => { ref.current = value; }, deps ?? [value]);
+  return ref;
 }
