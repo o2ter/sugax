@@ -59,6 +59,8 @@ export const useAsyncResource = <T>(
 
   }, debounce ?? {}, deps);
 
+  React.useEffect(() => { _refresh(); }, []);
+
   const refresh = React.useCallback(() => _refresh() ?? Promise.resolve(), [_refresh]);
 
   return {
