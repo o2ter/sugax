@@ -28,14 +28,7 @@ export type CancelToken = {
   cancel(): void;
 }
 
-export type ProgressEvent = {
-  loaded: number;
-  total?: number;
-  bytes: number;
-  rate?: number;
-}
-
-export type NetworkService<Config, Response> = {
+export type NetworkService<Config, ProgressEvent, Response> = {
   createCancelToken: () => CancelToken;
   request: (config: Config & {
     cancelToken: CancelToken;

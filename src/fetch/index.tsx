@@ -25,17 +25,17 @@
 
 import _ from 'lodash';
 import React from 'react';
-import defaultService, { DefaultRequestConfig, DefaultResponse } from './axios';
+import defaultService from './axios';
 import { useDebounce } from '../debounce';
 import { useEquivalent } from '../equivalent';
-import { CancelToken, NetworkService, ProgressEvent } from './types';
+import { CancelToken, NetworkService } from './types';
 import { useUnmount } from '../mount';
 
 export * from './types';
 
-type FetchState<R> = ReturnType<typeof _request<{}, R, Record<string, any>>>['state'];
+type FetchState<R> = ReturnType<typeof _request<{}, any, R, Record<string, any>>>['state'];
 
-const createCancelToken = <C extends {}, R>(service: NetworkService<C, R>) => {
+const createCancelToken = <C extends {}, P, R>(service: NetworkService<C, P, R>) => {
   const cancelToken = service.createCancelToken();
   return {
     get cancelled() { return cancelToken.cancelled },
@@ -43,8 +43,8 @@ const createCancelToken = <C extends {}, R>(service: NetworkService<C, R>) => {
   }
 }
 
-const _request = <C extends {}, R, Resources extends { [key: string]: C }>(
-  service: NetworkService<C, R>,
+const _request = <C extends {}, P, R, Resources extends { [key: string]: C }>(
+  service: NetworkService<C, P, R>,
   resources: Resources,
   debounce?: _.ThrottleSettings & { wait?: number; },
 ) => {
@@ -60,8 +60,8 @@ const _request = <C extends {}, R, Resources extends { [key: string]: C }>(
     loading?: boolean;
   }
 
-  const [state, setState] = React.useState<{ [P in keyof Resources]: UpdateToken & ResourceState }>(_.mapValues(resources, () => ({})));
-  const [progress, setProgress] = React.useState<{ [P in keyof Resources]?: UpdateToken & ProgressEvent }>({});
+  const [state, setState] = React.useState<{ [K in keyof Resources]: UpdateToken & ResourceState }>(_.mapValues(resources, () => ({})));
+  const [progress, setProgress] = React.useState<{ [K in keyof Resources]?: UpdateToken & { progress?: P } }>({});
 
   const refresh = useDebounce(async (resource: string, cancelToken?: CancelToken) => {
 
@@ -75,13 +75,14 @@ const _request = <C extends {}, R, Resources extends { [key: string]: C }>(
       ...state,
       [resource]: _.assign({}, state[resource], next),
     }) : state);
-    const setResourceProgress = (next: UpdateToken & ProgressEvent, token?: string) => setProgress(progress => shouldUpdate(progress, token) ? ({
+    const setResourceProgress = (next: UpdateToken & { progress?: P }, token?: string) => setProgress(progress => shouldUpdate(progress, token) ? ({
       ...progress,
       [resource]: _.assign({}, progress[resource], next),
     }) : progress);
 
     const _cancelToken = cancelToken ?? createCancelToken(service);
     setResource({ token, cancelToken: _cancelToken, loading: true });
+    setResourceProgress({ token, progress: undefined });
 
     const _state: ResourceState = {
       response: undefined,
@@ -92,7 +93,7 @@ const _request = <C extends {}, R, Resources extends { [key: string]: C }>(
       _state.response = await service.request({
         ...resources[resource],
         cancelToken: _cancelToken,
-        onDownloadProgress: (progress) => setResourceProgress(progress, token),
+        onDownloadProgress: (progress) => setResourceProgress({ progress }, token),
       });
     } catch (error) {
       _state.error = error as Error;
@@ -121,12 +122,14 @@ const _request = <C extends {}, R, Resources extends { [key: string]: C }>(
     refresh: () => refresh(resource) ?? Promise.resolve(),
   })), [state, refresh]);
 
-  return { state: _state, progress };
+  const _progress = React.useMemo(() => _.mapValues(progress, progress => progress?.progress), [progress]);
+
+  return { state: _state, progress: _progress };
 }
 
-const fetchResult = <R extends unknown>(
+const fetchResult = <R extends unknown, P>(
   fetch: FetchState<R>[string],
-  progress?: ProgressEvent,
+  progress?: P,
 ) => ({
   ...fetch,
   progress,
@@ -135,12 +138,12 @@ const fetchResult = <R extends unknown>(
   cancel: () => { fetch.cancelToken?.cancel(); },
 });
 
-export const createFetch = <C extends {}, R>(config: {
-  service: NetworkService<C, R>;
+export const createFetch = <C extends {}, P, R>(config: {
+  service: NetworkService<C, P, R>;
 }) => {
 
   const FetchStateContext = React.createContext<FetchState<R>>({});
-  const ProgressContext = React.createContext<Record<string, ProgressEvent>>({});
+  const ProgressContext = React.createContext<Record<string, P>>({});
 
   const Fetch = <Resources extends { [key: string]: C }>({
     resources,
@@ -149,7 +152,7 @@ export const createFetch = <C extends {}, R>(config: {
   }: {
     resources: Resources;
     debounce?: _.DebounceSettings & { wait?: number; };
-    children: React.ReactNode | ((state: { [P in keyof Resources]: ReturnType<typeof fetchResult<R>> }) => React.ReactNode);
+    children: React.ReactNode | ((state: { [K in keyof Resources]: ReturnType<typeof fetchResult<R, P>> }) => React.ReactNode);
   }) => {
     const { state, progress } = _request(config.service, resources, debounce);
     const parent_state = React.useContext(FetchStateContext);
@@ -195,4 +198,4 @@ export const {
   useFetch,
   useRequest,
   request,
-} = createFetch<DefaultRequestConfig, DefaultResponse>({ service: defaultService });
+} = createFetch({ service: defaultService });
