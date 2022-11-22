@@ -42,7 +42,7 @@ export const useAsyncResource = <T>(
 
   const [state, setState] = React.useState<State>({});
 
-  const refresh = useDebounce(async () => {
+  const _refresh = useDebounce(async () => {
 
     const token = _.uniqueId();
     setState(state => ({ ...state, token, loading: true }));
@@ -59,10 +59,12 @@ export const useAsyncResource = <T>(
 
   }, debounce ?? {}, deps);
 
+  const refresh = React.useCallback(() => _refresh() ?? Promise.resolve(), [_refresh]);
+
   return {
     get loading() { return state.loading ?? false },
     get resource() { return state.resource },
     get error() { return state.error },
-    refresh: () => refresh() ?? Promise.resolve(),
+    refresh,
   };
 }
