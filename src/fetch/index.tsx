@@ -31,6 +31,8 @@ import { useEquivalent } from '../equivalent';
 import { CancelToken, NetworkService, ProgressEvent } from './types';
 import { useUnmount } from '../mount';
 
+export * from './types';
+
 type FetchState<R> = ReturnType<typeof _request<{}, R, Record<string, any>>>['state'];
 
 const _request = <C extends {}, R, Resources extends { [key: string]: C }>(
