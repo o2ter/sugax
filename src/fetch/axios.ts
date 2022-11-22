@@ -24,20 +24,13 @@
 //
 
 import _ from 'lodash';
-import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios, { AxiosRequestConfig, AxiosProgressEvent, AxiosResponse } from 'axios';
 import { CancelToken, NetworkService } from './types';
 
 const axiosInstance = axios.create({ withCredentials: true });
 const tokenMap = new WeakMap<CancelToken, AbortController>();
 
-type ProgressEvent = {
-  loaded: number;
-  total?: number;
-  bytes: number;
-  rate?: number;
-}
-
-export const service: NetworkService<AxiosRequestConfig, ProgressEvent, AxiosResponse> = {
+export const service: NetworkService<AxiosRequestConfig, AxiosProgressEvent, AxiosResponse> = {
 
   createCancelToken() {
     const controller = new AbortController();
