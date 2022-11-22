@@ -30,9 +30,8 @@ import { useStableRef } from './stableRef';
 export const useDebounce = <T extends (...args: any) => any>(
   callback: T,
   settings: _.ThrottleSettings & { wait?: number; },
-  deps: React.DependencyList,
 ) => {
   const { wait, ...options } = settings;
-  const callbackRef = useStableRef(callback, deps);
+  const callbackRef = useStableRef(callback);
   return React.useCallback(_.throttle(((...args) => callbackRef.current(...args)) as T, wait, options), []);
 }

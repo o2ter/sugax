@@ -26,11 +26,8 @@
 import _ from 'lodash';
 import React from 'react';
 
-export const useStableRef = <T>(
-  value: T,
-  deps?: React.DependencyList,
-) => {
+export const useStableRef = <T>(value: T) => {
   const ref = React.useRef(value);
-  React.useEffect(() => { ref.current = value; }, deps ?? [value]);
+  ref.current = value;
   return ref;
 }

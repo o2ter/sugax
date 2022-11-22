@@ -27,7 +27,6 @@ import _ from 'lodash';
 import React from 'react';
 import defaultService from './axios';
 import { useDebounce } from '../debounce';
-import { useEquivalent } from '../equivalent';
 import { CancelToken, NetworkService } from './types';
 import { useMount, useUnmount } from '../mount';
 
@@ -100,7 +99,7 @@ const _request = <C extends {}, P, R, Resources extends { [key: string]: C }>(
 
     setResource({ ..._state, loading: false }, token);
 
-  }, debounce ?? {}, [state, useEquivalent(resources)]);
+  }, debounce ?? {});
 
   useMount(() => {
     for (const resource of _.keys(resources)) {
@@ -116,7 +115,7 @@ const _request = <C extends {}, P, R, Resources extends { [key: string]: C }>(
   const _state = React.useMemo(() => _.mapValues(state, (state, resource) => ({
     ..._.omit(state, 'token'),
     refresh: () => refresh(resource) ?? Promise.resolve(),
-  })), [state, refresh]);
+  })), [state]);
 
   const _progress = React.useMemo(() => _.mapValues(progress, progress => progress?.progress), [progress]);
 

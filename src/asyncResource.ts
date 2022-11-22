@@ -30,7 +30,6 @@ import { useDebounce } from './debounce';
 export const useAsyncResource = <T>(
   fetch: () => PromiseLike<T>,
   debounce?: _.ThrottleSettings & { wait?: number; },
-  deps: React.DependencyList = [],
 ) => {
 
   type State = {
@@ -60,7 +59,7 @@ export const useAsyncResource = <T>(
 
     setState(state => state.token === token ? ({ ...state, ..._state, loading: false }) : state);
 
-  }, debounce ?? {}, deps);
+  }, debounce ?? {});
 
   React.useEffect(() => { _refresh(); }, []);
 
