@@ -1,5 +1,5 @@
 //
-//  index.js
+//  resource.ts
 //
 //  The MIT License
 //  Copyright (c) 2021 - 2022 O2ter Limited. All rights reserved.
@@ -23,15 +23,45 @@
 //  THE SOFTWARE.
 //
 
-export * from './asyncEffect';
-export * from './channel';
-export * from './debounce';
-export * from './equivalent';
-export * from './fetch';
-export * from './mergeRefs';
-export * from './mount';
-export * from './previous';
-export * from './resource';
-export * from './schema';
-export * from './stableRef';
-export * from './state';
+import _ from 'lodash';
+import React from 'react';
+import { useDebounce } from './debounce';
+
+export const useResource = <T>(
+  fetch: () => Promise<T>,
+  debounce?: _.ThrottleSettings & { wait?: number; }
+) => {
+
+  type State = {
+    loading?: boolean;
+    resource?: T;
+    error?: Error;
+    token?: string;
+  };
+
+  const [state, setState] = React.useState<State>({});
+
+  const refresh = useDebounce(async () => {
+
+    const token = _.uniqueId();
+    setState(state => ({ ...state, token, loading: true }));
+
+    const _state: State = {};
+
+    try {
+      _state.resource = await fetch();
+    } catch (error) {
+      _state.error = error as Error;
+    }
+
+    setState(state => state.token === token ? ({ ...state, ..._state, loading: false }) : state);
+
+  }, debounce ?? {}, []);
+
+  return {
+    get loading() { return state.loading ?? false },
+    get resource() { return state.resource },
+    get error() { return state.error },
+    refresh: () => refresh() ?? Promise.resolve(),
+  };
+}
