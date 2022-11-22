@@ -100,7 +100,7 @@ const _request = <C extends {}, P, R, Resources extends { [key: string]: C }>(
 
     setResource({ ..._state, loading: false }, token);
 
-  }, debounce ?? {}, [useEquivalent(resources)]);
+  }, debounce ?? {}, [state, useEquivalent(resources)]);
 
   useMount(() => {
     for (const resource of _.keys(resources)) {
