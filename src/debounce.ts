@@ -35,3 +35,39 @@ export const useDebounce = <T extends (...args: any) => any>(
   const callbackRef = useStableRef(callback);
   return React.useCallback(_.throttle(((...args) => callbackRef.current(...args)) as T, wait, options), []);
 }
+
+const asyncDebounce = <T extends (...args: any) => PromiseLike<any>>(
+  func: T,
+  wait?: number,
+  options?: _.ThrottleSettings,
+) => {
+
+  type R = T extends (...args: any) => PromiseLike<infer R> ? R : never;
+  let preflight: Promise<R>;
+
+  const debounced = _.throttle(async (
+    resolve?: (value: PromiseLike<R>) => void,
+    ...args: Parameters<T>
+  ) => {
+    const result = func(...args as any) as PromiseLike<R>;
+    if (_.isFunction(resolve)) resolve(result);
+    return result;
+  }, wait, options);
+
+  return (...args: Parameters<T>) => {
+    if (_.isNil(preflight)) {
+      preflight = new Promise<R>(r => debounced(r, ...args));
+      return preflight;
+    }
+    return debounced(undefined, ...args) ?? preflight;
+  };
+};
+
+export const useAsyncDebounce = <T extends (...args: any) => PromiseLike<any>>(
+  callback: T,
+  settings: _.ThrottleSettings & { wait?: number; },
+) => {
+  const { wait, ...options } = settings;
+  const callbackRef = useStableRef(callback);
+  return React.useCallback(asyncDebounce(((...args) => callbackRef.current(...args)) as T, wait, options), []);
+}

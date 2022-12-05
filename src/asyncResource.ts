@@ -25,7 +25,7 @@
 
 import _ from 'lodash';
 import React from 'react';
-import { useDebounce } from './debounce';
+import { useAsyncDebounce } from './debounce';
 
 export const useAsyncResource = <T>(
   fetch: () => PromiseLike<T>,
@@ -41,7 +41,7 @@ export const useAsyncResource = <T>(
 
   const [state, setState] = React.useState<State>({});
 
-  const _refresh = useDebounce(async () => {
+  const _refresh = useAsyncDebounce(async () => {
 
     const token = _.uniqueId();
     setState(state => ({ ...state, token, loading: true }));
@@ -63,12 +63,10 @@ export const useAsyncResource = <T>(
 
   React.useEffect(() => { _refresh(); }, []);
 
-  const refresh = React.useCallback(() => _refresh() ?? Promise.resolve(), [_refresh]);
-
   return {
-    get loading() { return state.loading ?? false },
-    get resource() { return state.resource },
-    get error() { return state.error },
-    refresh,
+    loading: state.loading ?? false,
+    resource: state.resource,
+    error: state.error,
+    refresh: _refresh,
   };
 }

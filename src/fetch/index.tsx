@@ -26,7 +26,7 @@
 import _ from 'lodash';
 import React from 'react';
 import defaultService from './axios';
-import { useDebounce } from '../debounce';
+import { useAsyncDebounce } from '../debounce';
 import { CancelToken, NetworkService } from './types';
 import { useMount, useUnmount } from '../mount';
 
@@ -54,7 +54,7 @@ const _request = <C extends {}, P, R, Resources extends { [key: string]: C }>(
   const [state, setState] = React.useState<{ [K in keyof Resources]: UpdateToken & ResourceState }>(_.mapValues(resources, () => ({})));
   const [progress, setProgress] = React.useState<{ [K in keyof Resources]?: UpdateToken & { progress?: P } }>({});
 
-  const refresh = useDebounce(async (resource: string) => {
+  const refresh = useAsyncDebounce(async (resource: string) => {
 
     if (_.isNil(resources[resource])) return;
 
@@ -114,7 +114,7 @@ const _request = <C extends {}, P, R, Resources extends { [key: string]: C }>(
 
   const _state = React.useMemo(() => _.mapValues(state, (state, resource) => ({
     ..._.omit(state, 'token'),
-    refresh: () => refresh(resource) ?? Promise.resolve(),
+    refresh: () => refresh(resource),
   })), [state]);
 
   const _progress = React.useMemo(() => _.mapValues(progress, progress => progress?.progress), [progress]);
