@@ -25,7 +25,6 @@
 
 import _ from 'lodash';
 import locales from './locales';
-import { replaceAll } from '../utils';
 
 export class ValidateError extends Error {
 
@@ -62,15 +61,12 @@ export class ValidateError extends Error {
   get locales() {
 
     return _.mapValues(locales, locale => {
-
-      const params = { ...this.attrs, field: this.label ?? this.path.join('.') }
-      let result: string = _.get(locale, `${this.type}.${this.rule}`) ?? _.get(locale, `mixed.${this.rule}`) ?? '';
-
-      for (const [key, value] of _.entries(params)) {
-        result = replaceAll(result, '${' + key + '}', `${value}`);
+      const params: Record<string, string> = {
+        ...this.attrs,
+        field: this.label ?? this.path.join('.'),
       }
-
-      return result;
+      const pattern: string = _.get(locale, `${this.type}.${this.rule}`) ?? _.get(locale, `mixed.${this.rule}`) ?? '';
+      return pattern.replace(/\$\{\s*(\w+)\s*\}/g, (_, key) => `${params[key]}`);
     });
   }
 
