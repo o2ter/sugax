@@ -32,6 +32,7 @@ export class ValidateError extends Error {
   type: string;
   rule: string;
   path: string[];
+  label?: string;
   attrs: Record<string, string>;
 
   #msg?: string;
@@ -40,6 +41,7 @@ export class ValidateError extends Error {
     type: string,
     rule: string,
     path?: string[],
+    label?: string,
     attrs?: Record<string, string>,
     msg?: string,
   ) {
@@ -48,6 +50,7 @@ export class ValidateError extends Error {
     this.type = type;
     this.rule = rule;
     this.path = path ?? [];
+    this.label = label;
     this.attrs = attrs ?? {};
     this.#msg = msg;
   }
@@ -60,7 +63,7 @@ export class ValidateError extends Error {
 
     return _.mapValues(locales, locale => {
 
-      const params = { ...this.attrs, field: this.path.join('.') }
+      const params = { ...this.attrs, field: this.label ?? this.path.join('.') }
       let result: string = _.get(locale, `${this.type}.${this.rule}`) ?? _.get(locale, `mixed.${this.rule}`) ?? '';
 
       for (const [key, value] of _.entries(params)) {

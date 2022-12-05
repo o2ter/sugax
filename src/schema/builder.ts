@@ -32,6 +32,7 @@ type Internals<T> = {
   type: string;
   default?: T;
 
+  label?: string,
   rules: ({
     rule: string,
     validate: (
@@ -96,12 +97,12 @@ export const SchemaBuilder = <T, R extends RuleType = {}>(
     const _value = cast(value);
 
     for (const rule of internals.rules) {
-      const error = rule.validate(_value, (attrs, msg) => new ValidateError(internals.type, rule.rule, [], attrs, msg));
+      const error = rule.validate(_value, (attrs, msg) => new ValidateError(internals.type, rule.rule, [], internals.label, attrs, msg));
       if (!_.isNil(error)) errors.push(error);
     };
 
     if (!_.isNil(_value) && !internals.typeCheck(_value)) {
-      errors.push(new ValidateError(internals.type, 'type', [], { type: internals.type }));
+      errors.push(new ValidateError(internals.type, 'type', [], internals.label, { type: internals.type }));
     }
     
     if (!_.isNil(internals.validate)) {
@@ -117,6 +118,12 @@ export const SchemaBuilder = <T, R extends RuleType = {}>(
 
     strict() {
       return builder({ transform: (v) => internals.typeCheck(v) ? v : undefined });
+    },
+
+    label(
+      name: string
+    ) {
+      return builder({ label: name });
     },
 
     default(
