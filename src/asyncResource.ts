@@ -61,7 +61,7 @@ export const useAsyncResource = <T>(
 
   }, debounce ?? {});
 
-  React.useEffect(() => { _refresh(); }, []);
+  React.useEffect(() => void _refresh(), []);
 
   return {
     loading: state.loading ?? false,

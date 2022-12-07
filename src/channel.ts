@@ -42,11 +42,11 @@ export const createChannel = <T = any>(initialValue: T): IChannel<T> => {
     },
     setValue(value: React.SetStateAction<T>) {
       current = _.isFunction(value) ? value(current) : value;
-      listeners.forEach(listener => { listener(); });
+      listeners.forEach(listener => void listener());
     },
     subscribe: (callback: VoidFunction) => {
       listeners.add(callback);
-      return () => { listeners.delete(callback); };
+      return () => void listeners.delete(callback);
     },
   };
 }

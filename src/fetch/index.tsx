@@ -78,7 +78,7 @@ const _request = <C extends {}, P, R, Resources extends { [key: string]: C }>(
       loading: true,
       cancelToken: {
         get cancelled() { return _cancelToken.cancelled },
-        cancel: _.once(() => { _cancelToken.cancel() }),
+        cancel: _.once(() => void _cancelToken.cancel()),
       },
     });
 
@@ -130,7 +130,7 @@ const fetchResult = <R extends unknown, P>(
   progress,
   get cancelled() { return fetch.cancelToken?.cancelled ?? false; },
   get loading() { return fetch.loading ?? false; },
-  cancel: () => { fetch.cancelToken?.cancel(); },
+  cancel: () => void fetch.cancelToken?.cancel(),
 });
 
 export const createFetch = <C extends {}, P, R>(config: {
