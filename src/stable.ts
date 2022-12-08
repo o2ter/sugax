@@ -1,5 +1,5 @@
 //
-//  stableRef.ts
+//  stable.ts
 //
 //  The MIT License
 //  Copyright (c) 2021 - 2022 O2ter Limited. All rights reserved.
@@ -30,4 +30,9 @@ export const useStableRef = <T>(value: T) => {
   const ref = React.useRef(value);
   ref.current = value;
   return ref;
+}
+
+export const useStableCallback = <T extends (...args: any) => any>(callback: T) => {
+  const ref = useStableRef(callback);
+  return React.useCallback(((...args) => ref.current(...args)) as T, []);
 }

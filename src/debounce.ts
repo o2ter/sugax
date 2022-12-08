@@ -25,7 +25,7 @@
 
 import _ from 'lodash';
 import React from 'react';
-import { useStableRef } from './stableRef';
+import { useStableRef } from './stable';
 
 export const useDebounce = <T extends (...args: any) => any>(
   callback: T,

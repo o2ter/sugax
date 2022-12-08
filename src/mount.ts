@@ -25,7 +25,7 @@
 
 import _ from 'lodash';
 import React from 'react';
-import { useStableRef } from './stableRef';
+import { useStableRef } from './stable';
 
 export const useMount = (callback: VoidFunction) => {
   React.useEffect(() => { if (_.isFunction(callback)) callback(); }, []);
