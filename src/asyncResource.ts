@@ -25,6 +25,7 @@
 
 import _ from 'lodash';
 import React from 'react';
+import { useMount } from './mount';
 import { useAsyncDebounce } from './debounce';
 
 export const useAsyncResource = <T>(
@@ -61,7 +62,7 @@ export const useAsyncResource = <T>(
 
   }, debounce ?? {});
 
-  React.useEffect(() => void _refresh(), []);
+  useMount(() => void _refresh());
 
   return {
     loading: state.loading ?? false,
