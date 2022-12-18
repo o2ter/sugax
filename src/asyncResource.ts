@@ -34,6 +34,7 @@ export const useAsyncResource = <T>(
 ) => {
 
   type State = {
+    count?: number;
     loading?: boolean;
     resource?: T;
     error?: Error;
@@ -58,13 +59,19 @@ export const useAsyncResource = <T>(
       _state.error = error as Error;
     }
 
-    setState(state => state.token === token ? ({ ...state, ..._state, loading: false }) : state);
+    setState(state => state.token === token ? ({
+      ...state,
+      ..._state,
+      count: (state.count ?? 0) + 1,
+      loading: false,
+    }) : state);
 
   }, debounce ?? {});
 
   useMount(() => void _refresh());
 
   return {
+    count: state.count ?? 0,
     loading: state.loading ?? false,
     resource: state.resource,
     error: state.error,

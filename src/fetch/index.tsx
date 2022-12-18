@@ -45,6 +45,7 @@ const _request = <C extends {}, P, R, Resources extends { [key: string]: C }>(
   }
 
   type ResourceState = {
+    count?: number;
     response?: R;
     error?: Error;
     cancelToken?: CancelToken;
@@ -64,7 +65,7 @@ const _request = <C extends {}, P, R, Resources extends { [key: string]: C }>(
     const shouldUpdate = (state: Record<string, UpdateToken | undefined>, token?: string) => _.isNil(token) || state[resource]?.token === token;
     const setResource = (next: UpdateToken & ResourceState, token?: string) => setState(state => shouldUpdate(state, token) ? ({
       ...state,
-      [resource]: _.assign({}, state[resource], next),
+      [resource]: _.assign({}, state[resource], next, { count: (state[resource].count ?? 0) + (next.count ?? 0) }),
     }) : state);
     const setResourceProgress = (next: UpdateToken & { progress?: P }, token?: string) => setProgress(progress => shouldUpdate(progress, token) ? ({
       ...progress,
@@ -97,7 +98,7 @@ const _request = <C extends {}, P, R, Resources extends { [key: string]: C }>(
       _state.error = error as Error;
     }
 
-    setResource({ ..._state, loading: false }, token);
+    setResource({ ..._state, count: 1, loading: false }, token);
 
   }, debounce ?? {});
 
@@ -113,7 +114,8 @@ const _request = <C extends {}, P, R, Resources extends { [key: string]: C }>(
   });
 
   const _state = React.useMemo(() => _.mapValues(state, (state, resource) => ({
-    ..._.omit(state, 'token'),
+    ..._.omit(state, 'token', 'count'),
+    count: state.count ?? 0,
     refresh: () => refresh(resource),
   })), [state]);
 
