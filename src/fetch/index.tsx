@@ -142,7 +142,7 @@ export const createFetch = <C extends {}, P, R>(config: {
   const FetchStateContext = React.createContext<FetchState<R>>({});
   const ProgressContext = React.createContext<Record<string, P>>({});
 
-  const Fetch = React.forwardRef(<Resources extends { [key: string]: C }>({
+  const Fetch = React.forwardRef(<Resources extends Record<string, C>>({
     resources,
     debounce,
     children,
