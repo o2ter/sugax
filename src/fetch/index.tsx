@@ -142,7 +142,7 @@ export const createFetch = <C extends {}, P, R>(config: {
   const FetchStateContext = React.createContext<FetchState<R>>({});
   const ProgressContext = React.createContext<Record<string, P>>({});
 
-  const Fetch = <Resources extends { [key: string]: C }>({
+  const Fetch = React.forwardRef(<Resources extends { [key: string]: C }>({
     resources,
     debounce,
     children,
@@ -150,16 +150,23 @@ export const createFetch = <C extends {}, P, R>(config: {
     resources: Resources;
     debounce?: _.DebounceSettings & { wait?: number; };
     children: React.ReactNode | ((state: { [K in keyof Resources]: ReturnType<typeof fetchResult<R, P>> }) => React.ReactNode);
-  }) => {
+  }, forwardRef: React.ForwardedRef<{ [K in keyof Resources]: ReturnType<typeof fetchResult<R, P>> }>) => {
+
     const { state, progress } = _request(config.service, resources, debounce);
+
     const parent_state = React.useContext(FetchStateContext);
     const parent_progress = React.useContext(ProgressContext);
+
     const merged_state = React.useMemo(() => ({ ...parent_state, ...state }), [parent_state, state]);
     const merged_progress = React.useMemo(() => ({ ...parent_progress, ...progress }), [parent_progress, progress]);
+    const combined = React.useCallback(() => _.mapValues(state, (state, resource) => fetchResult(state, progress[resource])), [state, progress]);
+
+    React.useImperativeHandle(forwardRef, combined, [combined]);
+
     return <FetchStateContext.Provider value={merged_state}><ProgressContext.Provider value={merged_progress}>
-      {_.isFunction(children) ? children(_.mapValues(state, (state, resource) => fetchResult(state, progress[resource]))) : children}
+      {_.isFunction(children) ? children(combined()) : children}
     </ProgressContext.Provider></FetchStateContext.Provider>;
-  };
+  });
 
   const useFetch = (resource: string) => {
     const state = React.useContext(FetchStateContext)[resource];
