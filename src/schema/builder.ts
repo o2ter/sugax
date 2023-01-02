@@ -62,6 +62,8 @@ export type ISchema<T, R extends RuleType> = {
 
   strict(): ISchema<T, R>;
 
+  label(name: string): ISchema<T, R>;
+
   default(value: T): ISchema<T, R>;
 
   getDefault(): T | undefined;
