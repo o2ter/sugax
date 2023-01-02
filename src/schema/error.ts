@@ -73,4 +73,15 @@ export class ValidateError extends Error {
   get message() {
     return this.#msg ?? this.locales.en;
   }
+
+  clone() {
+    return new ValidateError(
+      this.type,
+      this.rule,
+      this.path,
+      this.label,
+      this.attrs,
+      this.#msg
+    )
+  }
 }

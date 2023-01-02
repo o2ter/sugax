@@ -40,7 +40,7 @@ export const object = <S extends Record<string, ISchema<any, any>>>(shape: S) =>
     const errors: ValidateError[] = [];
 
     for (const [key, type] of _.entries(shape)) {
-      const _errors = type.validate(value[key]);
+      const _errors = type.validate(value[key]).map(x => x.clone());
       _errors.forEach(x => x.path = [key, ...x.path]);
       errors.push(..._errors);
     }

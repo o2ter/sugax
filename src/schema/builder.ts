@@ -104,7 +104,7 @@ export const SchemaBuilder = <T, R extends RuleType = {}>(
     if (!_.isNil(_value) && !internals.typeCheck(_value)) {
       errors.push(new ValidateError(internals.type, 'type', [], internals.label, { type: internals.type }));
     }
-    
+
     if (!_.isNil(internals.validate)) {
       errors.push(...internals.validate(_value));
     }
