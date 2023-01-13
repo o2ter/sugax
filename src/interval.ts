@@ -1,5 +1,5 @@
 //
-//  index.js
+//  interval.ts
 //
 //  The MIT License
 //  Copyright (c) 2021 - 2023 O2ter Limited. All rights reserved.
@@ -23,16 +23,16 @@
 //  THE SOFTWARE.
 //
 
-export * from './asyncEffect';
-export * from './asyncResource';
-export * from './channel';
-export * from './debounce';
-export * from './equivalent';
-export * from './fetch';
-export * from './interval';
-export * from './mergeRefs';
-export * from './mount';
-export * from './previous';
-export * from './schema';
-export * from './stable';
-export * from './state';
+import _ from 'lodash';
+import React from 'react';
+
+export const useInterval = (ms?: number) => {
+  const [value, setValue] = React.useState(0);
+  const time = React.useRef(Date.now());
+  const reset = React.useCallback(() => { time.current = Date.now(); }, []);
+  React.useEffect(() => {
+    const interval = setInterval(() => { setValue(Date.now() - time.current) }, ms);
+    return () => clearInterval(interval);
+  }, []);
+  return { interval: value, reset };
+};
