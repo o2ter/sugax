@@ -41,9 +41,10 @@ export const array = <T extends ISchema<any, any>>(type?: T) => SchemaBuilder<Ty
     const errors: ValidateError[] = [];
 
     for (const [i, item] of value.entries()) {
-      const _errors = type.validate(item).map(x => x.clone());
-      _errors.forEach(x => x.path = [`${i}`, ...x.path]);
-      errors.push(..._errors);
+      errors.push(...type.validate(item).map(x => new ValidateError({
+        ...x.options,
+        path: [`${i}`, ...x.path],
+      })));
     }
 
     return errors;

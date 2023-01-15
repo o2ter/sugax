@@ -26,36 +26,43 @@
 import _ from 'lodash';
 import locales from './locales';
 
+type ValidateErrorOptions = {
+  type: string,
+  rule: string,
+  path?: string[],
+  label?: string,
+  attrs?: Record<string, string>,
+  message?: string,
+};
+
 export class ValidateError extends Error {
 
-  type: string;
-  rule: string;
-  path: string[];
-  label?: string;
-  attrs: Record<string, string>;
+  options: ValidateErrorOptions;
 
-  #msg?: string;
-
-  constructor(
-    type: string,
-    rule: string,
-    path?: string[],
-    label?: string,
-    attrs?: Record<string, string>,
-    msg?: string,
-  ) {
+  constructor(options: ValidateErrorOptions) {
     super();
     Object.setPrototypeOf(this, ValidateError.prototype);
-    this.type = type;
-    this.rule = rule;
-    this.path = path ?? [];
-    this.label = label;
-    this.attrs = attrs ?? {};
-    this.#msg = msg;
+    this.options = options;
   }
 
   static get _locales() {
     return locales;
+  }
+
+  get type() {
+    return this.options.type;
+  }
+  get rule() {
+    return this.options.rule;
+  }
+  get path() {
+    return this.options.path ?? [];
+  }
+  get label() {
+    return this.options.label;
+  }
+  get attrs() {
+    return this.options.attrs;
   }
 
   get locales() {
@@ -71,17 +78,6 @@ export class ValidateError extends Error {
   }
 
   get message() {
-    return this.#msg ?? this.locales.en;
-  }
-
-  clone() {
-    return new ValidateError(
-      this.type,
-      this.rule,
-      this.path,
-      this.label,
-      this.attrs,
-      this.#msg
-    )
+    return this.options.message ?? this.locales.en;
   }
 }

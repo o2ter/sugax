@@ -98,13 +98,27 @@ export const SchemaBuilder = <T, R extends RuleType = {}>(
     const errors: ValidateError[] = [];
     const _value = cast(value);
 
+    const opts = {
+      type: internals.type,
+      label: internals.label,
+    };
+
     for (const rule of internals.rules) {
-      const error = rule.validate(_value, (attrs, msg) => new ValidateError(internals.type, rule.rule, [], internals.label, attrs, msg));
+      const error = rule.validate(_value, (attrs, msg) => new ValidateError({
+        ...opts,
+        rule: rule.rule,
+        attrs,
+        message: msg,
+      }));
       if (!_.isNil(error)) errors.push(error);
     };
 
     if (!_.isNil(_value) && !internals.typeCheck(_value)) {
-      errors.push(new ValidateError(internals.type, 'type', [], internals.label, { type: internals.type }));
+      errors.push(new ValidateError({
+        ...opts,
+        rule: 'type',
+        attrs: { type: internals.type },
+      }));
     }
 
     if (!_.isNil(internals.validate)) {
