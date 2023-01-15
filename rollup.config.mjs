@@ -21,7 +21,8 @@ const rollupPlugins = [
 const rollupTypes = (name) => ({
   input: `src/${name}`,
   external: [
-    /node_modules/
+    /node_modules/,
+    /^react$/,
   ],
   output: [
     {
@@ -44,7 +45,8 @@ export default [
       schema: 'src/schema',
     },
     external: [
-      /node_modules/
+      /node_modules/,
+      /^react$/,
     ],
     output: [
       {
