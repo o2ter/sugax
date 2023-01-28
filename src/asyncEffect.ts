@@ -30,7 +30,7 @@ type Destructor = () => void | PromiseLike<void>;
 
 export const useAsyncEffect = (
   effect: () => PromiseLike<void | Destructor>, 
-  deps?: React.DependencyList | undefined
+  deps?: React.DependencyList,
 ) => React.useEffect(() => {
   const destructor = effect();
   return () => {

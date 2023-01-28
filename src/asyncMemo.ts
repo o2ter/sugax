@@ -1,5 +1,5 @@
 //
-//  index.js
+//  asyncMemo.ts
 //
 //  The MIT License
 //  Copyright (c) 2021 - 2023 O2ter Limited. All rights reserved.
@@ -23,17 +23,49 @@
 //  THE SOFTWARE.
 //
 
-export * from './asyncEffect';
-export * from './asyncMemo';
-export * from './asyncResource';
-export * from './channel';
-export * from './debounce';
-export * from './equivalent';
-export * from './fetch';
-export * from './interval';
-export * from './mergeRefs';
-export * from './mount';
-export * from './previous';
-export * from './schema';
-export * from './stable';
-export * from './state';
+import _ from 'lodash';
+import React from 'react';
+import { useAsyncEffect } from './asyncEffect';
+
+export const useAsyncMemo = <T>(
+  factory: () => PromiseLike<T>,
+  deps?: React.DependencyList,
+) => {
+
+  type State = {
+    result?: T;
+    error?: Error;
+    token?: string;
+  };
+
+  const [state, setState] = React.useState<State>({});
+
+  useAsyncEffect(async () => {
+
+    const token = _.uniqueId();
+    setState(state => ({ ...state, token }));
+
+    const _state: State = {
+      result: undefined,
+      error: undefined,
+    };
+
+    try {
+      _state.result = await factory();
+    } catch (error) {
+      _state.error = error as Error;
+    }
+
+    setState(state => state.token === token ? ({
+      ...state,
+      ..._state,
+    }) : state);
+
+  }, deps);
+
+  if (!_.isNil(state.error)) {
+    throw state.error;
+  }
+
+  return state.result;
+}
