@@ -25,12 +25,12 @@
 
 import _ from 'lodash';
 import React from 'react';
-import { useMount } from './mount';
 import { useAsyncDebounce } from './debounce';
 
 export const useAsyncResource = <T>(
   fetch: () => PromiseLike<T>,
   debounce?: _.ThrottleSettings & { wait?: number; },
+  deps?: React.DependencyList,
 ) => {
 
   type State = {
@@ -68,7 +68,7 @@ export const useAsyncResource = <T>(
 
   }, debounce ?? {});
 
-  useMount(() => void _refresh());
+  React.useEffect(() => void _refresh(), deps ?? []);
 
   return {
     count: state.count ?? 0,
