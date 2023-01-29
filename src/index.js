@@ -29,7 +29,6 @@ export * from './asyncResource';
 export * from './channel';
 export * from './debounce';
 export * from './equivalent';
-export * from './fetch';
 export * from './interval';
 export * from './mergeRefs';
 export * from './mount';
