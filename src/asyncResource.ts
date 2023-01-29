@@ -26,55 +26,78 @@
 import _ from 'lodash';
 import React from 'react';
 import { useAsyncDebounce } from './debounce';
+import { useStableCallback } from './stable';
 
-export const useAsyncResource = <T>(
-  fetch: () => PromiseLike<T>,
+const _useAsyncResource = <T>(
+  fetch: (x: {
+    dispatch: React.Dispatch<React.SetStateAction<T | undefined>>;
+    signal: AbortSignal;
+  }) => PromiseLike<T>,
   debounce?: _.ThrottleSettings & { wait?: number; },
   deps?: React.DependencyList,
 ) => {
 
-  type State = {
+  const [state, setState] = React.useState<{
     count?: number;
-    loading?: boolean;
     resource?: T;
     error?: Error;
     token?: string;
-  };
+    abort?: AbortController;
+  }>({});
 
-  const [state, setState] = React.useState<State>({});
-
-  const _refresh = useAsyncDebounce(async () => {
+  const _refresh = useAsyncDebounce(async (abort: AbortController) => {
 
     const token = _.uniqueId();
-    setState(state => ({ ...state, token, loading: true }));
+    setState(state => ({ ...state, token, abort }));
 
-    const _state: State = {
-      resource: undefined,
-      error: undefined,
-    };
+    let updateFlag = false;
+    const _dispatch: typeof setState = (next) => setState(state => state.token === token ? ({
+      ...(_.isFunction(next) ? next(updateFlag ? state : _.omit(state, 'resource', 'error')) : next),
+      count: updateFlag ? state.count : (state.count ?? 0) + 1,
+    }) : state);
 
     try {
-      _state.resource = await fetch();
-    } catch (error) {
-      _state.error = error as Error;
-    }
 
-    setState(state => state.token === token ? ({
-      ...state,
-      ..._state,
-      count: (state.count ?? 0) + 1,
-      loading: false,
-    }) : state);
+      const resource = await fetch({
+        signal: abort.signal,
+        dispatch: (next) => {
+          _dispatch(state => ({
+            ...state,
+            resource: _.isFunction(next) ? next(state.resource) : next,
+          }));
+          updateFlag = true;
+        },
+      });
+
+      _dispatch({ resource });
+
+    } catch (error) {
+
+      _dispatch(state => ({
+        resource: state.resource,
+        error: error as Error,
+      }));
+    }
 
   }, debounce ?? {});
 
-  React.useEffect(() => void _refresh(), deps ?? []);
+  React.useEffect(() => {
+    const controller = new AbortController();
+    void _refresh(controller);
+    return () => controller.abort();
+  }, deps ?? []);
+
+  const _cancelRef = useStableCallback((reason?: any) => void state.abort?.abort(reason));
+  const _refreshRef = useStableCallback(() => _refresh(new AbortController()));
 
   return {
     count: state.count ?? 0,
-    loading: state.loading ?? false,
+    loading: !_.isNil(state.abort),
     resource: state.resource,
     error: state.error,
-    refresh: _refresh,
+    cancel: _cancelRef,
+    refresh: _refreshRef,
   };
 }
+
+export const useAsyncResource = _useAsyncResource;
