@@ -32,34 +32,23 @@ export const useAsyncMemo = <T>(
   deps?: React.DependencyList,
 ) => {
 
-  type State = {
+  const [state, setState] = React.useState<{
     result?: T;
     error?: Error;
     token?: string;
-  };
-
-  const [state, setState] = React.useState<State>({});
+  }>({});
 
   useAsyncEffect(async () => {
 
     const token = _.uniqueId();
     setState(state => ({ ...state, token }));
 
-    const _state: State = {
-      result: undefined,
-      error: undefined,
-    };
-
     try {
-      _state.result = await factory();
+      const result = await factory();
+      setState(state => state.token === token ? ({ result }) : state);
     } catch (error) {
-      _state.error = error as Error;
+      setState(state => state.token === token ? ({ error: error as Error }) : state);
     }
-
-    setState(state => state.token === token ? ({
-      ...state,
-      ..._state,
-    }) : state);
 
   }, deps ?? []);
 
