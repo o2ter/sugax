@@ -61,7 +61,7 @@ export const useAsyncMemo = <T>(
       ..._state,
     }) : state);
 
-  }, deps);
+  }, deps ?? []);
 
   if (!_.isNil(state.error)) {
     throw state.error;
