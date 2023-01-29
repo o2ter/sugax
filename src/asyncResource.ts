@@ -31,7 +31,7 @@ import { useStableCallback } from './stable';
 export const useAsyncResource = <T>(
   fetch: (x: {
     dispatch: React.Dispatch<React.SetStateAction<T | undefined>>;
-    signal: AbortSignal;
+    abortSignal: AbortSignal;
   }) => PromiseLike<T>,
   debounce?: _.ThrottleSettings & { wait?: number; },
   deps?: React.DependencyList,
@@ -59,7 +59,7 @@ export const useAsyncResource = <T>(
     try {
 
       const resource = await fetch({
-        signal: abort.signal,
+        abortSignal: abort.signal,
         dispatch: (next) => {
           _dispatch(state => ({
             ...state,
@@ -102,13 +102,13 @@ export const useAsyncResource = <T>(
 
 export const useAsyncIterableResource = <T>(
   fetch: (x: {
-    signal: AbortSignal;
+    abortSignal: AbortSignal;
   }) => AsyncIterable<T> | PromiseLike<AsyncIterable<T>>,
   debounce?: _.ThrottleSettings & { wait?: number; },
   deps?: React.DependencyList,
-) => useAsyncResource<T[]>(async ({ dispatch, signal }) => {
+) => useAsyncResource<T[]>(async ({ dispatch, abortSignal }) => {
 
-  const resource = await fetch({ signal });
+  const resource = await fetch({ abortSignal });
   let accumulated: T[] = [];
 
   for await (const item of resource) {
