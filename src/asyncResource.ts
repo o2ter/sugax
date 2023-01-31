@@ -30,7 +30,7 @@ import { useStableCallback } from './stable';
 
 export const useAsyncResource = <T>(
   fetch: (x: {
-    dispatch: React.Dispatch<React.SetStateAction<T | undefined>>;
+    dispatch: React.Dispatch<T | ((prevState?: T) => T)>;
     abortSignal: AbortSignal;
   }) => PromiseLike<T>,
   debounce?: _.ThrottleSettings & { wait?: number; },
