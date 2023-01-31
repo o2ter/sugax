@@ -32,7 +32,7 @@ export const useAsyncResource = <T>(
   fetch: (x: {
     dispatch: React.Dispatch<T | ((prevState?: T) => T)>;
     abortSignal: AbortSignal;
-  }) => PromiseLike<T>,
+  }) => PromiseLike<void | T>,
   debounce?: _.ThrottleSettings & { wait?: number; },
   deps?: React.DependencyList,
 ) => {
@@ -69,7 +69,7 @@ export const useAsyncResource = <T>(
         },
       });
 
-      _dispatch({ resource });
+      _dispatch(state => ({ resource: resource ?? state.resource }));
 
     } catch (error) {
 
@@ -109,13 +109,9 @@ export const useAsyncIterableResource = <T>(
 ) => useAsyncResource<T[]>(async ({ dispatch, abortSignal }) => {
 
   const resource = await fetch({ abortSignal });
-  let accumulated: T[] = [];
 
   for await (const item of resource) {
-    accumulated = [...accumulated, item];
-    dispatch(accumulated);
+    dispatch(items => items ? [...items, item] : [item]);
   }
-
-  return accumulated;
 
 }, debounce, deps);
