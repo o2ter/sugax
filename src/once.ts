@@ -1,5 +1,5 @@
 //
-//  index.js
+//  once.ts
 //
 //  The MIT License
 //  Copyright (c) 2021 - 2023 O2ter Limited. All rights reserved.
@@ -23,17 +23,13 @@
 //  THE SOFTWARE.
 //
 
-export * from './asyncEffect';
-export * from './asyncMemo';
-export * from './asyncResource';
-export * from './channel';
-export * from './debounce';
-export * from './equivalent';
-export * from './interval';
-export * from './mergeRefs';
-export * from './mount';
-export * from './once';
-export * from './previous';
-export * from './schema';
-export * from './stable';
-export * from './state';
+import _ from 'lodash';
+import React from 'react';
+import { useStableRef } from './stable';
+
+export const useOnce = <T extends (...args: any) => any>(
+  callback: T,
+) => {
+  const callbackRef = useStableRef(callback);
+  return React.useCallback(_.once(((...args) => callbackRef.current(...args)) as T), []);
+}
