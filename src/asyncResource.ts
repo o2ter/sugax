@@ -87,7 +87,7 @@ export const useAsyncResource = <T>(
     return () => controller.abort();
   }, deps ?? []);
 
-  const _cancelRef = useStableCallback((reason?: any) => void state.abort?.abort(reason));
+  const _cancelRef = useStableCallback((reason?: any) => { state.abort?.abort(reason) });
   const _refreshRef = useStableCallback(() => _refresh(new AbortController()));
 
   return {
