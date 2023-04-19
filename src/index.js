@@ -34,6 +34,5 @@ export * from './mergeRefs';
 export * from './mount';
 export * from './once';
 export * from './previous';
-export * from './schema';
 export * from './stable';
 export * from './state';

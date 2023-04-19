@@ -18,48 +18,21 @@ const rollupPlugins = [
   json(),
 ];
 
-const rollupTypes = (name) => ({
-  input: `src/${name}`,
-  external: [
-    /node_modules/,
-    /^react$/,
-  ],
-  output: [
-    {
-      file: `dist/${name}.d.ts`,
-      format: 'es',
-    },
-  ],
-  plugins: [
-    resolve({
-      extensions: ['.ts', '.tsx', '.mjs', '.js']
-    }),
-    dts()
-  ],
-});
-
 export default [
   {
-    input: {
-      index: 'src/index',
-      schema: 'src/schema',
-    },
+    input: 'src/index',
     external: [
       /node_modules/,
       /^react$/,
     ],
     output: [
       {
-        entryFileNames: '[name].js',
-        chunkFileNames: 'internals/[name]-[hash].js',
-        dir: './dist',
+        file: 'dist/index.js',
         format: 'cjs',
         sourcemap: true,
       },
       {
-        entryFileNames: '[name].mjs',
-        chunkFileNames: 'internals/[name]-[hash].mjs',
-        dir: './dist',
+        file: 'dist/index.mjs',
         format: 'esm',
         sourcemap: true,
       },
@@ -71,6 +44,23 @@ export default [
       ...rollupPlugins
     ],
   },
-  rollupTypes('index'),
-  rollupTypes('schema'),
+  {
+    input: 'src/index',
+    external: [
+      /node_modules/,
+      /^react$/,
+    ],
+    output: [
+      {
+        file: 'dist/index.d.ts',
+        format: 'es',
+      },
+    ],
+    plugins: [
+      resolve({
+        extensions: ['.ts', '.tsx', '.mjs', '.js']
+      }),
+      dts()
+    ],
+  },
 ];
