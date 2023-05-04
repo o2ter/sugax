@@ -18,13 +18,17 @@ const rollupPlugins = [
   json(),
 ];
 
+const rollupConfig = {
+  input: 'src/index',
+  external: [
+    /node_modules/,
+    /^react$/,
+  ],
+};
+
 export default [
   {
-    input: 'src/index',
-    external: [
-      /node_modules/,
-      /^react$/,
-    ],
+    ...rollupConfig,
     output: [
       {
         file: 'dist/index.js',
@@ -45,11 +49,31 @@ export default [
     ],
   },
   {
-    input: 'src/index',
-    external: [
-      /node_modules/,
-      /^react$/,
+    ...rollupConfig,
+    output: [
+      {
+        file: 'dist/index.web.js',
+        format: 'cjs',
+        sourcemap: true,
+      },
+      {
+        file: 'dist/index.web.mjs',
+        format: 'esm',
+        sourcemap: true,
+      },
     ],
+    plugins: [
+      resolve({
+        extensions: [
+          '.web.ts', '.web.tsx', '.web.mjs', '.web.js',
+          '.ts', '.tsx', '.mjs', '.js',
+        ]
+      }),
+      ...rollupPlugins
+    ],
+  },
+  {
+    ...rollupConfig,
     output: [
       {
         file: 'dist/index.d.ts',
@@ -59,6 +83,24 @@ export default [
     plugins: [
       resolve({
         extensions: ['.ts', '.tsx', '.mjs', '.js']
+      }),
+      dts()
+    ],
+  },
+  {
+    ...rollupConfig,
+    output: [
+      {
+        file: 'dist/index.web.d.ts',
+        format: 'es',
+      },
+    ],
+    plugins: [
+      resolve({
+        extensions: [
+          '.web.ts', '.web.tsx', '.web.mjs', '.web.js',
+          '.ts', '.tsx', '.mjs', '.js',
+        ]
       }),
       dts()
     ],
