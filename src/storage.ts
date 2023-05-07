@@ -38,7 +38,7 @@ const useStorage = (storage: Storage, key: string): [string | null, (value?: str
     return () => window.removeEventListener('storage', listener);
   }, () => storage.getItem(key));
 
-  const setValue = React.useCallback((value?: string) => setStorage(storage, key, value), []);
+  const setValue = React.useCallback((value?: string) => setStorage(storage, key, value), [storage, key]);
 
   return [value, setValue];
 }
