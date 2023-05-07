@@ -26,9 +26,9 @@
 import _ from 'lodash';
 import React from 'react';
 
-const setStorage = (storage: Storage, key: string, value?: string) => _.isNil(value) ? storage.removeItem(key) : storage.setItem(key, value);
+const setStorage = (storage: Storage, key: string, value: string | null) => _.isNil(value) ? storage.removeItem(key) : storage.setItem(key, value);
 
-const useStorage = (storage: Storage, key: string): [string | null, (value?: string) => void] => {
+const useStorage = (storage: Storage, key: string): [string | null, React.Dispatch<React.SetStateAction<string | null>>] => {
 
   const [value, update] = React.useState(storage.getItem(key));
 
@@ -40,9 +40,9 @@ const useStorage = (storage: Storage, key: string): [string | null, (value?: str
     return () => window.removeEventListener('storage', listener);
   }, [storage, key]);
 
-  const setValue = React.useCallback((value?: string) => setStorage(storage, key, value), [storage, key]);
-
-  return [value, setValue];
+  return [value, React.useCallback((value) => {
+    setStorage(storage, key, _.isFunction(value) ? value(storage.getItem(key)) : value);
+  }, [storage, key])];
 }
 
 export const useLocalStorage = (key: string): ReturnType<typeof useStorage> => typeof window !== 'undefined' ? useStorage(window.localStorage, key) : [null, () => {}];
