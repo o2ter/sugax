@@ -30,13 +30,15 @@ const setStorage = (storage: Storage, key: string, value?: string) => _.isNil(va
 
 const useStorage = (storage: Storage, key: string): [string | null, (value?: string) => void] => {
 
-  const value = React.useSyncExternalStore((callback) => {
+  const [value, update] = React.useState(storage.getItem(key));
+
+  React.useEffect(() => {
     const listener = (event: StorageEvent) => {
-      if (event.storageArea === storage && event.key === key) callback();
+      if (event.storageArea === storage && event.key === key) update(event.newValue);
     };
     window.addEventListener('storage', listener);
     return () => window.removeEventListener('storage', listener);
-  }, () => storage.getItem(key));
+  }, [storage, key]);
 
   const setValue = React.useCallback((value?: string) => setStorage(storage, key, value), [storage, key]);
 
