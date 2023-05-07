@@ -28,9 +28,7 @@ import React from 'react';
 
 const useStorage = (storage: Storage, key: string) => React.useSyncExternalStore((callback) => {
   const listener = (event: StorageEvent) => {
-    if (event.storageArea !== storage) return;
-    if (event.key !== key) return;
-    callback();
+    if (event.storageArea === storage && event.key === key) callback();
   };
   window.addEventListener('storage', listener);
   return () => window.removeEventListener('storage', listener);
