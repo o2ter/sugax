@@ -26,13 +26,22 @@
 import _ from 'lodash';
 import React from 'react';
 
-const useStorage = (storage: Storage, key: string) => React.useSyncExternalStore((callback) => {
-  const listener = (event: StorageEvent) => {
-    if (event.storageArea === storage && event.key === key) callback();
-  };
-  window.addEventListener('storage', listener);
-  return () => window.removeEventListener('storage', listener);
-}, () => storage.getItem(key));
+const setStorage = (storage: Storage, key: string, value?: string) => _.isNil(value) ? storage.removeItem(key) : storage.setItem(key, value);
 
-export const useLocalStorage = (key: string) => typeof window !== 'undefined' ? useStorage(window.localStorage, key) : null;
-export const useSessionStorage = (key: string) => typeof window !== 'undefined' ? useStorage(window.sessionStorage, key) : null;
+const useStorage = (storage: Storage, key: string): [string | null, (value?: string) => void] => {
+
+  const value = React.useSyncExternalStore((callback) => {
+    const listener = (event: StorageEvent) => {
+      if (event.storageArea === storage && event.key === key) callback();
+    };
+    window.addEventListener('storage', listener);
+    return () => window.removeEventListener('storage', listener);
+  }, () => storage.getItem(key));
+
+  const setValue = React.useCallback((value?: string) => setStorage(storage, key, value), []);
+
+  return [value, setValue];
+}
+
+export const useLocalStorage = (key: string): ReturnType<typeof useStorage> => typeof window !== 'undefined' ? useStorage(window.localStorage, key) : [null, () => {}];
+export const useSessionStorage = (key: string): ReturnType<typeof useStorage> => typeof window !== 'undefined' ? useStorage(window.sessionStorage, key) : [null, () => {}];
