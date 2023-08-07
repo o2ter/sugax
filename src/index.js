@@ -36,3 +36,4 @@ export * from './once';
 export * from './previous';
 export * from './stable';
 export * from './state';
+export * from './types';

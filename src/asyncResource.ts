@@ -27,6 +27,7 @@ import _ from 'lodash';
 import React from 'react';
 import { useAsyncDebounce } from './debounce';
 import { useStableCallback } from './stable';
+import { Awaitable } from './types';
 
 export const useAsyncResource = <T>(
   fetch: (x: {
@@ -103,7 +104,7 @@ export const useAsyncResource = <T>(
 export const useAsyncIterableResource = <T>(
   fetch: (x: {
     abortSignal: AbortSignal;
-  }) => AsyncIterable<T> | PromiseLike<AsyncIterable<T>>,
+  }) => Awaitable<AsyncIterable<T>>,
   debounce?: _.ThrottleSettings & { wait?: number; },
   deps?: React.DependencyList,
 ) => useAsyncResource<T[]>(async ({ dispatch, abortSignal }) => {

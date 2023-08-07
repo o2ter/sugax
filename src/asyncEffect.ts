@@ -25,8 +25,9 @@
 
 import _ from 'lodash';
 import React from 'react';
+import { Awaitable } from './types';
 
-type Destructor = () => void | PromiseLike<void>;
+type Destructor = () => Awaitable<void>;
 
 export const useAsyncEffect = (
   effect: () => PromiseLike<void | Destructor>, 
