@@ -26,6 +26,8 @@
 import _ from 'lodash';
 import React from 'react';
 
+const listeners = new Map<Storage, ((value: string | null) => void)[]>;
+
 const setStorage = (storage: Storage, key: string, value: string | null) => _.isNil(value) ? storage.removeItem(key) : storage.setItem(key, value);
 const useStorage = (storage: Storage, key: string): [string | null, React.Dispatch<React.SetStateAction<string | null>>] => {
 
@@ -35,12 +37,17 @@ const useStorage = (storage: Storage, key: string): [string | null, React.Dispat
     const listener = (event: StorageEvent) => {
       if (event.storageArea === storage && event.key === key) update(event.newValue);
     };
+    listeners.set(storage, [...listeners.get(storage) ?? [], update]);
     window.addEventListener('storage', listener);
-    return () => window.removeEventListener('storage', listener);
+    return () => {
+      listeners.set(storage, _.filter(listeners.get(storage), x => x !== update));
+      window.removeEventListener('storage', listener);
+    }
   }, [storage, key]);
 
   return [value, React.useCallback((value) => {
     const newValue = _.isFunction(value) ? value(storage.getItem(key)) : value;
+    listeners.get(storage)?.forEach(x => { if (x !== update) x(newValue); });
     update(newValue);
     setStorage(storage, key, newValue);
   }, [storage, key])];
