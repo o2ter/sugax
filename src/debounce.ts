@@ -48,8 +48,10 @@ export const useDebounce = <T extends (...args: any) => any>(
 }
 
 export const useDebounceValue = <T>(value: T, settings: _.DebounceSettings & { wait?: number; }) => {
-  const debounce = useDebounce(() => value, settings);
-  return debounce();
+  const [state, setState] = React.useState(value);
+  const callback = React.useCallback(debounce(() => setState(value), settings), []);
+  React.useEffect(() => callback(), [value]);
+  return state;
 }
 
 const asyncDebounce = <T extends (...args: any) => PromiseLike<any>>(
