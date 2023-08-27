@@ -47,10 +47,10 @@ export const useDebounce = <T extends (...args: any) => any>(
   return React.useCallback(debounce(((...args) => callbackRef.current(...args)) as T, settings), []);
 }
 
-export const useDebounceValue = <T>(value: T, settings: _.DebounceSettings & { wait?: number; }) => {
+export const useDebounceValue = <T>(value: T, settings: _.DebounceSettings & { wait?: number; }, deps?: React.DependencyList) => {
   const [state, setState] = React.useState(value);
   const callback = React.useCallback(debounce(() => setState(value), settings), []);
-  React.useEffect(() => callback(), [value]);
+  React.useEffect(() => callback(), [value, ...deps ?? []]);
   return state;
 }
 
