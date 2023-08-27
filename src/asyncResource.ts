@@ -40,6 +40,7 @@ export const useAsyncResource = <T>(
 
   const [state, setState] = React.useState<{
     count?: number;
+    updateFlag?: boolean;
     resource?: T;
     error?: Error;
     token?: string;
@@ -49,12 +50,12 @@ export const useAsyncResource = <T>(
   const _refresh = useAsyncDebounce(async (abort: AbortController) => {
 
     const token = _.uniqueId();
-    setState(state => ({ ...state, token, abort }));
+    setState(state => ({ ...state, token, abort, updateFlag: false }));
 
-    let updateFlag = false;
     const _dispatch: typeof setState = (next) => setState(state => state.token === token ? ({
-      ...(_.isFunction(next) ? next(updateFlag ? state : _.omit(state, 'resource', 'error')) : next),
-      count: updateFlag ? state.count : (state.count ?? 0) + 1,
+      ...(_.isFunction(next) ? next(state.updateFlag ? state : _.omit(state, 'resource', 'error')) : next),
+      count: state.updateFlag ? state.count : (state.count ?? 0) + 1,
+      updateFlag: true,
     }) : state);
 
     try {
@@ -66,7 +67,6 @@ export const useAsyncResource = <T>(
             ...state,
             resource: _.isFunction(next) ? next(state.resource) : next,
           }));
-          updateFlag = true;
         },
       });
 
