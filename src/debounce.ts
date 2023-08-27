@@ -36,6 +36,11 @@ export const useDebounce = <T extends (...args: any) => any>(
   return React.useCallback(_.throttle(((...args) => callbackRef.current(...args)) as T, wait, options), []);
 }
 
+export const useDebounceValue = <T>(value: T, settings: _.ThrottleSettings & { wait?: number; }) => {
+  const debounce = useDebounce(() => value, settings);
+  return debounce() ?? value;
+}
+
 const asyncDebounce = <T extends (...args: any) => PromiseLike<any>>(
   func: T,
   wait?: number,
