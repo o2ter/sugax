@@ -25,9 +25,9 @@
 
 import _ from 'lodash';
 import React from 'react';
-import { useAsyncDebounce } from './debounce';
-import { useStableCallback } from './stable';
 import { Awaitable } from './types';
+import { useStableCallback } from './stable';
+import { useAsyncDebounce } from './debounce';
 
 export const useAsyncResource = <T>(
   fetch: (x: {
