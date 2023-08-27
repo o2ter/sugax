@@ -27,37 +27,47 @@ import _ from 'lodash';
 import React from 'react';
 import { useStableRef } from './stable';
 
-export const useDebounce = <T extends (...args: any) => any>(
+const debounce = <T extends (...args: any) => any>(
   callback: T,
-  settings: _.ThrottleSettings & { wait?: number; },
+  settings: _.DebounceSettings & { wait?: number; },
 ) => {
   const { wait, ...options } = settings;
-  const callbackRef = useStableRef(callback);
-  return React.useCallback(_.throttle(((...args) => callbackRef.current(...args)) as T, wait, options), []);
+  return _.debounce(callback, wait, {
+    ...options,
+    leading: 'leading' in options ? !!options.leading : true,
+    trailing: 'trailing' in options ? !!options.trailing : true,
+  });
 }
 
-export const useDebounceValue = <T>(value: T, settings: _.ThrottleSettings & { wait?: number; }) => {
+export const useDebounce = <T extends (...args: any) => any>(
+  callback: T,
+  settings: _.DebounceSettings & { wait?: number; },
+) => {
+  const callbackRef = useStableRef(callback);
+  return React.useCallback(debounce(((...args) => callbackRef.current(...args)) as T, settings), []);
+}
+
+export const useDebounceValue = <T>(value: T, settings: _.DebounceSettings & { wait?: number; }) => {
   const debounce = useDebounce(() => value, settings);
-  return debounce() ?? value;
+  return debounce();
 }
 
 const asyncDebounce = <T extends (...args: any) => PromiseLike<any>>(
   func: T,
-  wait?: number,
-  options?: _.ThrottleSettings,
+  settings: _.DebounceSettings & { wait?: number; },
 ) => {
 
   type R = T extends (...args: any) => PromiseLike<infer R> ? R : never;
   let preflight: Promise<R>;
 
-  const debounced = _.throttle(async (
+  const debounced = debounce(async (
     resolve?: (value: PromiseLike<R>) => void,
     ...args: Parameters<T>
   ) => {
     const result = func(...args as any) as PromiseLike<R>;
     if (_.isFunction(resolve)) resolve(result);
     return result;
-  }, wait, options);
+  }, settings);
 
   return (...args: Parameters<T>) => {
     if (_.isNil(preflight)) {
@@ -70,9 +80,8 @@ const asyncDebounce = <T extends (...args: any) => PromiseLike<any>>(
 
 export const useAsyncDebounce = <T extends (...args: any) => PromiseLike<any>>(
   callback: T,
-  settings: _.ThrottleSettings & { wait?: number; },
+  settings: _.DebounceSettings & { wait?: number; },
 ) => {
-  const { wait, ...options } = settings;
   const callbackRef = useStableRef(callback);
-  return React.useCallback(asyncDebounce(((...args) => callbackRef.current(...args)) as T, wait, options), []);
+  return React.useCallback(asyncDebounce(((...args) => callbackRef.current(...args)) as T, settings), []);
 }

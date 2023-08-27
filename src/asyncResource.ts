@@ -34,7 +34,7 @@ export const useAsyncResource = <T>(
     dispatch: React.Dispatch<T | ((prevState?: T) => T)>;
     abortSignal: AbortSignal;
   }) => PromiseLike<void | T>,
-  debounce?: _.ThrottleSettings & { wait?: number; },
+  debounce?: _.DebounceSettings & { wait?: number; },
   deps?: React.DependencyList,
 ) => {
 
@@ -105,7 +105,7 @@ export const useAsyncIterableResource = <T>(
   fetch: (x: {
     abortSignal: AbortSignal;
   }) => Awaitable<AsyncIterable<T>>,
-  debounce?: _.ThrottleSettings & { wait?: number; },
+  debounce?: _.DebounceSettings & { wait?: number; },
   deps?: React.DependencyList,
 ) => useAsyncResource<T[]>(async ({ dispatch, abortSignal }) => {
 
