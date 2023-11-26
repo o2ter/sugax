@@ -1,5 +1,5 @@
 //
-//  index.js
+//  animate.ts
 //
 //  The MIT License
 //  Copyright (c) 2021 - 2023 O2ter Limited. All rights reserved.
@@ -23,18 +23,47 @@
 //  THE SOFTWARE.
 //
 
-export * from './animate';
-export * from './asyncEffect';
-export * from './asyncMemo';
-export * from './asyncResource';
-export * from './channel';
-export * from './debounce';
-export * from './equivalent';
-export * from './interval';
-export * from './mergeRefs';
-export * from './mount';
-export * from './once';
-export * from './previous';
-export * from './stable';
-export * from './state';
-export * from './types';
+import _ from 'lodash';
+import React from 'react';
+import { useStableCallback } from './stable';
+
+type AnimateOptions = {
+  fromValue?: number;
+  toValue: number;
+  duration: number;
+  easing?: (value: number) => number;
+  delay?: number;
+};
+
+export const useAnimate = (initialValue: number) => {
+  const [value, setValue] = React.useState(initialValue);
+  const ref = React.useRef<ReturnType<typeof setInterval>>();
+  const stop = useStableCallback(() => {
+    if (ref.current) clearInterval(ref.current);
+    ref.current = undefined;
+  });
+  return {
+    value,
+    stop,
+    start: useStableCallback(({
+      fromValue = value,
+      toValue,
+      duration,
+      easing = (x) => x,
+      delay = 0,
+    }: AnimateOptions) => {
+      stop();
+      const start = Date.now();
+      if (duration > 0) ref.current = setInterval(() => {
+        const t = (Date.now() - start) / duration - delay;
+        if (t >= 1) {
+          clearInterval(ref.current);
+          ref.current = undefined;
+          setValue(toValue);
+        } else if (t >= 0) {
+          setValue((toValue - fromValue) * easing(_.clamp(t, 0, 1)) + fromValue);
+        }
+      }, 1);
+    }),
+  };
+}
