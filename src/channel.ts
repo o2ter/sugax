@@ -28,12 +28,12 @@ import React from 'react';
 import { IState } from './types';
 
 export interface IChannel<T = any> extends IState<T> {
-  subscribe: (callback: VoidFunction) => VoidFunction
+  subscribe: (callback: (oldVal: T, newVal: T) => void) => VoidFunction
 }
 
 export const createChannel = <T = any>(initialValue: T): IChannel<T> => {
 
-  const listeners = new Set<VoidFunction>();
+  const listeners = new Set<(oldVal: T, newVal: T) => void>();
   let current = initialValue;
 
   return {
@@ -41,14 +41,24 @@ export const createChannel = <T = any>(initialValue: T): IChannel<T> => {
       return current;
     },
     setValue(value: React.SetStateAction<T>) {
+      const oldVal = current;
       current = _.isFunction(value) ? value(current) : value;
-      listeners.forEach(listener => void listener());
+      listeners.forEach(listener => void listener(oldVal, current));
     },
-    subscribe: (callback: VoidFunction) => {
+    subscribe: (callback: (oldVal: T, newVal: T) => void) => {
       listeners.add(callback);
       return () => void listeners.delete(callback);
     },
   };
 }
 
-export const useChannel = <T = any>(channel: IChannel<T>) => React.useSyncExternalStore(channel.subscribe, () => channel.current);
+export const useChannel = <T = any, S = T>(
+  channel: IChannel<T>,
+  selector: (state: T) => S = v => v as any,
+  equal: (value: S, other: S) => boolean = _.isEqual,
+): S => React.useSyncExternalStore(
+  (onStoreChange) => channel.subscribe((oldVal, newVal) => {
+    if (equal(selector(oldVal), selector(newVal))) onStoreChange();
+  }),
+  () => selector(channel.current)
+);
