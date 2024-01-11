@@ -33,28 +33,30 @@ type AnimateOptions = {
   duration: number;
   easing?: (value: number) => number;
   delay?: number;
-  onCompleted?: (result: { finished: boolean }) => void;
+  onCompleted?: (result: {
+    value: number;
+    finished: boolean;
+  }) => void;
 };
 
 export const useAnimate = (initialValue: number) => {
   const [value, setValue] = React.useState(initialValue);
   const ref = React.useRef<{
     interval: ReturnType<typeof setInterval>;
-    callback?: (result: { finished: boolean }) => void;
+    callback?: AnimateOptions['onCompleted'];
   }>();
-  const _stop = () => {
+  const stop = () => {
     const { interval, callback } = ref.current ?? {};
     ref.current = undefined;
     if (interval) clearInterval(interval);
     return callback;
-  }
-  const stop = useStableCallback(() => {
-    const callback = _stop();
-    if (callback) callback({ finished: false });
-  });
+  };
   return {
     value,
-    stop,
+    stop: useStableCallback(() => {
+      const callback = stop();
+      if (_.isFunction(callback)) callback({ value, finished: false });
+    }),
     start: useStableCallback(({
       fromValue = value,
       toValue,
@@ -63,7 +65,7 @@ export const useAnimate = (initialValue: number) => {
       delay = 0,
       onCompleted,
     }: AnimateOptions) => {
-      _stop();
+      stop();
       const start = Date.now();
       if (duration > 0) {
         ref.current = {
@@ -73,7 +75,7 @@ export const useAnimate = (initialValue: number) => {
               clearInterval(ref.current?.interval);
               ref.current = undefined;
               setValue(toValue);
-              if (onCompleted) onCompleted({ finished: true });
+              if (_.isFunction(onCompleted)) onCompleted({ value: toValue, finished: true });
             } else if (t >= 0) {
               setValue((toValue - fromValue) * easing(_.clamp(t, 0, 1)) + fromValue);
             }
