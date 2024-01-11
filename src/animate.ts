@@ -33,14 +33,24 @@ type AnimateOptions = {
   duration: number;
   easing?: (value: number) => number;
   delay?: number;
+  onCompleted?: (result: { finished: boolean }) => void;
 };
 
 export const useAnimate = (initialValue: number) => {
   const [value, setValue] = React.useState(initialValue);
-  const ref = React.useRef<ReturnType<typeof setInterval>>();
-  const stop = useStableCallback(() => {
-    if (ref.current) clearInterval(ref.current);
+  const ref = React.useRef<{
+    interval: ReturnType<typeof setInterval>;
+    callback?: (result: { finished: boolean }) => void;
+  }>();
+  const _stop = () => {
+    const { interval, callback } = ref.current ?? {};
     ref.current = undefined;
+    if (interval) clearInterval(interval);
+    return callback;
+  }
+  const stop = useStableCallback(() => {
+    const callback = _stop();
+    if (callback) callback({ finished: false });
   });
   return {
     value,
@@ -51,19 +61,26 @@ export const useAnimate = (initialValue: number) => {
       duration,
       easing = (x) => x,
       delay = 0,
+      onCompleted,
     }: AnimateOptions) => {
-      stop();
+      _stop();
       const start = Date.now();
-      if (duration > 0) ref.current = setInterval(() => {
-        const t = (Date.now() - start) / duration - delay;
-        if (t >= 1) {
-          clearInterval(ref.current);
-          ref.current = undefined;
-          setValue(toValue);
-        } else if (t >= 0) {
-          setValue((toValue - fromValue) * easing(_.clamp(t, 0, 1)) + fromValue);
+      if (duration > 0) {
+        ref.current = {
+          interval: setInterval(() => {
+            const t = (Date.now() - start) / duration - delay;
+            if (t >= 1) {
+              clearInterval(ref.current?.interval);
+              ref.current = undefined;
+              setValue(toValue);
+              if (onCompleted) onCompleted({ finished: true });
+            } else if (t >= 0) {
+              setValue((toValue - fromValue) * easing(_.clamp(t, 0, 1)) + fromValue);
+            }
+          }, 1),
+          callback: onCompleted,
         }
-      }, 1);
+      }
     }),
   };
 }
