@@ -1,5 +1,5 @@
 //
-//  asyncEffect.ts
+//  asyncResource.tsx
 //
 //  The MIT License
 //  Copyright (c) 2021 - 2024 O2ter Limited. All rights reserved.
@@ -25,19 +25,47 @@
 
 import _ from 'lodash';
 import React from 'react';
-import { Awaitable } from './types';
+import { Awaitable, useAsyncIterableResource, useAsyncResource } from '../hooks';
 
-type Destructor = () => Awaitable<void>;
+type AsyncResourceProps<T> = {
+  fetch: (x: {
+    dispatch: React.Dispatch<T | ((prevState?: T) => T)>;
+    abortSignal: AbortSignal;
+  }) => PromiseLike<void | T>,
+  debounce?: _.DebounceSettings & { wait?: number; },
+  extraData?: any,
+  children: (state: ReturnType<typeof useAsyncResource<T>>) => React.ReactNode;
+};
 
-export const useAsyncEffect = (
-  effect: () => PromiseLike<void | Destructor>, 
-  deps?: React.DependencyList,
-) => React.useEffect(() => {
-  const destructor = effect();
-  return () => {
-    (async () => {
-      const _destructor = await destructor;
-      if (_.isFunction(_destructor)) _destructor();
-    })();
-  };
-}, deps);
+export const AsyncResource = <T extends unknown>({
+  fetch,
+  debounce,
+  extraData,
+  children
+}: AsyncResourceProps<T>) => {
+  const state = useAsyncResource(fetch, debounce, extraData);
+  return (
+    <>{children(state)}</>
+  );
+}
+
+type AsyncIterableResourceProps<T> = {
+  fetch: (x: {
+    abortSignal: AbortSignal;
+  }) => Awaitable<AsyncIterable<T>>,
+  debounce?: _.DebounceSettings & { wait?: number; },
+  extraData?: any,
+  children: (state: ReturnType<typeof useAsyncIterableResource<T>>) => React.ReactNode;
+};
+
+export const AsyncIterableResource = <T extends unknown>({
+  fetch,
+  debounce,
+  extraData,
+  children
+}: AsyncIterableResourceProps<T>) => {
+  const state = useAsyncIterableResource(fetch, debounce, extraData);
+  return (
+    <>{children(state)}</>
+  );
+}

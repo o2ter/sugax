@@ -23,5 +23,4 @@
 //  THE SOFTWARE.
 //
 
-export * from './components';
-export * from './hooks';
+export * from './asyncResource';

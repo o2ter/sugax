@@ -1,5 +1,5 @@
 //
-//  index.js
+//  asyncEffect.ts
 //
 //  The MIT License
 //  Copyright (c) 2021 - 2024 O2ter Limited. All rights reserved.
@@ -23,5 +23,21 @@
 //  THE SOFTWARE.
 //
 
-export * from './components';
-export * from './hooks';
+import _ from 'lodash';
+import React from 'react';
+import { Awaitable } from './types';
+
+type Destructor = () => Awaitable<void>;
+
+export const useAsyncEffect = (
+  effect: () => PromiseLike<void | Destructor>,
+  deps?: React.DependencyList,
+) => React.useEffect(() => {
+  const destructor = effect();
+  return () => {
+    (async () => {
+      const _destructor = await destructor;
+      if (_.isFunction(_destructor)) _destructor();
+    })();
+  };
+}, deps);
