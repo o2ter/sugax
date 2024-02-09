@@ -30,11 +30,13 @@ import { Awaitable } from './types';
 type Destructor = () => Awaitable<void>;
 
 export const useAsyncEffect = (
-  effect: () => PromiseLike<void | Destructor>,
+  effect: (abortSignal: AbortSignal) => PromiseLike<void | Destructor>,
   deps?: React.DependencyList,
 ) => React.useEffect(() => {
-  const destructor = effect();
+  const abort = new AbortController();
+  const destructor = effect(abort.signal);
   return () => {
+    abort.abort();
     (async () => {
       const _destructor = await destructor;
       if (_.isFunction(_destructor)) _destructor();
