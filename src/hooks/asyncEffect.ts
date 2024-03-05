@@ -25,7 +25,7 @@
 
 import _ from 'lodash';
 import React from 'react';
-import { Awaitable } from './types';
+import { Awaitable } from '@o2ter/utils-js';
 
 type Destructor = () => Awaitable<void>;
 

@@ -25,9 +25,9 @@
 
 import _ from 'lodash';
 import React from 'react';
-import { Awaitable } from './types';
 import { useStableCallback } from './stable';
 import { useAsyncDebounce } from './debounce';
+import { Awaitable } from '@o2ter/utils-js';
 
 export const useAsyncResource = <T>(
   fetch: (x: {

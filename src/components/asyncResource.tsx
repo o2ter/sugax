@@ -25,7 +25,8 @@
 
 import _ from 'lodash';
 import React from 'react';
-import { Awaitable, useAsyncIterableResource, useAsyncResource } from '../hooks';
+import { useAsyncIterableResource, useAsyncResource } from '../hooks';
+import { Awaitable } from '@o2ter/utils-js';
 
 type AsyncResourceProps<T> = {
   fetch: (x: {
