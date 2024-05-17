@@ -1,5 +1,5 @@
 //
-//  asyncResource.ts
+//  index.ts
 //
 //  The MIT License
 //  Copyright (c) 2021 - 2024 O2ter Limited. All rights reserved.
@@ -25,18 +25,17 @@
 
 import _ from 'lodash';
 import React from 'react';
-import { useStableCallback } from './stable';
-import { useAsyncDebounce } from './debounce';
-import { Awaitable } from '@o2ter/utils-js';
+import { useStableCallback } from '../stable';
+import { useAsyncDebounce } from '../debounce';
+import { Config, Fetch, FetchWithIterable } from './types';
 
 export const useAsyncResource = <T>(
-  fetch: (x: {
-    dispatch: React.Dispatch<T | ((prevState?: T) => T)>;
-    abortSignal: AbortSignal;
-  }) => PromiseLike<void | T>,
-  debounce?: _.DebounceSettings & { wait?: number; },
+  config: Fetch<T> | Config<Fetch<T>>,
   deps?: React.DependencyList,
 ) => {
+
+  const fetch = _.isFunction(config) ? config : config.fetch;
+  const debounce = _.isFunction(config) ? {} : config.debounce;
 
   const [state, setState] = React.useState<{
     count?: number;
@@ -102,17 +101,18 @@ export const useAsyncResource = <T>(
 }
 
 export const useAsyncIterableResource = <T>(
-  fetch: (x: {
-    abortSignal: AbortSignal;
-  }) => Awaitable<AsyncIterable<T>>,
-  debounce?: _.DebounceSettings & { wait?: number; },
+  config: FetchWithIterable<T> | Config<FetchWithIterable<T>>,
   deps?: React.DependencyList,
-) => useAsyncResource<T[]>(async ({ dispatch, abortSignal }) => {
-
-  const resource = await fetch({ abortSignal });
-
-  for await (const item of resource) {
-    dispatch(items => items ? [...items, item] : [item]);
-  }
-
-}, debounce, deps);
+) => {
+  const fetch = _.isFunction(config) ? config : config.fetch;
+  const debounce = _.isFunction(config) ? {} : config.debounce;
+  return useAsyncResource<T[]>({
+    fetch: async ({ dispatch, abortSignal }) => {
+      const resource = await fetch({ abortSignal });
+      for await (const item of resource) {
+        dispatch(items => items ? [...items, item] : [item]);
+      }
+    },
+    debounce,
+  }, deps);
+}

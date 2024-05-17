@@ -1,5 +1,5 @@
 //
-//  asyncResource.tsx
+//  types.ts
 //
 //  The MIT License
 //  Copyright (c) 2021 - 2024 O2ter Limited. All rights reserved.
@@ -25,37 +25,18 @@
 
 import _ from 'lodash';
 import React from 'react';
-import { useAsyncIterableResource, useAsyncResource } from '../hooks';
-import { Config, Fetch, FetchWithIterable } from '../hooks/asyncResource/types';
+import { Awaitable } from '@o2ter/utils-js';
 
-type AsyncResourceProps<T> = Config<Fetch<T>> & {
-  extraData?: any,
-  children: (state: ReturnType<typeof useAsyncResource<T>>) => React.ReactNode;
+export type Fetch<T> = (x: {
+  dispatch: React.Dispatch<T | ((prevState?: T) => T)>;
+  abortSignal: AbortSignal;
+}) => PromiseLike<void | T>;
+
+export type FetchWithIterable<T> = (x: {
+  abortSignal: AbortSignal;
+}) => Awaitable<AsyncIterable<T>>;
+
+export type Config<F> = {
+  fetch: F,
+  debounce?: _.DebounceSettings & { wait?: number; },
 };
-
-export const AsyncResource = <T extends unknown>({
-  extraData,
-  children,
-  ...config
-}: AsyncResourceProps<T>) => {
-  const state = useAsyncResource(config, extraData);
-  return (
-    <>{children(state)}</>
-  );
-}
-
-type AsyncIterableResourceProps<T> = Config<FetchWithIterable<T>> & {
-  extraData?: any,
-  children: (state: ReturnType<typeof useAsyncIterableResource<T>>) => React.ReactNode;
-};
-
-export const AsyncIterableResource = <T extends unknown>({
-  extraData,
-  children,
-  ...config
-}: AsyncIterableResourceProps<T>) => {
-  const state = useAsyncIterableResource(config, extraData);
-  return (
-    <>{children(state)}</>
-  );
-}
