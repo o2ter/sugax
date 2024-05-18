@@ -25,7 +25,7 @@
 
 import _ from 'lodash';
 import React from 'react';
-import { useAsyncIterableResource, useAsyncResource } from '../hooks';
+import { useAsyncIterableResource, useAsyncResource } from '../hooks/asyncResource';
 import { Config, Fetch, FetchWithIterable } from '../hooks/asyncResource/types';
 
 type AsyncResourceProps<T> = Config<Fetch<T>> & {
