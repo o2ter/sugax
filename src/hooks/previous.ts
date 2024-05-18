@@ -34,7 +34,7 @@ export const usePrevious = <T = any>(state: T) => {
 
 export const usePreviousMemo = <T = any>(
   factory: (value: T | undefined) => T,
-  deps: React.DependencyList | undefined
+  deps: React.DependencyList = []
 ) => {
   const ref = React.useRef<T>();
   React.useMemo(() => { ref.current = factory(ref.current); }, deps);
