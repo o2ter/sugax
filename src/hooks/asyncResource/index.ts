@@ -55,14 +55,19 @@ export const useAsyncResource = <T>(
     flag: true,
   }) : state);
 
-  const _refresh = useAsyncDebounce(async (abort: AbortController) => {
+  const _fetch = useAsyncDebounce(async (
+    abort: AbortController,
+    reset: boolean,
+    prevState?: T,
+  ) => {
 
     const token = _.uniqueId();
-    setState(state => ({ ...state, token, abort, flag: false }));
+    setState(state => ({ ...state, token, abort, flag: !reset }));
 
     try {
 
       const resource = await fetch({
+        prevState,
         abortSignal: abort.signal,
         dispatch: (next) => {
           _dispatch(token, state => ({
@@ -86,12 +91,13 @@ export const useAsyncResource = <T>(
 
   React.useEffect(() => {
     const controller = new AbortController();
-    void _refresh(controller);
+    void _fetch(controller, true);
     return () => controller.abort();
   }, deps ?? []);
 
   const _cancelRef = useStableCallback((reason?: any) => { state.abort?.abort(reason) });
-  const _refreshRef = useStableCallback(() => _refresh(new AbortController()));
+  const _refreshRef = useStableCallback(() => _fetch(new AbortController(), true));
+  const _nextRef = useStableCallback(() => _fetch(new AbortController(), false, state.resource));
 
   return {
     count: state.count ?? 0,
@@ -100,6 +106,7 @@ export const useAsyncResource = <T>(
     error: state.error,
     cancel: _cancelRef,
     refresh: _refreshRef,
+    next: _nextRef,
   };
 }
 
@@ -109,7 +116,7 @@ export const useAsyncIterableResource = <T>(
 ) => {
   const fetch = _.isFunction(config) ? config : config.fetch;
   const debounce = _.isFunction(config) ? {} : config.debounce;
-  return useAsyncResource<T[]>({
+  const { next, ...result } = useAsyncResource<T[]>({
     fetch: async ({ dispatch, abortSignal }) => {
       const resource = await fetch({ abortSignal });
       for await (const item of resource) {
@@ -118,4 +125,5 @@ export const useAsyncIterableResource = <T>(
     },
     debounce,
   }, deps);
+  return result;
 }

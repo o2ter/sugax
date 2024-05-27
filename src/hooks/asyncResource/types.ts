@@ -30,6 +30,7 @@ import { Awaitable } from '@o2ter/utils-js';
 export type Fetch<T> = (x: {
   dispatch: React.Dispatch<T | ((prevState?: T) => T)>;
   abortSignal: AbortSignal;
+  prevState?: T;
 }) => PromiseLike<void | T>;
 
 export type FetchWithIterable<T> = (x: {
