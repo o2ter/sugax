@@ -39,7 +39,6 @@ export const useAsyncResource = <T>(
 
   const [state, setState] = React.useState<{
     count?: number;
-    updateFlag?: boolean;
     resource?: T;
     error?: Error;
     token?: string;
@@ -49,12 +48,15 @@ export const useAsyncResource = <T>(
   const _refresh = useAsyncDebounce(async (abort: AbortController) => {
 
     const token = _.uniqueId();
-    setState(state => ({ ...state, token, abort, updateFlag: false }));
+    setState(state => ({ ...state, token, abort }));
 
-    const _dispatch: typeof setState = (next) => setState(state => state.token === token ? ({
-      ...(_.isFunction(next) ? next(state.updateFlag ? state : _.omit(state, 'resource', 'error')) : next),
-      count: state.updateFlag ? state.count : (state.count ?? 0) + 1,
-      updateFlag: true,
+    const _reset: typeof setState = (next) => setState(state => state.token === token ? ({
+      ...(_.isFunction(next) ? next(_.omit(state, 'resource', 'error')) : next),
+      count: (state.count ?? 0) + 1,
+    }) : state);
+
+    const _update: typeof setState = (next) => setState(state => state.token === token ? ({
+      ...(_.isFunction(next) ? next(state) : next),
     }) : state);
 
     try {
@@ -62,18 +64,18 @@ export const useAsyncResource = <T>(
       const resource = await fetch({
         abortSignal: abort.signal,
         dispatch: (next) => {
-          _dispatch(state => ({
+          _update(state => ({
             ...state,
             resource: _.isFunction(next) ? next(state.resource) : next,
           }));
         },
       });
 
-      _dispatch(state => ({ resource: resource ?? state.resource }));
+      _reset(state => ({ resource: resource ?? state.resource }));
 
     } catch (error) {
 
-      _dispatch(state => ({
+      _reset(state => ({
         resource: state.resource,
         error: error as Error,
       }));
