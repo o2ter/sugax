@@ -23,5 +23,5 @@
 //  THE SOFTWARE.
 //
 
-export * from './index.js';
+export * from './common';
 export * from './storage';
