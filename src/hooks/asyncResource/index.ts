@@ -44,7 +44,7 @@ export const useAsyncResource = <T>(
     count?: number;
     flag?: boolean;
     resource?: T;
-    error?: Error;
+    error?: any;
     token?: string;
     abort?: AbortController;
   }>({});
@@ -86,7 +86,7 @@ export const useAsyncResource = <T>(
 
       _dispatch(token, state => ({
         resource: state.resource,
-        error: error as Error,
+        error,
       }));
     }
 
