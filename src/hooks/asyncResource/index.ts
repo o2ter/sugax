@@ -29,6 +29,9 @@ import { useStableCallback } from '../stable';
 import { useAsyncDebounce } from '../debounce';
 import { Config, Fetch, FetchWithIterable } from './types';
 
+import { Context as ErrorContext } from './error';
+export { AsyncResourceErrors, useAsyncResourceErrors } from './error';
+
 export const useAsyncResource = <T>(
   config: Fetch<T> | Config<Fetch<T>>,
   deps?: React.DependencyList,
@@ -98,6 +101,14 @@ export const useAsyncResource = <T>(
   const _cancelRef = useStableCallback((reason?: any) => { state.abort?.abort(reason) });
   const _refreshRef = useStableCallback(() => _fetch(new AbortController(), true));
   const _nextRef = useStableCallback(() => _fetch(new AbortController(), false, state.resource));
+
+  const { setErrors } = React.useContext(ErrorContext);
+  React.useEffect(() => {
+    const { token = _.uniqueId(), error } = state;
+    if (!error) return;
+    setErrors(v => [...v, { token, error, refresh: _refreshRef }]);
+    return () => setErrors(v => _.filter(v, x => x.token !== token));
+  }, [state]);
 
   return {
     count: state.count ?? 0,
