@@ -28,32 +28,32 @@ import React from 'react';
 import { useAsyncIterableResource, useAsyncResource } from '../hooks/asyncResource';
 import { Config, Fetch, FetchWithIterable } from '../hooks/asyncResource/types';
 
-type AsyncResourceProps<T> = Config<Fetch<T>> & {
+type AsyncResourceProps<T, P> = Config<Fetch<T, P>> & {
   extraData?: any,
-  children: (state: ReturnType<typeof useAsyncResource<T>>) => React.ReactNode;
+  children: (state: ReturnType<typeof useAsyncResource<T, P>>) => React.ReactNode;
 };
 
-export const AsyncResource = <T extends unknown>({
+export const AsyncResource = <T extends unknown, P = any>({
   extraData,
   children,
   ...config
-}: AsyncResourceProps<T>) => {
+}: AsyncResourceProps<T, P>) => {
   const state = useAsyncResource(config, extraData);
   return (
     <>{children(state)}</>
   );
 }
 
-type AsyncIterableResourceProps<T> = Config<FetchWithIterable<T>> & {
+type AsyncIterableResourceProps<T, P> = Config<FetchWithIterable<T, P>> & {
   extraData?: any,
-  children: (state: ReturnType<typeof useAsyncIterableResource<T>>) => React.ReactNode;
+  children: (state: ReturnType<typeof useAsyncIterableResource<T, P>>) => React.ReactNode;
 };
 
-export const AsyncIterableResource = <T extends unknown>({
+export const AsyncIterableResource = <T extends unknown, P = any>({
   extraData,
   children,
   ...config
-}: AsyncIterableResourceProps<T>) => {
+}: AsyncIterableResourceProps<T, P>) => {
   const state = useAsyncIterableResource(config, extraData);
   return (
     <>{children(state)}</>

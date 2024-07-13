@@ -27,14 +27,16 @@ import _ from 'lodash';
 import React from 'react';
 import { Awaitable } from '@o2ter/utils-js';
 
-export type Fetch<T> = (x: {
-  dispatch: React.Dispatch<T | ((prevState?: T) => T)>;
+export type Fetch<T, P> = (x: {
   abortSignal: AbortSignal;
+  param?: P;
   prevState?: T;
+  dispatch: React.Dispatch<T | ((prevState?: T) => T)>;
 }) => PromiseLike<void | T>;
 
-export type FetchWithIterable<T> = (x: {
+export type FetchWithIterable<T, P> = (x: {
   abortSignal: AbortSignal;
+  param?: P;
 }) => Awaitable<AsyncIterable<T>>;
 
 export type Config<F> = {

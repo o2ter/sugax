@@ -32,8 +32,8 @@ import { Config, Fetch, FetchWithIterable } from './types';
 import { Context as ErrorContext } from './error';
 export { AsyncResourceErrors, useAsyncResourceErrors } from './error';
 
-export const useAsyncResource = <T>(
-  config: Fetch<T> | Config<Fetch<T>>,
+export const useAsyncResource = <T, P = any>(
+  config: Fetch<T, P> | Config<Fetch<T, P>>,
   deps?: React.DependencyList,
 ) => {
 
@@ -61,6 +61,7 @@ export const useAsyncResource = <T>(
   const _fetch = useAsyncDebounce(async (
     abort: AbortController,
     reset: boolean,
+    param?: P,
     prevState?: T,
   ) => {
 
@@ -70,6 +71,7 @@ export const useAsyncResource = <T>(
     try {
 
       const resource = await fetch({
+        param,
         prevState,
         abortSignal: abort.signal,
         dispatch: (next) => {
@@ -99,8 +101,8 @@ export const useAsyncResource = <T>(
   }, deps ?? []);
 
   const _cancelRef = useStableCallback((reason?: any) => { state.abort?.abort(reason) });
-  const _refreshRef = useStableCallback(() => _fetch(new AbortController(), true));
-  const _nextRef = useStableCallback(() => _fetch(new AbortController(), false, state.resource));
+  const _refreshRef = useStableCallback((param?: P) => _fetch(new AbortController(), true, param));
+  const _nextRef = useStableCallback((param?: P) => _fetch(new AbortController(), false, param, state.resource));
 
   const { setErrors } = React.useContext(ErrorContext);
   React.useEffect(() => {
@@ -121,15 +123,15 @@ export const useAsyncResource = <T>(
   };
 }
 
-export const useAsyncIterableResource = <T>(
-  config: FetchWithIterable<T> | Config<FetchWithIterable<T>>,
+export const useAsyncIterableResource = <T, P = any>(
+  config: FetchWithIterable<T, P> | Config<FetchWithIterable<T, P>>,
   deps?: React.DependencyList,
 ) => {
   const fetch = _.isFunction(config) ? config : config.fetch;
   const debounce = _.isFunction(config) ? {} : config.debounce;
   const { next, ...result } = useAsyncResource<T[]>({
-    fetch: async ({ dispatch, abortSignal }) => {
-      const resource = await fetch({ abortSignal });
+    fetch: async ({ dispatch, abortSignal, param }) => {
+      const resource = await fetch({ abortSignal, param });
       for await (const item of resource) {
         dispatch(items => items ? [...items, item] : [item]);
       }
