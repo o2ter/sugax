@@ -38,22 +38,23 @@ export const useInterval = (ms?: number) => {
 };
 
 export const useTimer = (ms?: number) => {
-  const [pause, setPause] = React.useState(true);
+  const [paused, setPaused] = React.useState(true);
   const [value, setValue] = React.useState(0);
   const time = React.useRef(Date.now());
   React.useEffect(() => {
-    if (pause) return;
+    if (paused) return;
     const interval = setInterval(() => { setValue(Date.now() - time.current); }, ms);
     return () => clearInterval(interval);
-  }, [pause]);
+  }, [paused]);
   const start = React.useCallback(() => {
     time.current = Date.now();
-    setPause(false);
+    setPaused(false);
   }, []);
-  const stop = React.useCallback(() => { setPause(true); }, []);
+  const stop = React.useCallback(() => { setPaused(true); }, []);
   const reset = React.useCallback(() => { setValue(0); }, []);
   return {
     interval: value,
+    paused,
     start,
     stop,
     reset,
