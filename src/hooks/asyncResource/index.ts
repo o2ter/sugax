@@ -41,6 +41,7 @@ export const useAsyncResource = <T, P = any>(
   const debounce = _.isFunction(config) ? {} : config.debounce;
 
   const [state, setState] = React.useState<{
+    type?: 'refresh' | 'next';
     count?: number;
     flag?: boolean;
     resource?: T;
@@ -59,6 +60,7 @@ export const useAsyncResource = <T, P = any>(
   }) : state);
 
   const _fetch = useAsyncDebounce(async (
+    type: 'refresh' | 'next',
     abort: AbortController,
     reset: boolean,
     param?: P,
@@ -66,7 +68,7 @@ export const useAsyncResource = <T, P = any>(
   ) => {
 
     const token = _.uniqueId();
-    setState(state => ({ ...state, token, abort, flag: !reset }));
+    setState(state => ({ ...state, type, token, abort, flag: !reset }));
 
     try {
 
@@ -96,13 +98,13 @@ export const useAsyncResource = <T, P = any>(
 
   React.useEffect(() => {
     const controller = new AbortController();
-    void _fetch(controller, true);
+    void _fetch('refresh', controller, true);
     return () => controller.abort();
   }, deps ?? []);
 
   const _cancelRef = useStableCallback((reason?: any) => { state.abort?.abort(reason) });
-  const _refreshRef = useStableCallback((param?: P) => _fetch(new AbortController(), true, param));
-  const _nextRef = useStableCallback((param?: P) => _fetch(new AbortController(), false, param, state.resource));
+  const _refreshRef = useStableCallback((param?: P) => _fetch('refresh', new AbortController(), true, param));
+  const _nextRef = useStableCallback((param?: P) => _fetch('next', new AbortController(), false, param, state.resource));
 
   const { setErrors } = React.useContext(ErrorContext);
   React.useEffect(() => {
@@ -114,6 +116,7 @@ export const useAsyncResource = <T, P = any>(
 
   return {
     count: state.count ?? 0,
+    refreshing: !_.isNil(state.abort) && state.type === 'refresh',
     loading: !_.isNil(state.abort),
     resource: state.resource,
     error: state.error,
