@@ -105,6 +105,10 @@ export const useAsyncResource = <T, P = any>(
   const _cancelRef = useStableCallback((reason?: any) => { state.abort?.abort(reason) });
   const _refreshRef = useStableCallback((param?: P) => _fetch('refresh', new AbortController(), true, param));
   const _nextRef = useStableCallback((param?: P) => _fetch('next', new AbortController(), false, param, state.resource));
+  const _setResRef = useStableCallback((resource: T | ((prevState?: T) => T)) => setState(state => ({
+    ..._.omit(state, 'resource', 'error'),
+    resource: _.isFunction(resource) ? resource(state.resource) : resource,
+  })));
 
   const { setErrors } = React.useContext(ErrorContext);
   React.useEffect(() => {
@@ -123,6 +127,7 @@ export const useAsyncResource = <T, P = any>(
     cancel: _cancelRef,
     refresh: _refreshRef,
     next: _nextRef,
+    setResource: _setResRef,
   };
 }
 
