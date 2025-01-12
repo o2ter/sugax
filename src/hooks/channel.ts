@@ -52,7 +52,7 @@ export const createChannel = <T extends unknown = any>(initialValue: T): IChanne
   };
 }
 
-export const useChannel = <T = any, S = T>(
+export const useChannel = <T extends unknown = any, S = T>(
   channel: IChannel<T>,
   selector: (state: T) => S = v => v as any,
   equal: (value: S, other: S) => boolean = _.isEqual,
