@@ -26,7 +26,7 @@
 import _ from 'lodash';
 import React from 'react';
 
-export const useEquivalent = <T = any>(
+export const useEquivalent = <T extends unknown = any>(
   value: T,
   equal: (value: T, other: T) => boolean = _.isEqual
 ) => {

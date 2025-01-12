@@ -26,13 +26,13 @@
 import _ from 'lodash';
 import React from 'react';
 
-export const usePrevious = <T = any>(state: T) => {
+export const usePrevious = <T extends unknown = any>(state: T) => {
   const ref = React.useRef<T>();
   React.useEffect(() => { ref.current = state; });
   return ref.current;
 }
 
-export const usePreviousMemo = <T = any>(
+export const usePreviousMemo = <T extends unknown = any>(
   factory: (value: T | undefined) => T,
   deps: React.DependencyList = []
 ) => {

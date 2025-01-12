@@ -25,7 +25,7 @@
 
 import React from 'react';
 
-export interface IState<T = any> {
+export interface IState<T extends unknown = any> {
   get current(): T
   setValue(value: React.SetStateAction<T>): void
 }

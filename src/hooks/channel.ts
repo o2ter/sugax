@@ -27,11 +27,11 @@ import _ from 'lodash';
 import React from 'react';
 import { IState } from './types';
 
-export interface IChannel<T = any> extends IState<T> {
+export interface IChannel<T extends unknown = any> extends IState<T> {
   subscribe: (callback: (oldVal: T, newVal: T) => void) => VoidFunction
 }
 
-export const createChannel = <T = any>(initialValue: T): IChannel<T> => {
+export const createChannel = <T extends unknown = any>(initialValue: T): IChannel<T> => {
 
   const listeners = new Set<(oldVal: T, newVal: T) => void>();
   let current = initialValue;
