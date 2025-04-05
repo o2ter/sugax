@@ -44,6 +44,7 @@ export default [
         file: `dist/index${suffix}.js`,
         format: 'cjs',
         sourcemap: true,
+        exports: 'named',
       },
       {
         file: `dist/index${suffix}.mjs`,
