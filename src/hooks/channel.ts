@@ -58,7 +58,7 @@ export const useChannel = <T extends unknown = any, S = T>(
   equal: (value: S, other: S) => boolean = _.isEqual,
 ): S => React.useSyncExternalStore(
   (onStoreChange) => channel.subscribe((oldVal, newVal) => {
-    if (equal(selector(oldVal), selector(newVal))) onStoreChange();
+    if (!equal(selector(oldVal), selector(newVal))) onStoreChange();
   }),
   () => selector(channel.current)
 );
